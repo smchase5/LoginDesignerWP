@@ -1,0 +1,119 @@
+/**
+ * LoginDesignerWP Admin Styles
+ *
+ * Light styling for the settings page.
+ */
+
+/* Wrap container */
+.logindesignerwp-wrap {
+    max-width: 900px;
+}
+
+.logindesignerwp-wrap > .description {
+    margin-bottom: 24px;
+    font-size: 14px;
+}
+
+/* Card sections */
+.logindesignerwp-card {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+}
+
+.logindesignerwp-card h2 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.logindesignerwp-card h3 {
+    margin-top: 24px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.logindesignerwp-card h3:first-of-type {
+    margin-top: 0;
+}
+
+/* Form tables */
+.logindesignerwp-card .form-table {
+    margin-top: 0;
+}
+
+.logindesignerwp-card .form-table th {
+    width: 200px;
+    padding-left: 0;
+    font-weight: 400;
+}
+
+.logindesignerwp-card .form-table td {
+    padding-left: 10px;
+}
+
+/* Color picker adjustments */
+.logindesignerwp-card .wp-picker-container {
+    display: inline-block;
+}
+
+/* Background mode options */
+.logindesignerwp-bg-options {
+    border-top: 1px solid #eee;
+    margin-top: 16px;
+    padding-top: 8px;
+}
+
+/* Image preview */
+.logindesignerwp-image-preview {
+    margin-bottom: 12px;
+    max-width: 300px;
+}
+
+.logindesignerwp-image-preview img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.logindesignerwp-logo-preview {
+    max-width: 200px;
+}
+
+/* Image buttons */
+.logindesignerwp-upload-image,
+.logindesignerwp-remove-image {
+    margin-right: 8px !important;
+}
+
+/* Actions bar */
+.logindesignerwp-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-top: 10px;
+}
+
+.logindesignerwp-actions .button-primary {
+    margin: 0 !important;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 782px) {
+    .logindesignerwp-card .form-table th {
+        width: 100%;
+        padding-bottom: 4px;
+    }
+    
+    .logindesignerwp-card .form-table td {
+        padding-left: 0;
+    }
+}
