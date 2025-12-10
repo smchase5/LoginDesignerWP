@@ -78,12 +78,70 @@
 }
 
 .logindesignerwp-card h2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin-top: 0;
     margin-bottom: 16px;
     padding-bottom: 12px;
     border-bottom: 1px solid #eee;
     font-size: 18px;
     font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+}
+
+.logindesignerwp-card h2 .toggle-indicator {
+    font-size: 20px;
+    color: #787c82;
+    transition: transform 0.2s ease;
+}
+
+.logindesignerwp-card.collapsed h2 .toggle-indicator {
+    transform: rotate(-90deg);
+}
+
+.logindesignerwp-card.collapsed h2 {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.logindesignerwp-card-content {
+    transition: max-height 0.3s ease, opacity 0.2s ease;
+    overflow: hidden;
+}
+
+.logindesignerwp-card.collapsed .logindesignerwp-card-content {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/* Drag handle and sortable */
+.logindesignerwp-card h2 .drag-handle {
+    cursor: grab;
+    color: #9ca3af;
+    margin-right: 4px;
+    transition: color 0.2s ease;
+}
+
+.logindesignerwp-card h2 .drag-handle:hover {
+    color: #374151;
+}
+
+.logindesignerwp-card.ui-sortable-helper {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    transform: rotate(1deg);
+    cursor: grabbing;
+}
+
+.logindesignerwp-card.ui-sortable-placeholder {
+    visibility: visible !important;
+    background: #e5e7eb;
+    border: 2px dashed #9ca3af;
+    min-height: 60px;
 }
 
 .logindesignerwp-card h3 {
@@ -313,4 +371,160 @@
     .logindesignerwp-card .form-table td {
         padding-left: 0;
     }
+}
+
+/* ========================================
+   Pro Locked Sections
+   ======================================== */
+
+.logindesignerwp-pro-locked {
+    position: relative;
+    background: #f9fafb;
+    border: 1px dashed #d1d5db;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.logindesignerwp-pro-locked::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.6);
+    z-index: 5;
+    pointer-events: none;
+}
+
+.logindesignerwp-pro-locked-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: #374151;
+    color: #fff;
+    position: relative;
+    z-index: 10;
+}
+
+.logindesignerwp-pro-locked-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.logindesignerwp-pro-locked-title .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #fff;
+}
+
+.logindesignerwp-pro-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #6b7280;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.logindesignerwp-pro-locked-content {
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.logindesignerwp-pro-locked .form-table {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.logindesignerwp-pro-locked .form-table th,
+.logindesignerwp-pro-locked .form-table td {
+    padding: 10px 0;
+}
+
+.logindesignerwp-pro-locked input,
+.logindesignerwp-pro-locked select,
+.logindesignerwp-pro-locked textarea {
+    background: #e5e7eb !important;
+    cursor: not-allowed !important;
+}
+
+.logindesignerwp-pro-locked-footer {
+    padding: 16px 20px;
+    background: #f3f4f6;
+    border-top: 1px solid #e5e7eb;
+    text-align: center;
+    position: relative;
+    z-index: 10;
+}
+
+.logindesignerwp-pro-upgrade-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #2563eb;
+    color: #fff !important;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+.logindesignerwp-pro-upgrade-btn:hover {
+    background: #1d4ed8;
+    color: #fff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+.logindesignerwp-pro-upgrade-btn .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.logindesignerwp-pro-upgrade-text {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 8px;
+}
+
+/* Pro feature preview items */
+.logindesignerwp-pro-features-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.logindesignerwp-pro-feature-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.logindesignerwp-pro-feature-item .dashicons {
+    color: #9ca3af;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
 }

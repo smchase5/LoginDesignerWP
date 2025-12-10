@@ -90,7 +90,7 @@ class LoginDesignerWP_Settings {
         wp_enqueue_script(
             'logindesignerwp-admin',
             LOGINDESIGNERWP_URL . 'assets/js/admin.js',
-            array( 'jquery', 'wp-color-picker' ),
+            array( 'jquery', 'wp-color-picker', 'jquery-ui-sortable' ),
             LOGINDESIGNERWP_VERSION,
             true
         );
@@ -119,6 +119,9 @@ class LoginDesignerWP_Settings {
                         <?php $this->render_background_section( $settings ); ?>
                         <?php $this->render_form_section( $settings ); ?>
                         <?php $this->render_logo_section( $settings ); ?>
+
+                        <!-- Pro Locked Sections -->
+                        <?php $this->render_pro_locked_sections(); ?>
 
                         <div class="logindesignerwp-actions">
                             <?php submit_button( __( 'Save Changes', 'logindesignerwp' ), 'primary', 'submit', false ); ?>
@@ -202,7 +205,7 @@ class LoginDesignerWP_Settings {
      */
     private function render_background_section( $settings ) {
         ?>
-        <div class="logindesignerwp-card">
+        <div class="logindesignerwp-card" data-section-id="background">
             <h2><?php esc_html_e( 'Background', 'logindesignerwp' ); ?></h2>
 
             <table class="form-table">
@@ -316,7 +319,7 @@ class LoginDesignerWP_Settings {
      */
     private function render_form_section( $settings ) {
         ?>
-        <div class="logindesignerwp-card">
+        <div class="logindesignerwp-card" data-section-id="form">
             <h2><?php esc_html_e( 'Login Form', 'logindesignerwp' ); ?></h2>
 
             <h3><?php esc_html_e( 'Form Container', 'logindesignerwp' ); ?></h3>
@@ -430,7 +433,7 @@ class LoginDesignerWP_Settings {
      */
     private function render_logo_section( $settings ) {
         ?>
-        <div class="logindesignerwp-card">
+        <div class="logindesignerwp-card" data-section-id="logo">
             <h2><?php esc_html_e( 'Logo', 'logindesignerwp' ); ?></h2>
 
             <table class="form-table">
@@ -469,6 +472,215 @@ class LoginDesignerWP_Settings {
                 </tr>
             </table>
         </div>
+        <?php
+    }
+
+    /**
+     * Render all Pro locked sections.
+     */
+    private function render_pro_locked_sections() {
+        $upgrade_url = 'https://frontierwp.com/logindesignerwp-pro';
+        ?>
+        
+        <!-- Glassmorphism Section -->
+        <div class="logindesignerwp-pro-locked">
+            <div class="logindesignerwp-pro-locked-header">
+                <h2 class="logindesignerwp-pro-locked-title">
+                    <span class="dashicons dashicons-lock"></span>
+                    <?php esc_html_e( 'Glassmorphism Effects', 'logindesignerwp' ); ?>
+                </h2>
+                <span class="logindesignerwp-pro-badge">
+                    <span class="dashicons dashicons-star-filled"></span>
+                    <?php esc_html_e( 'Pro', 'logindesignerwp' ); ?>
+                </span>
+            </div>
+            <div class="logindesignerwp-pro-locked-content">
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Blur Strength', 'logindesignerwp' ); ?></th>
+                        <td><input type="range" min="0" max="20" value="8" disabled> <span>8px</span></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Transparency', 'logindesignerwp' ); ?></th>
+                        <td><input type="range" min="0" max="100" value="80" disabled> <span>80%</span></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Glass Border', 'logindesignerwp' ); ?></th>
+                        <td><input type="checkbox" disabled checked> <?php esc_html_e( 'Enable frosted border effect', 'logindesignerwp' ); ?></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="logindesignerwp-pro-locked-footer">
+                <a href="<?php echo esc_url( $upgrade_url ); ?>" class="logindesignerwp-pro-upgrade-btn" target="_blank">
+                    <span class="dashicons dashicons-unlock"></span>
+                    <?php esc_html_e( 'Unlock with LoginDesignerWP Pro', 'logindesignerwp' ); ?>
+                </a>
+                <p class="logindesignerwp-pro-upgrade-text"><?php esc_html_e( 'Create stunning glass-like form effects', 'logindesignerwp' ); ?></p>
+            </div>
+        </div>
+
+        <!-- Layout Options Section -->
+        <div class="logindesignerwp-pro-locked">
+            <div class="logindesignerwp-pro-locked-header">
+                <h2 class="logindesignerwp-pro-locked-title">
+                    <span class="dashicons dashicons-lock"></span>
+                    <?php esc_html_e( 'Layout Options', 'logindesignerwp' ); ?>
+                </h2>
+                <span class="logindesignerwp-pro-badge">
+                    <span class="dashicons dashicons-star-filled"></span>
+                    <?php esc_html_e( 'Pro', 'logindesignerwp' ); ?>
+                </span>
+            </div>
+            <div class="logindesignerwp-pro-locked-content">
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Form Position', 'logindesignerwp' ); ?></th>
+                        <td>
+                            <select disabled>
+                                <option><?php esc_html_e( 'Center', 'logindesignerwp' ); ?></option>
+                                <option><?php esc_html_e( 'Left', 'logindesignerwp' ); ?></option>
+                                <option><?php esc_html_e( 'Right', 'logindesignerwp' ); ?></option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Layout Style', 'logindesignerwp' ); ?></th>
+                        <td>
+                            <select disabled>
+                                <option><?php esc_html_e( 'Standard', 'logindesignerwp' ); ?></option>
+                                <option><?php esc_html_e( 'Compact', 'logindesignerwp' ); ?></option>
+                                <option><?php esc_html_e( 'Spacious', 'logindesignerwp' ); ?></option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Hide Footer Links', 'logindesignerwp' ); ?></th>
+                        <td><input type="checkbox" disabled> <?php esc_html_e( 'Hide "Back to site" and privacy links', 'logindesignerwp' ); ?></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="logindesignerwp-pro-locked-footer">
+                <a href="<?php echo esc_url( $upgrade_url ); ?>" class="logindesignerwp-pro-upgrade-btn" target="_blank">
+                    <span class="dashicons dashicons-unlock"></span>
+                    <?php esc_html_e( 'Unlock with LoginDesignerWP Pro', 'logindesignerwp' ); ?>
+                </a>
+                <p class="logindesignerwp-pro-upgrade-text"><?php esc_html_e( 'Position and style your login form', 'logindesignerwp' ); ?></p>
+            </div>
+        </div>
+
+        <!-- Presets Section -->
+        <div class="logindesignerwp-pro-locked">
+            <div class="logindesignerwp-pro-locked-header">
+                <h2 class="logindesignerwp-pro-locked-title">
+                    <span class="dashicons dashicons-lock"></span>
+                    <?php esc_html_e( 'Design Presets', 'logindesignerwp' ); ?>
+                </h2>
+                <span class="logindesignerwp-pro-badge">
+                    <span class="dashicons dashicons-star-filled"></span>
+                    <?php esc_html_e( 'Pro', 'logindesignerwp' ); ?>
+                </span>
+            </div>
+            <div class="logindesignerwp-pro-locked-content">
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Choose Preset', 'logindesignerwp' ); ?></th>
+                        <td>
+                            <select disabled style="min-width: 200px;">
+                                <option><?php esc_html_e( 'Dark Glass', 'logindesignerwp' ); ?></option>
+                                <option><?php esc_html_e( 'Minimal Light', 'logindesignerwp' ); ?></option>
+                                <option><?php esc_html_e( 'Neon Gradient', 'logindesignerwp' ); ?></option>
+                                <option><?php esc_html_e( 'Corporate Blue', 'logindesignerwp' ); ?></option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Save Current', 'logindesignerwp' ); ?></th>
+                        <td><button type="button" class="button" disabled><?php esc_html_e( 'Save as Preset', 'logindesignerwp' ); ?></button></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="logindesignerwp-pro-locked-footer">
+                <a href="<?php echo esc_url( $upgrade_url ); ?>" class="logindesignerwp-pro-upgrade-btn" target="_blank">
+                    <span class="dashicons dashicons-unlock"></span>
+                    <?php esc_html_e( 'Unlock with LoginDesignerWP Pro', 'logindesignerwp' ); ?>
+                </a>
+                <p class="logindesignerwp-pro-upgrade-text"><?php esc_html_e( 'One-click beautiful designs', 'logindesignerwp' ); ?></p>
+            </div>
+        </div>
+
+        <!-- Redirects Section -->
+        <div class="logindesignerwp-pro-locked">
+            <div class="logindesignerwp-pro-locked-header">
+                <h2 class="logindesignerwp-pro-locked-title">
+                    <span class="dashicons dashicons-lock"></span>
+                    <?php esc_html_e( 'Redirects & Behavior', 'logindesignerwp' ); ?>
+                </h2>
+                <span class="logindesignerwp-pro-badge">
+                    <span class="dashicons dashicons-star-filled"></span>
+                    <?php esc_html_e( 'Pro', 'logindesignerwp' ); ?>
+                </span>
+            </div>
+            <div class="logindesignerwp-pro-locked-content">
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'After Login Redirect', 'logindesignerwp' ); ?></th>
+                        <td><input type="text" class="regular-text" placeholder="/my-account/" disabled></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'After Logout Redirect', 'logindesignerwp' ); ?></th>
+                        <td><input type="text" class="regular-text" placeholder="/" disabled></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Custom Message', 'logindesignerwp' ); ?></th>
+                        <td><textarea rows="2" class="large-text" placeholder="Need help? Contact support..." disabled></textarea></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="logindesignerwp-pro-locked-footer">
+                <a href="<?php echo esc_url( $upgrade_url ); ?>" class="logindesignerwp-pro-upgrade-btn" target="_blank">
+                    <span class="dashicons dashicons-unlock"></span>
+                    <?php esc_html_e( 'Unlock with LoginDesignerWP Pro', 'logindesignerwp' ); ?>
+                </a>
+                <p class="logindesignerwp-pro-upgrade-text"><?php esc_html_e( 'Control where users go after login/logout', 'logindesignerwp' ); ?></p>
+            </div>
+        </div>
+
+        <!-- Advanced Tools Section -->
+        <div class="logindesignerwp-pro-locked">
+            <div class="logindesignerwp-pro-locked-header">
+                <h2 class="logindesignerwp-pro-locked-title">
+                    <span class="dashicons dashicons-lock"></span>
+                    <?php esc_html_e( 'Advanced Tools', 'logindesignerwp' ); ?>
+                </h2>
+                <span class="logindesignerwp-pro-badge">
+                    <span class="dashicons dashicons-star-filled"></span>
+                    <?php esc_html_e( 'Pro', 'logindesignerwp' ); ?>
+                </span>
+            </div>
+            <div class="logindesignerwp-pro-locked-content">
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Export / Import', 'logindesignerwp' ); ?></th>
+                        <td>
+                            <button type="button" class="button" disabled><?php esc_html_e( 'Export Settings', 'logindesignerwp' ); ?></button>
+                            <button type="button" class="button" disabled><?php esc_html_e( 'Import Settings', 'logindesignerwp' ); ?></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Custom CSS', 'logindesignerwp' ); ?></th>
+                        <td><textarea rows="4" class="large-text code" placeholder="/* Add your custom CSS here */" disabled></textarea></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="logindesignerwp-pro-locked-footer">
+                <a href="<?php echo esc_url( $upgrade_url ); ?>" class="logindesignerwp-pro-upgrade-btn" target="_blank">
+                    <span class="dashicons dashicons-unlock"></span>
+                    <?php esc_html_e( 'Unlock with LoginDesignerWP Pro', 'logindesignerwp' ); ?>
+                </a>
+                <p class="logindesignerwp-pro-upgrade-text"><?php esc_html_e( 'Export settings and add custom CSS', 'logindesignerwp' ); ?></p>
+            </div>
+        </div>
+
         <?php
     }
 }

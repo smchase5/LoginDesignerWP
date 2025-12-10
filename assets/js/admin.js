@@ -570,9 +570,126 @@
         initCheckboxes();
         initButtonHover();
         initStickyPreview();
+        initCollapsibleSections();
+        initSortableSections();
 
         // Apply initial preview after a short delay to ensure color pickers are ready
         setTimeout(applyInitialPreview, 100);
     });
+
+    /**
+     * Initialize collapsible settings sections.
+     */
+    function initCollapsibleSections() {
+        var $cards = $('.logindesignerwp-card');
+
+        // Add toggle indicator to each card header
+        $cards.each(function () {
+            var $card = $(this);
+            var $header = $card.find('h2').first();
+            var cardId = $card.attr('data-section-id');
+
+            // Add toggle indicator if not already present
+            if ($header.find('.toggle-indicator').length === 0) {
+                $header.append('<span class="dashicons dashicons-arrow-down-alt2 toggle-indicator"></span>');
+            }
+
+            // Wrap content if not already wrapped
+            if ($card.find('.logindesignerwp-card-content').length === 0) {
+                $header.nextAll().wrapAll('<div class="logindesignerwp-card-content"></div>');
+            }
+
+            // Restore collapsed state from localStorage
+            if (cardId && localStorage.getItem('ldwp_collapsed_' + cardId) === 'true') {
+                $card.addClass('collapsed');
+            }
+        });
+
+        // Handle click on card header (but not on drag handle)
+        $(document).on('click', '.logindesignerwp-card h2', function (e) {
+            // Don't toggle if clicking on drag handle, button, or link
+            if ($(e.target).closest('.drag-handle, button, a, input').length) {
+                return;
+            }
+
+            var $card = $(this).closest('.logindesignerwp-card');
+            var cardId = $card.attr('data-section-id');
+
+            $card.toggleClass('collapsed');
+
+            // Save state to localStorage
+            if (cardId) {
+                localStorage.setItem('ldwp_collapsed_' + cardId, $card.hasClass('collapsed'));
+            }
+        });
+    }
+
+    /**
+     * Initialize sortable sections for drag-to-reorder.
+     */
+    function initSortableSections() {
+        var $settingsColumn = $('.logindesignerwp-settings-column');
+        var $form = $settingsColumn.find('form');
+
+        if ($form.length === 0) {
+            return;
+        }
+
+        // Add drag handles to card headers (only for free sections, not Pro locked)
+        $('.logindesignerwp-card:not(.logindesignerwp-pro-locked) h2').each(function () {
+            var $header = $(this);
+            if ($header.find('.drag-handle').length === 0) {
+                $header.prepend('<span class="dashicons dashicons-move drag-handle" title="Drag to reorder"></span>');
+            }
+        });
+
+        // Restore saved order from localStorage (only for free sections)
+        var savedOrder = localStorage.getItem('ldwp_section_order');
+        var $freeCards = $form.find('.logindesignerwp-card:not(.logindesignerwp-pro-locked)');
+        var $proCards = $form.find('.logindesignerwp-pro-locked');
+        var $actionsDiv = $form.find('.logindesignerwp-actions');
+
+        if (savedOrder) {
+            try {
+                var order = JSON.parse(savedOrder);
+
+                // Reorder only free cards based on saved order
+                order.forEach(function (sectionId) {
+                    var $card = $freeCards.filter('[data-section-id="' + sectionId + '"]');
+                    if ($card.length) {
+                        $proCards.first().before($card);
+                    }
+                });
+            } catch (e) {
+                // Invalid JSON, ignore
+            }
+        }
+
+        // Ensure Pro sections are always at the bottom (before actions)
+        $proCards.each(function () {
+            $actionsDiv.before($(this));
+        });
+
+        // Make cards sortable (exclude Pro locked sections)
+        $form.sortable({
+            items: '.logindesignerwp-card:not(.logindesignerwp-pro-locked)',
+            handle: '.drag-handle',
+            placeholder: 'logindesignerwp-card ui-sortable-placeholder',
+            tolerance: 'pointer',
+            cursor: 'grabbing',
+            opacity: 0.9,
+            update: function () {
+                // Save new order to localStorage
+                var order = [];
+                $form.find('.logindesignerwp-card').each(function () {
+                    var sectionId = $(this).attr('data-section-id');
+                    if (sectionId) {
+                        order.push(sectionId);
+                    }
+                });
+                localStorage.setItem('ldwp_section_order', JSON.stringify(order));
+            }
+        });
+    }
 
 })(jQuery);
