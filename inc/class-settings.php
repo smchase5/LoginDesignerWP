@@ -411,6 +411,13 @@ class LoginDesignerWP_Settings {
                         <p class="description"><?php esc_html_e( 'Use 999 for fully rounded (pill) buttons.', 'logindesignerwp' ); ?></p>
                     </td>
                 </tr>
+                <tr>
+                    <th scope="row"><?php esc_html_e( 'Below Form Link Color', 'logindesignerwp' ); ?></th>
+                    <td>
+                        <input type="text" class="logindesignerwp-color-picker" name="<?php echo esc_attr( $this->option_name ); ?>[below_form_link_color]" value="<?php echo esc_attr( $settings['below_form_link_color'] ); ?>" data-preview-target="below-form-links">
+                        <p class="description"><?php esc_html_e( 'Color for "Lost your password?" and "Back to site" links.', 'logindesignerwp' ); ?></p>
+                    </td>
+                </tr>
             </table>
         </div>
         <?php

@@ -41,11 +41,13 @@ function logindesignerwp_get_defaults()
         'input_border_color' => '#1f2937',
         'input_border_focus' => '#3b82f6',
 
-        // Button settings.
         'button_bg' => '#3b82f6',
         'button_bg_hover' => '#2563eb',
         'button_text_color' => '#ffffff',
         'button_border_radius' => 999,
+
+        // Below form link settings.
+        'below_form_link_color' => '#94a3b8',
 
         // Logo settings.
         'logo_id' => 0,
@@ -99,6 +101,7 @@ function logindesignerwp_sanitize_settings($input)
         'button_bg',
         'button_bg_hover',
         'button_text_color',
+        'below_form_link_color',
     );
 
     foreach ($color_fields as $field) {

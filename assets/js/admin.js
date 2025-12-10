@@ -120,6 +120,13 @@
                 updatePreview('button_text_color', ui.color.toString());
             }
         });
+
+        // Below form link color
+        $('input[name="logindesignerwp_settings[below_form_link_color]"]').wpColorPicker({
+            change: function (event, ui) {
+                updatePreview('below_form_link_color', ui.color.toString());
+            }
+        });
     }
 
     /**
@@ -317,6 +324,9 @@
             case 'label_text_color':
                 $previewLabels.css('color', value);
                 $previewRemember.css('color', value);
+                break;
+
+            case 'below_form_link_color':
                 $previewLinks.css('color', value);
                 break;
 
@@ -466,6 +476,7 @@
             button_bg: $('input[name="logindesignerwp_settings[button_bg]"]').val(),
             button_text_color: $('input[name="logindesignerwp_settings[button_text_color]"]').val(),
             button_border_radius: $('input[name="logindesignerwp_settings[button_border_radius]"]').val(),
+            below_form_link_color: $('input[name="logindesignerwp_settings[below_form_link_color]"]').val(),
             logo_width: $('input[name="logindesignerwp_settings[logo_width]"]').val()
         };
 

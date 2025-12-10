@@ -140,9 +140,9 @@ class LoginDesignerWP_Login_Style
         $css .= "    color: " . esc_attr($s['button_text_color']) . " !important;\n";
         $css .= "}\n";
 
-        // Links
+        // Links below form
         $css .= "#login #nav a, #login #backtoblog a {\n";
-        $css .= "    color: " . esc_attr($s['label_text_color']) . " !important;\n";
+        $css .= "    color: " . esc_attr($s['below_form_link_color']) . " !important;\n";
         $css .= "}\n";
         $css .= "#login #nav a:hover, #login #backtoblog a:hover {\n";
         $css .= "    color: " . esc_attr($s['input_border_focus']) . " !important;\n";
