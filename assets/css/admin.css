@@ -6,12 +6,66 @@
 
 /* Wrap container */
 .logindesignerwp-wrap {
-    max-width: 900px;
+    /* Full width - no max-width constraint */
 }
 
-.logindesignerwp-wrap > .description {
+.logindesignerwp-wrap>.description {
     margin-bottom: 24px;
     font-size: 14px;
+}
+
+/* Two-column layout - 50/50 split */
+.logindesignerwp-layout {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.logindesignerwp-settings-column {
+    flex: 1;
+    min-width: 0;
+}
+
+.logindesignerwp-preview-column {
+    flex: 1;
+    min-width: 0;
+    align-self: flex-start;
+}
+
+.logindesignerwp-preview-sticky {
+    /* JS handles sticky positioning - see initStickyPreview() */
+}
+
+/* Live Preview badge */
+.logindesignerwp-preview-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+}
+
+/* Preview action buttons */
+.logindesignerwp-preview-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #ddd;
+}
+
+.logindesignerwp-preview-actions .button {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
 }
 
 /* Card sections */
@@ -50,7 +104,7 @@
 }
 
 .logindesignerwp-card .form-table th {
-    width: 200px;
+    width: 180px;
     padding-left: 0;
     font-weight: 400;
 }
@@ -106,13 +160,156 @@
     margin: 0 !important;
 }
 
+/* ============================================
+   LIVE PREVIEW STYLES
+   ============================================ */
+
+.logindesignerwp-preview-container {
+    border: 1px solid #c3c4c7;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.logindesignerwp-preview-bg {
+    padding: 30px 20px;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease, background-color 0.3s ease;
+}
+
+/* Logo area */
+.logindesignerwp-preview-logo {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.logindesignerwp-preview-logo a {
+    display: inline-block;
+}
+
+.logindesignerwp-preview-logo img {
+    max-width: 100%;
+    height: auto;
+    max-height: 100px;
+    transition: width 0.3s ease;
+}
+
+.logindesignerwp-preview-logo svg {
+    transition: width 0.3s ease;
+}
+
+/* Login container */
+.logindesignerwp-preview-login {
+    width: 100%;
+    max-width: 280px;
+}
+
+/* Form box */
+.logindesignerwp-preview-form {
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+/* Field groups */
+.logindesignerwp-preview-field {
+    margin-bottom: 16px;
+}
+
+.logindesignerwp-preview-field label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 13px;
+    font-weight: 400;
+    transition: color 0.3s ease;
+}
+
+.logindesignerwp-preview-field input {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.logindesignerwp-preview-field input:focus {
+    outline: none;
+}
+
+/* Remember me */
+.logindesignerwp-preview-remember {
+    margin-bottom: 16px;
+}
+
+.logindesignerwp-preview-remember label {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.3s ease;
+}
+
+.logindesignerwp-preview-remember input {
+    margin: 0;
+}
+
+/* Button */
+#ldwp-preview-button {
+    width: 100%;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: default;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+/* Links */
+.logindesignerwp-preview-links {
+    text-align: center;
+    margin-top: 16px;
+}
+
+.logindesignerwp-preview-links a {
+    font-size: 12px;
+    text-decoration: none;
+    opacity: 0.8;
+    transition: color 0.3s ease;
+}
+
+.logindesignerwp-preview-links a:hover {
+    opacity: 1;
+}
+
 /* Responsive adjustments */
+@media screen and (max-width: 1200px) {
+    .logindesignerwp-layout {
+        flex-direction: column;
+    }
+
+    .logindesignerwp-settings-column {
+        max-width: 100%;
+    }
+
+    .logindesignerwp-preview-column {
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .logindesignerwp-preview-sticky {
+        position: static;
+    }
+}
+
 @media screen and (max-width: 782px) {
     .logindesignerwp-card .form-table th {
         width: 100%;
         padding-bottom: 4px;
     }
-    
+
     .logindesignerwp-card .form-table td {
         padding-left: 0;
     }

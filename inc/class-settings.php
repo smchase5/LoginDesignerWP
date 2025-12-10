@@ -101,25 +101,96 @@ class LoginDesignerWP_Settings {
      */
     public function render_settings_page() {
         $settings = logindesignerwp_get_settings();
+        
+        // Get image URLs for preview.
+        $bg_image_url = $settings['background_image_id'] ? wp_get_attachment_image_url( $settings['background_image_id'], 'full' ) : '';
+        $logo_url     = $settings['logo_id'] ? wp_get_attachment_image_url( $settings['logo_id'], 'medium' ) : '';
         ?>
         <div class="wrap logindesignerwp-wrap">
             <h1><?php esc_html_e( 'LoginDesignerWP', 'logindesignerwp' ); ?></h1>
             <p class="description"><?php esc_html_e( 'Customize your WordPress login screen with simple, lightweight controls.', 'logindesignerwp' ); ?></p>
 
-            <form method="post" action="options.php">
-                <?php settings_fields( 'logindesignerwp_settings_group' ); ?>
+            <div class="logindesignerwp-layout">
+                <!-- Settings Column -->
+                <div class="logindesignerwp-settings-column">
+                    <form method="post" action="options.php" id="logindesignerwp-settings-form">
+                        <?php settings_fields( 'logindesignerwp_settings_group' ); ?>
 
-                <?php $this->render_background_section( $settings ); ?>
-                <?php $this->render_form_section( $settings ); ?>
-                <?php $this->render_logo_section( $settings ); ?>
+                        <?php $this->render_background_section( $settings ); ?>
+                        <?php $this->render_form_section( $settings ); ?>
+                        <?php $this->render_logo_section( $settings ); ?>
 
-                <div class="logindesignerwp-actions">
-                    <?php submit_button( __( 'Save Changes', 'logindesignerwp' ), 'primary', 'submit', false ); ?>
-                    <a href="<?php echo esc_url( wp_login_url() ); ?>" target="_blank" class="button button-secondary">
-                        <?php esc_html_e( 'Open Login Page', 'logindesignerwp' ); ?>
-                    </a>
+                        <div class="logindesignerwp-actions">
+                            <?php submit_button( __( 'Save Changes', 'logindesignerwp' ), 'primary', 'submit', false ); ?>
+                            <a href="<?php echo esc_url( wp_login_url() ); ?>" target="_blank" class="button button-secondary">
+                                <?php esc_html_e( 'Open Login Page', 'logindesignerwp' ); ?>
+                            </a>
+                        </div>
+                    </form>
                 </div>
-            </form>
+
+                <!-- Preview Column -->
+                <div class="logindesignerwp-preview-column">
+                    <div class="logindesignerwp-preview-sticky">
+                        <div class="logindesignerwp-preview-container" 
+                             data-bg-image="<?php echo esc_url( $bg_image_url ); ?>"
+                             data-logo-url="<?php echo esc_url( $logo_url ); ?>">
+                            <span class="logindesignerwp-preview-badge"><?php esc_html_e( 'Live Preview', 'logindesignerwp' ); ?></span>
+                            <!-- Preview Background -->
+                            <div class="logindesignerwp-preview-bg" id="ldwp-preview-bg">
+                                <!-- Preview Login Box -->
+                                <div class="logindesignerwp-preview-login" id="ldwp-preview-login">
+                                    <!-- Logo -->
+                                    <div class="logindesignerwp-preview-logo" id="ldwp-preview-logo">
+                                        <a href="#">
+                                            <?php if ( $logo_url ) : ?>
+                                                <img src="<?php echo esc_url( $logo_url ); ?>" alt="Logo" id="ldwp-preview-logo-img">
+                                            <?php else : ?>
+                                                <svg id="ldwp-preview-logo-wp" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.52 122.523" width="84" height="84">
+                                                    <path fill="#fff" d="M8.708 61.26c0 20.802 12.089 38.779 29.619 47.298L13.258 39.872a52.354 52.354 0 00-4.55 21.388zM96.74 58.608c0-6.495-2.333-10.993-4.334-14.494-2.664-4.329-5.161-7.995-5.161-12.324 0-4.831 3.664-9.328 8.825-9.328.233 0 .454.029.681.042-9.35-8.566-21.807-13.796-35.489-13.796-18.36 0-34.513 9.42-43.91 23.688 1.233.037 2.395.063 3.382.063 5.497 0 14.006-.667 14.006-.667 2.833-.167 3.167 3.994.337 4.329 0 0-2.847.335-6.015.501L48.2 93.547l11.501-34.493-8.188-22.434c-2.83-.166-5.511-.501-5.511-.501-2.832-.166-2.5-4.496.332-4.329 0 0 8.679.667 13.843.667 5.496 0 14.006-.667 14.006-.667 2.835-.167 3.168 3.994.337 4.329 0 0-2.853.335-6.015.501l18.992 56.494 5.242-17.517c2.272-7.269 4.001-12.49 4.001-16.989z"/>
+                                                    <path fill="#fff" d="M62.184 65.857l-15.768 45.819a52.552 52.552 0 0032.29-.838 4.693 4.693 0 01-.37-.712L62.184 65.857zM107.376 36.046a42.584 42.584 0 01.358 5.708c0 5.651-1.057 12.002-4.229 19.94l-16.973 49.082c16.519-9.627 27.618-27.628 27.618-48.18 0-9.762-2.499-18.929-6.774-26.55z"/>
+                                                    <path fill="#fff" d="M61.262 0C27.483 0 0 27.481 0 61.26c0 33.783 27.483 61.263 61.262 61.263 33.778 0 61.265-27.48 61.265-61.263C122.526 27.481 95.04 0 61.262 0zm0 119.715c-32.23 0-58.453-26.223-58.453-58.455 0-32.23 26.222-58.451 58.453-58.451 32.229 0 58.45 26.221 58.45 58.451 0 32.232-26.221 58.455-58.45 58.455z"/>
+                                                </svg>
+                                            <?php endif; ?>
+                                        </a>
+                                    </div>
+
+                                    <!-- Form -->
+                                    <div class="logindesignerwp-preview-form" id="ldwp-preview-form">
+                                        <div class="logindesignerwp-preview-field">
+                                            <label id="ldwp-preview-label-user"><?php esc_html_e( 'Username or Email', 'logindesignerwp' ); ?></label>
+                                            <input type="text" id="ldwp-preview-input-user" readonly>
+                                        </div>
+                                        <div class="logindesignerwp-preview-field">
+                                            <label id="ldwp-preview-label-pass"><?php esc_html_e( 'Password', 'logindesignerwp' ); ?></label>
+                                            <input type="password" id="ldwp-preview-input-pass" value="••••••••" readonly>
+                                        </div>
+                                        <div class="logindesignerwp-preview-remember">
+                                            <label><input type="checkbox" checked readonly> <?php esc_html_e( 'Remember Me', 'logindesignerwp' ); ?></label>
+                                        </div>
+                                        <button type="button" id="ldwp-preview-button"><?php esc_html_e( 'Log In', 'logindesignerwp' ); ?></button>
+                                    </div>
+
+                                    <!-- Links -->
+                                    <div class="logindesignerwp-preview-links" id="ldwp-preview-links">
+                                        <a href="#"><?php esc_html_e( 'Lost your password?', 'logindesignerwp' ); ?></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preview Actions -->
+                        <div class="logindesignerwp-preview-actions">
+                            <button type="submit" form="logindesignerwp-settings-form" class="button button-primary">
+                                <?php esc_html_e( 'Save Changes', 'logindesignerwp' ); ?>
+                            </button>
+                            <a href="<?php echo esc_url( wp_login_url() ); ?>" target="_blank" class="button button-secondary">
+                                <?php esc_html_e( 'Open Login Page', 'logindesignerwp' ); ?>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <?php
     }
