@@ -36,6 +36,73 @@
     /* JS handles sticky positioning - see initStickyPreview() */
 }
 
+/* Tab Navigation */
+.logindesignerwp-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.logindesignerwp-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 20px;
+    text-decoration: none;
+    color: #6b7280;
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s ease;
+}
+
+.logindesignerwp-tab:hover {
+    color: #374151;
+    background: #f9fafb;
+}
+
+.logindesignerwp-tab.active {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+}
+
+.logindesignerwp-tab .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Tab Content */
+.logindesignerwp-tab-content {
+    display: none;
+}
+
+.logindesignerwp-tab-content.active {
+    display: block;
+}
+
+/* Design Tab 2-Column Layout */
+.logindesignerwp-design-layout {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.logindesignerwp-design-settings {
+    flex: 1;
+    min-width: 0;
+}
+
+.logindesignerwp-design-preview {
+    flex: 1;
+    min-width: 0;
+    position: sticky;
+    top: 32px;
+    /* Account for WP admin bar */
+    align-self: flex-start;
+}
+
 /* Live Preview badge */
 .logindesignerwp-preview-badge {
     position: absolute;
@@ -89,6 +156,14 @@
     font-weight: 600;
     cursor: pointer;
     user-select: none;
+}
+
+.logindesignerwp-card-title-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 8px;
 }
 
 .logindesignerwp-card h2 .toggle-indicator {
@@ -401,7 +476,8 @@
 .logindesignerwp-pro-locked-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 12px;
     padding: 16px 20px;
     background: #374151;
     color: #fff;

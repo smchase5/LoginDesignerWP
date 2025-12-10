@@ -189,6 +189,10 @@ class LoginDesignerWP_Login_Style
         echo "<!-- LoginDesignerWP CSS -->\n";
         echo "<style type=\"text/css\" id=\"logindesignerwp-styles\">\n";
         echo $css;
+
+        // Allow Pro to add additional CSS.
+        do_action('logindesignerwp_login_styles', $s);
+
         echo "</style>\n";
     }
 

@@ -28,6 +28,12 @@ require_once LOGINDESIGNERWP_PATH . 'inc/helpers.php';
 require_once LOGINDESIGNERWP_PATH . 'inc/class-settings.php';
 require_once LOGINDESIGNERWP_PATH . 'inc/class-login-style.php';
 
+// Load Pro module if it exists.
+$pro_bootstrap = LOGINDESIGNERWP_PATH . 'pro/pro-bootstrap.php';
+if (file_exists($pro_bootstrap)) {
+    require_once $pro_bootstrap;
+}
+
 /**
  * Initialize the plugin.
  */

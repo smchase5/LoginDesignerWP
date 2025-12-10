@@ -11,13 +11,23 @@ if (!defined('ABSPATH')) {
 }
 
 /**
+ * Check if Pro plugin is active and licensed.
+ *
+ * @return bool True if Pro is active and licensed.
+ */
+function logindesignerwp_is_pro_active()
+{
+    return apply_filters('logindesignerwp_is_pro_active', false);
+}
+
+/**
  * Get default settings.
  *
  * @return array Default settings array.
  */
 function logindesignerwp_get_defaults()
 {
-    return array(
+    $defaults = array(
         // Background settings.
         'background_mode' => 'solid',
         'background_color' => '#0f172a',
@@ -55,6 +65,9 @@ function logindesignerwp_get_defaults()
         'logo_url' => '',
         'logo_title' => '',
     );
+
+    // Allow Pro to extend defaults.
+    return apply_filters('logindesignerwp_default_settings', $defaults);
 }
 
 /**

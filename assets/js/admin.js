@@ -570,12 +570,50 @@
         initCheckboxes();
         initButtonHover();
         initStickyPreview();
+        initTabs();
         initCollapsibleSections();
         initSortableSections();
 
         // Apply initial preview after a short delay to ensure color pickers are ready
         setTimeout(applyInitialPreview, 100);
     });
+
+    /**
+     * Initialize tab navigation.
+     */
+    function initTabs() {
+        var $tabs = $('.logindesignerwp-tab');
+        var $contents = $('.logindesignerwp-tab-content');
+
+        if ($tabs.length === 0) {
+            return;
+        }
+
+        // Restore active tab from localStorage
+        var savedTab = localStorage.getItem('ldwp_active_tab');
+        if (savedTab) {
+            $tabs.removeClass('active');
+            $contents.removeClass('active');
+            $tabs.filter('[data-tab="' + savedTab + '"]').addClass('active');
+            $('#tab-' + savedTab).addClass('active');
+        }
+
+        // Handle tab clicks
+        $tabs.on('click', function (e) {
+            e.preventDefault();
+            var $tab = $(this);
+            var tabId = $tab.data('tab');
+
+            // Update active states
+            $tabs.removeClass('active');
+            $contents.removeClass('active');
+            $tab.addClass('active');
+            $('#tab-' + tabId).addClass('active');
+
+            // Save to localStorage
+            localStorage.setItem('ldwp_active_tab', tabId);
+        });
+    }
 
     /**
      * Initialize collapsible settings sections.
