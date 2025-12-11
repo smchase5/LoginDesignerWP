@@ -315,14 +315,57 @@ class LoginDesignerWP_Settings {
             <!-- Gradient Options -->
             <div class="logindesignerwp-bg-options logindesignerwp-bg-gradient" <?php echo $settings['background_mode'] !== 'gradient' ? 'style="display:none;"' : ''; ?>>
                 <table class="form-table">
+                    <!-- Gradient Type -->
                     <tr>
-                        <th scope="row"><?php esc_html_e( 'Gradient Start', 'logindesignerwp' ); ?></th>
+                        <th scope="row"><?php esc_html_e( 'Gradient Type', 'logindesignerwp' ); ?></th>
+                        <td>
+                            <select name="<?php echo esc_attr( $this->option_name ); ?>[gradient_type]" class="logindesignerwp-gradient-type">
+                                <option value="linear" <?php selected( $settings['gradient_type'], 'linear' ); ?>><?php esc_html_e( 'Linear', 'logindesignerwp' ); ?></option>
+                                <option value="radial" <?php selected( $settings['gradient_type'], 'radial' ); ?>><?php esc_html_e( 'Radial', 'logindesignerwp' ); ?></option>
+                                <option value="mesh" <?php selected( $settings['gradient_type'], 'mesh' ); ?>><?php esc_html_e( 'Mesh (Pro)', 'logindesignerwp' ); ?></option>
+                            </select>
+                            <button type="button" class="button logindesignerwp-randomize-gradient" title="<?php esc_attr_e( 'Generate Random Colors', 'logindesignerwp' ); ?>">
+                                <span class="dashicons dashicons-randomize" style="margin-top: 3px;"></span>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Linear Angle -->
+                    <tr class="logindesignerwp-gradient-opt logindesignerwp-gradient-linear" <?php echo $settings['gradient_type'] !== 'linear' ? 'style="display:none;"' : ''; ?>>
+                        <th scope="row"><?php esc_html_e( 'Angle', 'logindesignerwp' ); ?></th>
+                        <td>
+                            <input type="range" name="<?php echo esc_attr( $this->option_name ); ?>[gradient_angle]" min="0" max="360" value="<?php echo esc_attr( $settings['gradient_angle'] ); ?>" oninput="this.nextElementSibling.value = this.value + ' deg'">
+                            <output><?php echo esc_html( $settings['gradient_angle'] ); ?> deg</output>
+                        </td>
+                    </tr>
+
+                    <!-- Radial Position -->
+                    <tr class="logindesignerwp-gradient-opt logindesignerwp-gradient-radial" <?php echo $settings['gradient_type'] !== 'radial' ? 'style="display:none;"' : ''; ?>>
+                        <th scope="row"><?php esc_html_e( 'Position', 'logindesignerwp' ); ?></th>
+                        <td>
+                            <select name="<?php echo esc_attr( $this->option_name ); ?>[gradient_position]">
+                                <option value="center center" <?php selected( $settings['gradient_position'], 'center center' ); ?>><?php esc_html_e( 'Center', 'logindesignerwp' ); ?></option>
+                                <option value="top left" <?php selected( $settings['gradient_position'], 'top left' ); ?>><?php esc_html_e( 'Top Left', 'logindesignerwp' ); ?></option>
+                                <option value="top center" <?php selected( $settings['gradient_position'], 'top center' ); ?>><?php esc_html_e( 'Top Center', 'logindesignerwp' ); ?></option>
+                                <option value="top right" <?php selected( $settings['gradient_position'], 'top right' ); ?>><?php esc_html_e( 'Top Right', 'logindesignerwp' ); ?></option>
+                                <option value="center left" <?php selected( $settings['gradient_position'], 'center left' ); ?>><?php esc_html_e( 'Center Left', 'logindesignerwp' ); ?></option>
+                                <option value="center right" <?php selected( $settings['gradient_position'], 'center right' ); ?>><?php esc_html_e( 'Center Right', 'logindesignerwp' ); ?></option>
+                                <option value="bottom left" <?php selected( $settings['gradient_position'], 'bottom left' ); ?>><?php esc_html_e( 'Bottom Left', 'logindesignerwp' ); ?></option>
+                                <option value="bottom center" <?php selected( $settings['gradient_position'], 'bottom center' ); ?>><?php esc_html_e( 'Bottom Center', 'logindesignerwp' ); ?></option>
+                                <option value="bottom right" <?php selected( $settings['gradient_position'], 'bottom right' ); ?>><?php esc_html_e( 'Bottom Right', 'logindesignerwp' ); ?></option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <!-- Colors -->
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Start Color', 'logindesignerwp' ); ?></th>
                         <td>
                             <input type="text" class="logindesignerwp-color-picker" name="<?php echo esc_attr( $this->option_name ); ?>[background_gradient_1]" value="<?php echo esc_attr( $settings['background_gradient_1'] ); ?>">
                         </td>
                     </tr>
                     <tr>
-                        <th scope="row"><?php esc_html_e( 'Gradient End', 'logindesignerwp' ); ?></th>
+                        <th scope="row"><?php esc_html_e( 'End Color', 'logindesignerwp' ); ?></th>
                         <td>
                             <input type="text" class="logindesignerwp-color-picker" name="<?php echo esc_attr( $this->option_name ); ?>[background_gradient_2]" value="<?php echo esc_attr( $settings['background_gradient_2'] ); ?>">
                         </td>
@@ -500,46 +543,109 @@ class LoginDesignerWP_Settings {
      *
      * @param array $settings Current settings.
      */
-    private function render_logo_section( $settings ) {
+    public function render_logo_section( $settings ) {
+        // Prepare Logo Preview URL
+        $logo_url = '';
+        if ( ! empty( $settings['logo_id'] ) ) {
+            $logo_url = wp_get_attachment_image_url( $settings['logo_id'], 'medium' );
+        }
         ?>
         <div class="logindesignerwp-card" data-section-id="logo">
-            <h2><?php esc_html_e( 'Logo', 'logindesignerwp' ); ?></h2>
+            <h2><span class="dashicons dashicons-format-image"></span> <?php esc_html_e( 'Logo', 'logindesignerwp' ); ?></h2>
+            <div class="logindesignerwp-card-content">
+                <p><?php esc_html_e( 'Customize your login logo.', 'logindesignerwp' ); ?></p>
 
-            <table class="form-table">
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Custom Logo', 'logindesignerwp' ); ?></th>
-                    <td>
-                        <?php $logo_url = $settings['logo_id'] ? wp_get_attachment_image_url( $settings['logo_id'], 'medium' ) : ''; ?>
-                        <div class="logindesignerwp-image-preview logindesignerwp-logo-preview" <?php echo ! $logo_url ? 'style="display:none;"' : ''; ?>>
-                            <img src="<?php echo esc_url( $logo_url ); ?>" alt="">
-                        </div>
-                        <input type="hidden" class="logindesignerwp-image-id" name="<?php echo esc_attr( $this->option_name ); ?>[logo_id]" value="<?php echo esc_attr( $settings['logo_id'] ); ?>">
-                        <button type="button" class="button logindesignerwp-upload-image"><?php esc_html_e( 'Select Logo', 'logindesignerwp' ); ?></button>
-                        <button type="button" class="button logindesignerwp-remove-image" <?php echo ! $logo_url ? 'style="display:none;"' : ''; ?>><?php esc_html_e( 'Remove', 'logindesignerwp' ); ?></button>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Logo Width', 'logindesignerwp' ); ?></th>
-                    <td>
-                        <input type="number" name="<?php echo esc_attr( $this->option_name ); ?>[logo_width]" value="<?php echo esc_attr( $settings['logo_width'] ); ?>" min="50" max="500" step="1"> px
-                        <p class="description"><?php esc_html_e( 'Logo width is a maximum; the image will scale down on smaller screens.', 'logindesignerwp' ); ?></p>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Logo Link URL', 'logindesignerwp' ); ?></th>
-                    <td>
-                        <input type="url" class="regular-text" name="<?php echo esc_attr( $this->option_name ); ?>[logo_url]" value="<?php echo esc_attr( $settings['logo_url'] ); ?>" placeholder="<?php echo esc_attr( home_url() ); ?>">
-                        <p class="description"><?php esc_html_e( 'Leave empty to link to your homepage.', 'logindesignerwp' ); ?></p>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Logo Title', 'logindesignerwp' ); ?></th>
-                    <td>
-                        <input type="text" class="regular-text" name="<?php echo esc_attr( $this->option_name ); ?>[logo_title]" value="<?php echo esc_attr( $settings['logo_title'] ); ?>" placeholder="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
-                        <p class="description"><?php esc_html_e( 'Leave empty to use your site name.', 'logindesignerwp' ); ?></p>
-                    </td>
-                </tr>
-            </table>
+                <table class="form-table logindesignerwp-logo-table">
+                    <!-- Logo Image -->
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Logo Image', 'logindesignerwp' ); ?></th>
+                        <td>
+                            <div class="logindesignerwp-image-upload">
+                                <input type="hidden" name="logindesignerwp_settings[logo_id]" class="logindesignerwp-image-id" value="<?php echo esc_attr( $settings['logo_id'] ); ?>">
+                                <div class="logindesignerwp-image-preview logindesignerwp-logo-preview" style="<?php echo $logo_url ? '' : 'display:none;'; ?>">
+                                    <img src="<?php echo esc_url( $logo_url ); ?>" alt="Logo Preview">
+                                </div>
+                                <button type="button" class="button logindesignerwp-upload-image"><?php esc_html_e( 'Select Image', 'logindesignerwp' ); ?></button>
+                                <button type="button" class="button logindesignerwp-remove-image" style="<?php echo $logo_url ? '' : 'display:none;'; ?>"><?php esc_html_e( 'Remove', 'logindesignerwp' ); ?></button>
+                            </div>
+                            <p class="description"><?php esc_html_e( 'Upload your custom logo.', 'logindesignerwp' ); ?></p>
+                        </td>
+                    </tr>
+
+                    <!-- Logo Width -->
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Logo Width (px)', 'logindesignerwp' ); ?></th>
+                        <td>
+                            <input type="number" name="logindesignerwp_settings[logo_width]" value="<?php echo esc_attr( $settings['logo_width'] ); ?>" min="0" max="500">
+                        </td>
+                    </tr>
+
+                    <!-- Logo Height -->
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Logo Height (px)', 'logindesignerwp' ); ?></th>
+                        <td>
+                            <input type="number" name="logindesignerwp_settings[logo_height]" value="<?php echo esc_attr( $settings['logo_height'] ); ?>" min="0" max="500">
+                            <p class="description"><?php esc_html_e( 'Set to 0 or 84 (default) to keep WP standard.', 'logindesignerwp' ); ?></p>
+                        </td>
+                    </tr>
+
+                    <!-- Padding -->
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Padding (px)', 'logindesignerwp' ); ?></th>
+                        <td>
+                            <input type="number" name="logindesignerwp_settings[logo_padding]" value="<?php echo esc_attr( $settings['logo_padding'] ); ?>" min="0" max="100">
+                        </td>
+                    </tr>
+
+                    <!-- Bottom Margin -->
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Bottom Margin (px)', 'logindesignerwp' ); ?></th>
+                        <td>
+                            <div class="logindesignerwp-range-wrapper">
+                                <input type="range" name="logindesignerwp_settings[logo_bottom_margin]" value="<?php echo esc_attr( $settings['logo_bottom_margin'] ); ?>" min="0" max="100" oninput="this.nextElementSibling.value = this.value">
+                                <output><?php echo esc_attr( $settings['logo_bottom_margin'] ); ?></output> px
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Border Radius -->
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Border Radius (px)', 'logindesignerwp' ); ?></th>
+                        <td>
+                            <div class="logindesignerwp-range-wrapper">
+                                <input type="range" name="logindesignerwp_settings[logo_border_radius]" value="<?php echo esc_attr( $settings['logo_border_radius'] ); ?>" min="0" max="100" oninput="this.nextElementSibling.value = this.value">
+                                <output><?php echo esc_attr( $settings['logo_border_radius'] ); ?></output> px
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Background Color -->
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Background Color', 'logindesignerwp' ); ?></th>
+                        <td>
+                            <input type="text" class="logindesignerwp-color-picker" name="logindesignerwp_settings[logo_background_color]" value="<?php echo esc_attr( $settings['logo_background_color'] ); ?>" data-preview-target="logo-background">
+                        </td>
+                    </tr>
+
+                    <!-- Logo URL -->
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Logo URL', 'logindesignerwp' ); ?></th>
+                        <td>
+                            <input type="text" class="regular-text" name="logindesignerwp_settings[logo_url]" value="<?php echo esc_url( $settings['logo_url'] ); ?>">
+                            <p class="description"><?php esc_html_e( 'Link when clicking the logo. Default: Homepage.', 'logindesignerwp' ); ?></p>
+                        </td>
+                    </tr>
+
+                    <!-- Logo Title -->
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Logo Title', 'logindesignerwp' ); ?></th>
+                        <td>
+                            <input type="text" class="regular-text" name="logindesignerwp_settings[logo_title]" value="<?php echo esc_attr( $settings['logo_title'] ); ?>">
+                            <p class="description"><?php esc_html_e( 'Title attribute for the logo link. Default: Site Title.', 'logindesignerwp' ); ?></p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
         <?php
     }

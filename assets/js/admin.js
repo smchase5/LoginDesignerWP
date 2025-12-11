@@ -127,6 +127,13 @@
                 updatePreview('below_form_link_color', ui.color.toString());
             }
         });
+
+        // Logo background
+        $('input[name="logindesignerwp_settings[logo_background_color]"]').wpColorPicker({
+            change: function (event, ui) {
+                updatePreview('logo_background_color', ui.color.toString());
+            }
+        });
     }
 
     /**
@@ -238,6 +245,75 @@
 
         // On change.
         $modeInputs.on('change', toggleBackgroundOptions);
+
+        initGradientControls();
+        initRandomizer();
+    }
+
+    /**
+     * Initialize gradient specific controls (type toggle, randomizer).
+     */
+    function initGradientControls() {
+        var $typeSelect = $('select.logindesignerwp-gradient-type');
+
+        $typeSelect.on('change', function () {
+            var type = $(this).val();
+
+            // Toggle visibility of specific options
+            $('.logindesignerwp-gradient-opt').hide();
+            $('.logindesignerwp-gradient-' + type).show();
+
+            // Update preview immediately
+            updatePreview('gradient_type', type);
+        });
+
+        // Loop inputs for angle and position
+        $('input[name="logindesignerwp_settings[gradient_angle]"]').on('input change', function () {
+            updatePreview('gradient_angle', $(this).val());
+        });
+
+        $('select[name="logindesignerwp_settings[gradient_position]"]').on('change', function () {
+            updatePreview('gradient_position', $(this).val());
+        });
+    }
+
+    /**
+     * Initialize Gradient Randomizer.
+     */
+    function initRandomizer() {
+        $('.logindesignerwp-randomize-gradient').on('click', function (e) {
+            e.preventDefault();
+
+            // Helper to generate random hex
+            var randomHex = function () {
+                return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+            };
+
+            // Generate two nice contrasting colors
+            var col1 = randomHex();
+            var col2 = randomHex();
+
+            // If linear, maybe random angle
+            var $angleInput = $('input[name="logindesignerwp_settings[gradient_angle]"]');
+            var randomAngle = Math.floor(Math.random() * 360);
+            $angleInput.val(randomAngle).trigger('input'); // Trigger input so output element updates
+
+            // Update color pickers
+            $('input[name="logindesignerwp_settings[background_gradient_1]"]').wpColorPicker('color', col1);
+            $('input[name="logindesignerwp_settings[background_gradient_2]"]').wpColorPicker('color', col2);
+
+            // Note: wpColorPicker 'color' method triggers change automatically usually, but we ensure preview updates
+        });
+    }
+
+    /**
+     * Helper to generate Mesh Gradient CSS.
+     */
+    function generateMeshGradient(c1, c2) {
+        // A fluid mesh effect using radial gradients
+        return 'radial-gradient(at top left, ' + c1 + ', transparent 70%), ' +
+            'radial-gradient(at bottom right, ' + c2 + ', transparent 70%), ' +
+            'linear-gradient(135deg, ' + c2 + ', ' + c1 + ')';
     }
 
     /**
@@ -258,6 +334,33 @@
         $('input[name="logindesignerwp_settings[logo_width]"]').on('input change', function () {
             updatePreview('logo_width', $(this).val());
         });
+    }
+
+    /**
+     * Initialize Logo Controls.
+     */
+    function initLogoControls() {
+        // Logo Height
+        $('input[name="logindesignerwp_settings[logo_height]"]').on('input change', function () {
+            updatePreview('logo_height', $(this).val());
+        });
+
+        // Logo Padding
+        $('input[name="logindesignerwp_settings[logo_padding]"]').on('input change', function () {
+            updatePreview('logo_padding', $(this).val());
+        });
+
+        // Logo Border Radius
+        $('input[name="logindesignerwp_settings[logo_border_radius]"]').on('input change', function () {
+            updatePreview('logo_border_radius', $(this).val());
+        });
+
+        // Logo Bottom Margin
+        $('input[name="logindesignerwp_settings[logo_bottom_margin]"]').on('input change', function () {
+            updatePreview('logo_bottom_margin', $(this).val());
+        });
+
+        // Background color handled by initColorPickers
     }
 
     /**
@@ -291,6 +394,12 @@
 
             case 'background_gradient_2':
                 $previewContainer.data('gradient-2', value);
+                applyBackgroundPreview();
+                break;
+
+            case 'gradient_type':
+            case 'gradient_angle':
+            case 'gradient_position':
                 applyBackgroundPreview();
                 break;
 
@@ -392,9 +501,42 @@
                 break;
 
             case 'logo_width':
-                if ($previewLogoImg.length && $previewLogoImg.is(':visible')) {
-                    $previewLogoImg.css('max-width', value + 'px');
+                // Check if using image
+                var $img = $previewLogo.find('img');
+                if ($img.length && $img.is(':visible')) {
+                    $previewLogo.find('a').css('width', value + 'px');
+                    $previewLogo.find('a').css('background-size', 'contain'); // Force recheck
+                } else {
+                    // SVG/Default
+                    $previewLogo.find('a').css('width', value + 'px');
+                    $previewLogo.find('a').css('background-size', value + 'px ' + value + 'px'); // Keep it tight
                 }
+                break;
+
+            case 'logo_height':
+                var h = (value == 0 || value == '') ? '84px' : value + 'px';
+                $previewLogo.find('a').css('height', h);
+                // Also update background size cover/contain logic if needed, but 'contain' usually fine
+                break;
+
+            case 'logo_padding':
+                $previewLogo.find('a').css('padding', value + 'px');
+                // Ensure bg clip content box if using background? No, usually padding adds space inside border-box
+                // Just standard padding works effectively for 'badge' look
+                break;
+
+            case 'logo_border_radius':
+                $previewLogo.find('a').css('border-radius', value + 'px');
+                break;
+
+            case 'logo_bottom_margin':
+                $previewLogo.css('margin-bottom', value + 'px'); // h1 margin
+                break;
+
+            case 'logo_background_color':
+                $previewLogo.find('a').css('background-color', value);
+                // Ensure background-image (logo) sits ON TOP of color. 
+                // Default WP CSS puts image in background-image. Color works fine with that.
                 break;
         }
     }
@@ -404,10 +546,18 @@
      */
     function applyBackgroundPreview() {
         var mode = $('input[name="logindesignerwp_settings[background_mode]"]:checked').val();
-        var bgColor = $('input[name="logindesignerwp_settings[background_color]"]').val();
-        var gradient1 = $('input[name="logindesignerwp_settings[background_gradient_1]"]').val();
-        var gradient2 = $('input[name="logindesignerwp_settings[background_gradient_2]"]').val();
+
+        // Use cached data for live updates to avoid timing issues with color picker
+        var bgColor = $previewContainer.data('bg-color') || $('input[name="logindesignerwp_settings[background_color]"]').val();
+        var gradient1 = $previewContainer.data('gradient-1') || $('input[name="logindesignerwp_settings[background_gradient_1]"]').val();
+        var gradient2 = $previewContainer.data('gradient-2') || $('input[name="logindesignerwp_settings[background_gradient_2]"]').val();
+
         var bgImage = $previewContainer.data('bg-image') || '';
+
+        // Advanced Gradient Settings
+        var gradType = $('select[name="logindesignerwp_settings[gradient_type]"]').val() || 'linear';
+        var gradAngle = $('input[name="logindesignerwp_settings[gradient_angle]"]').val() || '135';
+        var gradPos = $('select[name="logindesignerwp_settings[gradient_position]"]').val() || 'center center';
 
         // Reset background
         $previewBg.css({
@@ -425,7 +575,16 @@
                 break;
 
             case 'gradient':
-                $previewBg.css('background', 'linear-gradient(to bottom, ' + gradient1 + ', ' + gradient2 + ')');
+                var gradientCss = '';
+                if (gradType === 'linear') {
+                    gradientCss = 'linear-gradient(' + gradAngle + 'deg, ' + gradient1 + ', ' + gradient2 + ')';
+                } else if (gradType === 'radial') {
+                    gradientCss = 'radial-gradient(circle at ' + gradPos + ', ' + gradient1 + ', ' + gradient2 + ')';
+                } else if (gradType === 'mesh') {
+                    gradientCss = generateMeshGradient(gradient1, gradient2);
+                }
+
+                $previewBg.css('background', gradientCss);
                 break;
 
             case 'image':
@@ -477,7 +636,12 @@
             button_text_color: $('input[name="logindesignerwp_settings[button_text_color]"]').val(),
             button_border_radius: $('input[name="logindesignerwp_settings[button_border_radius]"]').val(),
             below_form_link_color: $('input[name="logindesignerwp_settings[below_form_link_color]"]').val(),
-            logo_width: $('input[name="logindesignerwp_settings[logo_width]"]').val()
+            logo_width: $('input[name="logindesignerwp_settings[logo_width]"]').val(),
+            logo_height: $('input[name="logindesignerwp_settings[logo_height]"]').val(),
+            logo_padding: $('input[name="logindesignerwp_settings[logo_padding]"]').val(),
+            logo_border_radius: $('input[name="logindesignerwp_settings[logo_border_radius]"]').val(),
+            logo_bottom_margin: $('input[name="logindesignerwp_settings[logo_bottom_margin]"]').val(),
+            logo_background_color: $('input[name="logindesignerwp_settings[logo_background_color]"]').val()
         };
 
         // Apply each setting
@@ -573,6 +737,8 @@
         initTabs();
         initCollapsibleSections();
         initSortableSections();
+        initGlassmorphismPreview();
+        initLogoControls();
 
         // Apply initial preview after a short delay to ensure color pickers are ready
         setTimeout(applyInitialPreview, 100);
@@ -664,6 +830,103 @@
 
     /**
      * Initialize sortable sections for drag-to-reorder.
+     */
+    /**
+     * Initialize Glassmorphism preview handlers.
+     */
+    function initGlassmorphismPreview() {
+        var $glassEnabled = $('input[name="logindesignerwp_settings[glass_enabled]"]');
+        var $glassBlur = $('input[name="logindesignerwp_settings[glass_blur]"]');
+        var $glassTransparency = $('input[name="logindesignerwp_settings[glass_transparency]"]');
+        var $glassBorder = $('input[name="logindesignerwp_settings[glass_border]"]');
+
+        function hexToRgb(hex) {
+            // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+            var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+            hex = hex.replace(shorthandRegex, function (m, r, g, b) {
+                return r + r + g + g + b + b;
+            });
+
+            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : { r: 255, g: 255, b: 255 }; // Default to white if invalid
+        }
+
+        function updateGlassPreview() {
+            var isEnabled = $glassEnabled.is(':checked');
+            var blur = $glassBlur.val();
+            var transparency = $glassTransparency.val();
+            var hasBorder = $glassBorder.is(':checked');
+            var baseColorVal = $('input[name="logindesignerwp_settings[form_bg_color]"]').val();
+            var baseColor = baseColorVal ? baseColorVal : '#ffffff';
+
+            if (isEnabled) {
+                // Calculate opacity (inverted transparency)
+                var opacity = 1 - (parseInt(transparency) / 100);
+
+                // Convert hex to rgb for rgba string
+                var rgb = hexToRgb(baseColor);
+                var rgba = 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + opacity + ')';
+
+                $previewForm.css({
+                    'background-color': rgba,
+                    'backdrop-filter': 'blur(' + blur + 'px)',
+                    '-webkit-backdrop-filter': 'blur(' + blur + 'px)'
+                });
+
+                if (hasBorder) {
+                    $previewForm.css('border', '1px solid rgba(255, 255, 255, 0.2)');
+                } else {
+                    // Revert to standard border color if glass border is off
+                    var borderColor = $('input[name="logindesignerwp_settings[form_border_color]"]').val();
+                    $previewForm.css('border', '1px solid ' + borderColor);
+                }
+
+            } else {
+                // Remove glass styles and revert to standard background/border
+                var standardBg = $('input[name="logindesignerwp_settings[form_bg_color]"]').val();
+                var standardBorder = $('input[name="logindesignerwp_settings[form_border_color]"]').val();
+
+                $previewForm.css({
+                    'background-color': standardBg,
+                    'backdrop-filter': '',
+                    '-webkit-backdrop-filter': ''
+                });
+
+                $previewForm.css('border', '1px solid ' + standardBorder);
+            }
+        }
+
+        // Attach listeners
+        $glassEnabled.on('change', updateGlassPreview);
+        $glassBlur.on('input change', updateGlassPreview);
+        $glassTransparency.on('input change', updateGlassPreview);
+        $glassBorder.on('change', updateGlassPreview);
+
+        // Also update when form background color changes, if glass is enabled
+        $('input[name="logindesignerwp_settings[form_bg_color]"]').on('change keyup', function () {
+            if ($glassEnabled.is(':checked')) {
+                updateGlassPreview();
+            }
+        });
+        // Also update when form border color changes, if glass is disabled or glass border is unchecked
+        $('input[name="logindesignerwp_settings[form_border_color]"]').on('change keyup', function () {
+            if (!$glassEnabled.is(':checked') || !$glassBorder.is(':checked')) {
+                // The ColorPicker change event handles the standard update, 
+                // but we need to ensure Glass logic doesn't override it incorrectly or vice versa.
+                // Actually standard updatePreview handles this fine for non-glass cases.
+            }
+        });
+
+        // Run once on init
+        setTimeout(updateGlassPreview, 200); // Slight delay to ensure color pickers are ready
+    }
+
+    /**
+     * Start the sortables.
      */
     function initSortableSections() {
         var $settingsColumn = $('.logindesignerwp-settings-column');

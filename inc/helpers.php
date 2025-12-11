@@ -33,6 +33,9 @@ function logindesignerwp_get_defaults()
         'background_color' => '#0f172a',
         'background_gradient_1' => '#0f172a',
         'background_gradient_2' => '#111827',
+        'gradient_type' => 'linear',
+        'gradient_angle' => 135,
+        'gradient_position' => 'center center',
         'background_image_id' => 0,
         'background_image_size' => 'cover',
         'background_image_pos' => 'center',
@@ -57,11 +60,16 @@ function logindesignerwp_get_defaults()
         'button_border_radius' => 999,
 
         // Below form link settings.
-        'below_form_link_color' => '#94a3b8',
+        'below_form_link_color' => '#555d66',
 
-        // Logo settings.
+        // Logo
         'logo_id' => 0,
-        'logo_width' => 220,
+        'logo_width' => 84,
+        'logo_height' => 84,
+        'logo_padding' => 0,
+        'logo_border_radius' => 0,
+        'logo_bottom_margin' => 0,
+        'logo_background_color' => '',
         'logo_url' => '',
         'logo_title' => '',
     );
@@ -93,6 +101,12 @@ function logindesignerwp_sanitize_settings($input)
 {
     $defaults = logindesignerwp_get_defaults();
     $sanitized = array();
+
+    error_log('LoginDesignerWP Sanitization Start');
+    error_log('Raw Input Keys: ' . implode(', ', array_keys($input)));
+    if (isset($input['background_color'])) {
+        error_log('Input Background Color: ' . $input['background_color']);
+    }
 
     // Background mode.
     $sanitized['background_mode'] = in_array($input['background_mode'] ?? '', array('solid', 'gradient', 'image'), true)
@@ -140,6 +154,14 @@ function logindesignerwp_sanitize_settings($input)
         ? $input['background_image_repeat']
         : $defaults['background_image_repeat'];
 
+    // Gradient settings.
+    $sanitized['gradient_type'] = in_array($input['gradient_type'] ?? '', array('linear', 'radial', 'mesh'), true)
+        ? $input['gradient_type']
+        : $defaults['gradient_type'];
+
+    $sanitized['gradient_angle'] = absint($input['gradient_angle'] ?? $defaults['gradient_angle']);
+    $sanitized['gradient_position'] = sanitize_text_field($input['gradient_position'] ?? $defaults['gradient_position']);
+
     // Border radius - integers with bounds.
     $sanitized['form_border_radius'] = max(0, min(50, absint($input['form_border_radius'] ?? $defaults['form_border_radius'])));
     $sanitized['button_border_radius'] = max(0, min(999, absint($input['button_border_radius'] ?? $defaults['button_border_radius'])));
@@ -150,8 +172,13 @@ function logindesignerwp_sanitize_settings($input)
     // Logo settings.
     $sanitized['logo_id'] = absint($input['logo_id'] ?? 0);
     $sanitized['logo_width'] = max(50, min(500, absint($input['logo_width'] ?? $defaults['logo_width'])));
+    $sanitized['logo_height'] = absint($input['logo_height'] ?? $defaults['logo_height']);
+    $sanitized['logo_padding'] = absint($input['logo_padding'] ?? $defaults['logo_padding']);
+    $sanitized['logo_border_radius'] = absint($input['logo_border_radius'] ?? $defaults['logo_border_radius']);
+    $sanitized['logo_bottom_margin'] = absint($input['logo_bottom_margin'] ?? $defaults['logo_bottom_margin']);
+    $sanitized['logo_background_color'] = sanitize_hex_color($input['logo_background_color'] ?? $defaults['logo_background_color']);
     $sanitized['logo_url'] = esc_url_raw($input['logo_url'] ?? '');
     $sanitized['logo_title'] = sanitize_text_field($input['logo_title'] ?? '');
 
-    return $sanitized;
+    return apply_filters('logindesignerwp_sanitize_settings', $sanitized, $input);
 }

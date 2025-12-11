@@ -63,7 +63,26 @@ class LoginDesignerWP_Login_Style
         if ('solid' === $s['background_mode']) {
             $css .= "    background: " . esc_attr($s['background_color']) . " !important;\n";
         } elseif ('gradient' === $s['background_mode']) {
-            $css .= "    background: linear-gradient(to bottom, " . esc_attr($s['background_gradient_1']) . ", " . esc_attr($s['background_gradient_2']) . ") !important;\n";
+            $gradient_type = isset($s['gradient_type']) ? $s['gradient_type'] : 'linear';
+            $gradient_angle = isset($s['gradient_angle']) ? $s['gradient_angle'] : 135;
+            $gradient_pos = isset($s['gradient_position']) ? $s['gradient_position'] : 'center center';
+            $col1 = esc_attr($s['background_gradient_1']);
+            $col2 = esc_attr($s['background_gradient_2']);
+
+            if ('linear' === $gradient_type) {
+                $css .= "    background: linear-gradient(" . intval($gradient_angle) . "deg, " . $col1 . ", " . $col2 . ") !important;\n";
+            } elseif ('radial' === $gradient_type) {
+                $css .= "    background: radial-gradient(circle at " . esc_attr($gradient_pos) . ", " . $col1 . ", " . $col2 . ") !important;\n";
+            } elseif ('mesh' === $gradient_type) {
+                // Pseudo-mesh using multiple radial gradients
+                $css .= "    background: radial-gradient(at top left, " . $col1 . ", transparent 70%),\n";
+                $css .= "                radial-gradient(at bottom right, " . $col2 . ", transparent 70%),\n";
+                $css .= "                linear-gradient(135deg, " . $col2 . ", " . $col1 . ") !important;\n";
+            } else {
+                // Fallback
+                $css .= "    background: linear-gradient(135deg, " . $col1 . ", " . $col2 . ") !important;\n";
+            }
+
             $css .= "    min-height: 100vh;\n";
         } elseif ('image' === $s['background_mode'] && $bg_image_url) {
             $css .= "    background-color: " . esc_attr($s['background_color']) . " !important;\n";
@@ -150,16 +169,30 @@ class LoginDesignerWP_Login_Style
 
         // Logo
         $logo_color = ltrim(esc_attr($s['label_text_color']), '#');
+
+        // Logo Container (h1)
+        $css .= "#login h1 {\n";
+        $css .= "    margin-bottom: " . intval($s['logo_bottom_margin']) . "px !important;\n";
+        $css .= "}\n";
+
+        // Logo Link (a)
         $css .= "#login h1 a {\n";
         $css .= "    width: " . intval($s['logo_width']) . "px !important;\n";
-        $css .= "    height: 84px !important;\n";
+        $height = intval($s['logo_height']) > 0 ? intval($s['logo_height']) : 84;
+        $css .= "    height: " . $height . "px !important;\n";
         $css .= "    max-width: 100% !important;\n";
+        $css .= "    padding: " . intval($s['logo_padding']) . "px !important;\n";
+        $css .= "    border-radius: " . intval($s['logo_border_radius']) . "px !important;\n";
+        if (!empty($s['logo_background_color'])) {
+            $css .= "    background-color: " . esc_attr($s['logo_background_color']) . " !important;\n";
+        }
+
         if ($logo_url) {
             $css .= "    background-image: url('" . esc_url($logo_url) . "') !important;\n";
             $css .= "    background-size: contain !important;\n";
         } else {
             $css .= "    background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 122.52 122.523'%3E%3Cpath fill='%23" . $logo_color . "' d='M8.708 61.26c0 20.802 12.089 38.779 29.619 47.298L13.258 39.872a52.354 52.354 0 00-4.55 21.388zM96.74 58.608c0-6.495-2.333-10.993-4.334-14.494-2.664-4.329-5.161-7.995-5.161-12.324 0-4.831 3.664-9.328 8.825-9.328.233 0 .454.029.681.042-9.35-8.566-21.807-13.796-35.489-13.796-18.36 0-34.513 9.42-43.91 23.688 1.233.037 2.395.063 3.382.063 5.497 0 14.006-.667 14.006-.667 2.833-.167 3.167 3.994.337 4.329 0 0-2.847.335-6.015.501L48.2 93.547l11.501-34.493-8.188-22.434c-2.83-.166-5.511-.501-5.511-.501-2.832-.166-2.5-4.496.332-4.329 0 0 8.679.667 13.843.667 5.496 0 14.006-.667 14.006-.667 2.835-.167 3.168 3.994.337 4.329 0 0-2.853.335-6.015.501l18.992 56.494 5.242-17.517c2.272-7.269 4.001-12.49 4.001-16.989z'/%3E%3Cpath fill='%23" . $logo_color . "' d='M62.184 65.857l-15.768 45.819a52.552 52.552 0 0032.29-.838 4.693 4.693 0 01-.37-.712L62.184 65.857zM107.376 36.046a42.584 42.584 0 01.358 5.708c0 5.651-1.057 12.002-4.229 19.94l-16.973 49.082c16.519-9.627 27.618-27.628 27.618-48.18 0-9.762-2.499-18.929-6.774-26.55z'/%3E%3Cpath fill='%23" . $logo_color . "' d='M61.262 0C27.483 0 0 27.481 0 61.26c0 33.783 27.483 61.263 61.262 61.263 33.778 0 61.265-27.48 61.265-61.263C122.526 27.481 95.04 0 61.262 0zm0 119.715c-32.23 0-58.453-26.223-58.453-58.455 0-32.23 26.222-58.451 58.453-58.451 32.229 0 58.45 26.221 58.45 58.451 0 32.232-26.221 58.455-58.45 58.455z'/%3E%3C/svg%3E\") !important;\n";
-            $css .= "    background-size: 84px 84px !important;\n";
+            $css .= "    background-size: " . intval($s['logo_width']) . "px " . $height . "px !important;\n";
         }
         $css .= "    background-position: center !important;\n";
         $css .= "    background-repeat: no-repeat !important;\n";
