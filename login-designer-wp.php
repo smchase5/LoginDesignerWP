@@ -27,6 +27,7 @@ require_once LOGINDESIGNERWP_PATH . 'inc/helpers.php';
 // Load classes.
 require_once LOGINDESIGNERWP_PATH . 'inc/class-settings.php';
 require_once LOGINDESIGNERWP_PATH . 'inc/class-login-style.php';
+require_once LOGINDESIGNERWP_PATH . 'inc/class-ai.php';
 
 // Load Pro module if it exists.
 $pro_bootstrap = LOGINDESIGNERWP_PATH . 'pro/pro-bootstrap.php';
@@ -46,5 +47,10 @@ function logindesignerwp_init()
 
     // Initialize login styling (frontend).
     new LoginDesignerWP_Login_Style();
+
+    // Initialize AI features.
+    if (is_admin()) {
+        new LoginDesignerWP_AI();
+    }
 }
 add_action('plugins_loaded', 'logindesignerwp_init');

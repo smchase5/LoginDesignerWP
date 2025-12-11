@@ -377,47 +377,49 @@ class LoginDesignerWP_Pro_Features
                     <span class="logindesignerwp-pro-badge">PRO</span>
                 </span>
             </h2>
-            <table class="form-table">
-                <tr>
-                    <th scope="row"><?php esc_html_e('Enable Glass Effect', 'logindesignerwp-pro'); ?></th>
-                    <td>
-                        <label>
-                            <input type="checkbox" name="logindesignerwp_settings[glass_enabled]" value="1" <?php checked($settings['glass_enabled']); ?>>
-                            <?php esc_html_e('Enable glassmorphism effect', 'logindesignerwp-pro'); ?>
-                        </label>
-                        <p class="description">
-                            <?php esc_html_e('Requires a background image to be visible.', 'logindesignerwp-pro'); ?>
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e('Blur Strength', 'logindesignerwp-pro'); ?></th>
-                    <td>
-                        <input type="range" name="logindesignerwp_settings[glass_blur]" min="0" max="20"
-                            value="<?php echo esc_attr($settings['glass_blur']); ?>"
-                            oninput="this.nextElementSibling.value = this.value + 'px'">
-                        <output><?php echo esc_html($settings['glass_blur']); ?>px</output>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e('Transparency', 'logindesignerwp-pro'); ?></th>
-                    <td>
-                        <input type="range" name="logindesignerwp_settings[glass_transparency]" min="0" max="100"
-                            value="<?php echo esc_attr($settings['glass_transparency']); ?>"
-                            oninput="this.nextElementSibling.value = this.value + '%'">
-                        <output><?php echo esc_html($settings['glass_transparency']); ?>%</output>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e('Glass Border', 'logindesignerwp-pro'); ?></th>
-                    <td>
-                        <label>
-                            <input type="checkbox" name="logindesignerwp_settings[glass_border]" value="1" <?php checked($settings['glass_border']); ?>>
-                            <?php esc_html_e('Enable frosted border effect', 'logindesignerwp-pro'); ?>
-                        </label>
-                    </td>
-                </tr>
-            </table>
+            <div class="logindesignerwp-card-content">
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Enable Glass Effect', 'logindesignerwp-pro'); ?></th>
+                        <td>
+                            <label>
+                                <input type="checkbox" name="logindesignerwp_settings[glass_enabled]" value="1" <?php checked($settings['glass_enabled']); ?>>
+                                <?php esc_html_e('Enable glassmorphism effect', 'logindesignerwp-pro'); ?>
+                            </label>
+                            <p class="description">
+                                <?php esc_html_e('Requires a background image to be visible.', 'logindesignerwp-pro'); ?>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Blur Strength', 'logindesignerwp-pro'); ?></th>
+                        <td>
+                            <input type="range" name="logindesignerwp_settings[glass_blur]" min="0" max="20"
+                                value="<?php echo esc_attr($settings['glass_blur']); ?>"
+                                oninput="this.nextElementSibling.value = this.value + 'px'">
+                            <output><?php echo esc_html($settings['glass_blur']); ?>px</output>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Transparency', 'logindesignerwp-pro'); ?></th>
+                        <td>
+                            <input type="range" name="logindesignerwp_settings[glass_transparency]" min="0" max="100"
+                                value="<?php echo esc_attr($settings['glass_transparency']); ?>"
+                                oninput="this.nextElementSibling.value = this.value + '%'">
+                            <output><?php echo esc_html($settings['glass_transparency']); ?>%</output>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Glass Border', 'logindesignerwp-pro'); ?></th>
+                        <td>
+                            <label>
+                                <input type="checkbox" name="logindesignerwp_settings[glass_border]" value="1" <?php checked($settings['glass_border']); ?>>
+                                <?php esc_html_e('Enable frosted border effect', 'logindesignerwp-pro'); ?>
+                            </label>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
         <?php
     }
@@ -438,49 +440,51 @@ class LoginDesignerWP_Pro_Features
                     <span class="logindesignerwp-pro-badge">PRO</span>
                 </span>
             </h2>
-            <table class="form-table">
-                <tr>
-                    <th scope="row"><?php esc_html_e('Form Position', 'logindesignerwp-pro'); ?></th>
-                    <td>
-                        <select name="logindesignerwp_settings[layout_position]">
-                            <option value="center" <?php selected($settings['layout_position'], 'center'); ?>>
-                                <?php esc_html_e('Center', 'logindesignerwp-pro'); ?>
-                            </option>
-                            <option value="left" <?php selected($settings['layout_position'], 'left'); ?>>
-                                <?php esc_html_e('Left', 'logindesignerwp-pro'); ?>
-                            </option>
-                            <option value="right" <?php selected($settings['layout_position'], 'right'); ?>>
-                                <?php esc_html_e('Right', 'logindesignerwp-pro'); ?>
-                            </option>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e('Layout Style', 'logindesignerwp-pro'); ?></th>
-                    <td>
-                        <select name="logindesignerwp_settings[layout_style]">
-                            <option value="standard" <?php selected($settings['layout_style'], 'standard'); ?>>
-                                <?php esc_html_e('Standard', 'logindesignerwp-pro'); ?>
-                            </option>
-                            <option value="compact" <?php selected($settings['layout_style'], 'compact'); ?>>
-                                <?php esc_html_e('Compact', 'logindesignerwp-pro'); ?>
-                            </option>
-                            <option value="spacious" <?php selected($settings['layout_style'], 'spacious'); ?>>
-                                <?php esc_html_e('Spacious', 'logindesignerwp-pro'); ?>
-                            </option>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e('Hide Footer Links', 'logindesignerwp-pro'); ?></th>
-                    <td>
-                        <label>
-                            <input type="checkbox" name="logindesignerwp_settings[hide_footer_links]" value="1" <?php checked($settings['hide_footer_links']); ?>>
-                            <?php esc_html_e('Hide "Back to site" and privacy links', 'logindesignerwp-pro'); ?>
-                        </label>
-                    </td>
-                </tr>
-            </table>
+            <div class="logindesignerwp-card-content">
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Form Position', 'logindesignerwp-pro'); ?></th>
+                        <td>
+                            <select name="logindesignerwp_settings[layout_position]">
+                                <option value="center" <?php selected($settings['layout_position'], 'center'); ?>>
+                                    <?php esc_html_e('Center', 'logindesignerwp-pro'); ?>
+                                </option>
+                                <option value="left" <?php selected($settings['layout_position'], 'left'); ?>>
+                                    <?php esc_html_e('Left', 'logindesignerwp-pro'); ?>
+                                </option>
+                                <option value="right" <?php selected($settings['layout_position'], 'right'); ?>>
+                                    <?php esc_html_e('Right', 'logindesignerwp-pro'); ?>
+                                </option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Layout Style', 'logindesignerwp-pro'); ?></th>
+                        <td>
+                            <select name="logindesignerwp_settings[layout_style]">
+                                <option value="standard" <?php selected($settings['layout_style'], 'standard'); ?>>
+                                    <?php esc_html_e('Standard', 'logindesignerwp-pro'); ?>
+                                </option>
+                                <option value="compact" <?php selected($settings['layout_style'], 'compact'); ?>>
+                                    <?php esc_html_e('Compact', 'logindesignerwp-pro'); ?>
+                                </option>
+                                <option value="spacious" <?php selected($settings['layout_style'], 'spacious'); ?>>
+                                    <?php esc_html_e('Spacious', 'logindesignerwp-pro'); ?>
+                                </option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Hide Footer Links', 'logindesignerwp-pro'); ?></th>
+                        <td>
+                            <label>
+                                <input type="checkbox" name="logindesignerwp_settings[hide_footer_links]" value="1" <?php checked($settings['hide_footer_links']); ?>>
+                                <?php esc_html_e('Hide "Back to site" and privacy links', 'logindesignerwp-pro'); ?>
+                            </label>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
         <?php
     }
@@ -501,39 +505,42 @@ class LoginDesignerWP_Pro_Features
                     <span class="logindesignerwp-pro-badge">PRO</span>
                 </span>
             </h2>
-            <table class="form-table">
-                <tr>
-                    <th scope="row"><?php esc_html_e('After Login Redirect', 'logindesignerwp-pro'); ?></th>
-                    <td>
-                        <input type="url" class="regular-text" name="logindesignerwp_settings[redirect_login]"
-                            value="<?php echo esc_attr($settings['redirect_login']); ?>"
-                            placeholder="<?php echo esc_attr(home_url('/my-account/')); ?>">
-                        <p class="description">
-                            <?php esc_html_e('Leave empty for default WordPress behavior.', 'logindesignerwp-pro'); ?>
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e('After Logout Redirect', 'logindesignerwp-pro'); ?></th>
-                    <td>
-                        <input type="url" class="regular-text" name="logindesignerwp_settings[redirect_logout]"
-                            value="<?php echo esc_attr($settings['redirect_logout']); ?>"
-                            placeholder="<?php echo esc_attr(home_url()); ?>">
-                        <p class="description">
-                            <?php esc_html_e('Leave empty for default WordPress behavior.', 'logindesignerwp-pro'); ?>
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e('Custom Message', 'logindesignerwp-pro'); ?></th>
-                    <td>
-                        <textarea name="logindesignerwp_settings[custom_message]" rows="2" class="large-text"
-                            placeholder="<?php esc_html_e('Need help? Contact support...', 'logindesignerwp-pro'); ?>"><?php echo esc_textarea($settings['custom_message']); ?></textarea>
-                        <p class="description"><?php esc_html_e('Displayed below the login form.', 'logindesignerwp-pro'); ?>
-                        </p>
-                    </td>
-                </tr>
-            </table>
+            <div class="logindesignerwp-card-content">
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><?php esc_html_e('After Login Redirect', 'logindesignerwp-pro'); ?></th>
+                        <td>
+                            <input type="url" class="regular-text" name="logindesignerwp_settings[redirect_login]"
+                                value="<?php echo esc_attr($settings['redirect_login']); ?>"
+                                placeholder="<?php echo esc_attr(home_url('/my-account/')); ?>">
+                            <p class="description">
+                                <?php esc_html_e('Leave empty for default WordPress behavior.', 'logindesignerwp-pro'); ?>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('After Logout Redirect', 'logindesignerwp-pro'); ?></th>
+                        <td>
+                            <input type="url" class="regular-text" name="logindesignerwp_settings[redirect_logout]"
+                                value="<?php echo esc_attr($settings['redirect_logout']); ?>"
+                                placeholder="<?php echo esc_attr(home_url()); ?>">
+                            <p class="description">
+                                <?php esc_html_e('Leave empty for default WordPress behavior.', 'logindesignerwp-pro'); ?>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Custom Message', 'logindesignerwp-pro'); ?></th>
+                        <td>
+                            <textarea name="logindesignerwp_settings[custom_message]" rows="2" class="large-text"
+                                placeholder="<?php esc_html_e('Need help? Contact support...', 'logindesignerwp-pro'); ?>"><?php echo esc_textarea($settings['custom_message']); ?></textarea>
+                            <p class="description">
+                                <?php esc_html_e('Displayed below the login form.', 'logindesignerwp-pro'); ?>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
         <?php
     }
@@ -554,28 +561,30 @@ class LoginDesignerWP_Pro_Features
                     <span class="logindesignerwp-pro-badge">PRO</span>
                 </span>
             </h2>
-            <table class="form-table">
-                <tr>
-                    <th scope="row"><?php esc_html_e('Export / Import', 'logindesignerwp-pro'); ?></th>
-                    <td>
-                        <button type="button" class="button"
-                            id="logindesignerwp-export"><?php esc_html_e('Export Settings', 'logindesignerwp-pro'); ?></button>
-                        <button type="button" class="button"
-                            id="logindesignerwp-import-trigger"><?php esc_html_e('Import Settings', 'logindesignerwp-pro'); ?></button>
-                        <input type="file" id="logindesignerwp-import-file" style="display:none;" accept=".json">
-                        <p class="description">
-                            <?php esc_html_e('Export your settings to JSON or import from another site.', 'logindesignerwp-pro'); ?>
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e('Custom CSS', 'logindesignerwp-pro'); ?></th>
-                    <td>
-                        <textarea name="logindesignerwp_settings[custom_css]" rows="6" class="large-text code"
-                            placeholder="/* Add your custom CSS here */"><?php echo esc_textarea($settings['custom_css']); ?></textarea>
-                    </td>
-                </tr>
-            </table>
+            <div class="logindesignerwp-card-content">
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Export / Import', 'logindesignerwp-pro'); ?></th>
+                        <td>
+                            <button type="button" class="button"
+                                id="logindesignerwp-export"><?php esc_html_e('Export Settings', 'logindesignerwp-pro'); ?></button>
+                            <button type="button" class="button"
+                                id="logindesignerwp-import-trigger"><?php esc_html_e('Import Settings', 'logindesignerwp-pro'); ?></button>
+                            <input type="file" id="logindesignerwp-import-file" style="display:none;" accept=".json">
+                            <p class="description">
+                                <?php esc_html_e('Export your settings to JSON or import from another site.', 'logindesignerwp-pro'); ?>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Custom CSS', 'logindesignerwp-pro'); ?></th>
+                        <td>
+                            <textarea name="logindesignerwp_settings[custom_css]" rows="6" class="large-text code"
+                                placeholder="/* Add your custom CSS here */"><?php echo esc_textarea($settings['custom_css']); ?></textarea>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
 
         <script>

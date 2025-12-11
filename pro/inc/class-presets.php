@@ -210,55 +210,192 @@ class LoginDesignerWP_Pro_Presets
                 </span>
             </h2>
 
-            <table class="form-table">
-                <tr>
-                    <th scope="row"><?php esc_html_e('Apply Preset', 'logindesignerwp-pro'); ?></th>
-                    <td>
-                        <select id="logindesignerwp-preset-select" class="regular-text">
-                            <option value=""><?php esc_html_e('— Select a preset —', 'logindesignerwp-pro'); ?></option>
-                            <optgroup label="<?php esc_attr_e('Built-in Presets', 'logindesignerwp-pro'); ?>">
-                                <?php foreach ($this->built_in_presets as $key => $preset): ?>
-                                    <option value="<?php echo esc_attr($key); ?>">
-                                        <?php echo esc_html($preset['name']); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </optgroup>
-                            <?php if (!empty($custom_presets)): ?>
-                                <optgroup label="<?php esc_attr_e('Custom Presets', 'logindesignerwp-pro'); ?>">
-                                    <?php foreach ($custom_presets as $key => $preset): ?>
-                                        <option value="<?php echo esc_attr($key); ?>">
-                                            <?php echo esc_html($preset['name']); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </optgroup>
-                            <?php endif; ?>
-                        </select>
-                        <button type="button" class="button button-primary" id="logindesignerwp-apply-preset">
-                            <?php esc_html_e('Apply', 'logindesignerwp-pro'); ?>
-                        </button>
-                        <p class="description">
-                            <?php esc_html_e('Select a preset and click Apply to update all settings at once.', 'logindesignerwp-pro'); ?>
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e('Save Current as Preset', 'logindesignerwp-pro'); ?></th>
-                    <td>
-                        <input type="text" id="logindesignerwp-preset-name" class="regular-text"
-                            placeholder="<?php esc_attr_e('My Custom Preset', 'logindesignerwp-pro'); ?>" />
-                        <button type="button" class="button" id="logindesignerwp-save-preset">
-                            <?php esc_html_e('Save Preset', 'logindesignerwp-pro'); ?>
-                        </button>
-                        <p class="description">
-                            <?php esc_html_e('Save your current settings as a reusable preset.', 'logindesignerwp-pro'); ?>
-                        </p>
-                    </td>
-                </tr>
-            </table>
+            <div class="logindesignerwp-presets-container">
+                <style>
+                    .logindesignerwp-presets-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                        gap: 20px;
+                        margin-bottom: 20px;
+                    }
+
+                    .logindesignerwp-preset-card {
+                        border: 1px solid #ddd;
+                        border-radius: 8px;
+                        overflow: hidden;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        position: relative;
+                        background: #fff;
+                    }
+
+                    .logindesignerwp-preset-card:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                        border-color: #2271b1;
+                    }
+
+                    .logindesignerwp-preset-card.active {
+                        border-color: #2271b1;
+                        box-shadow: 0 0 0 2px #2271b1;
+                    }
+
+                    .logindesignerwp-preset-preview {
+                        height: 120px;
+                        position: relative;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        background: #f0f0f1;
+                    }
+
+                    .logindesignerwp-preset-preview-form {
+                        width: 60%;
+                        height: 60%;
+                        background: #fff;
+                        border-radius: 4px;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: center;
+                        padding: 10px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+                    }
+
+                    .logindesignerwp-preset-preview-btn {
+                        width: 80%;
+                        height: 8px;
+                        background: #2271b1;
+                        border-radius: 2px;
+                        margin-top: 5px;
+                    }
+
+                    .logindesignerwp-preset-preview-input {
+                        width: 80%;
+                        height: 6px;
+                        background: #f0f0f1;
+                        margin-bottom: 5px;
+                        border-radius: 2px;
+                    }
+
+                    .logindesignerwp-preset-name {
+                        padding: 10px;
+                        text-align: center;
+                        font-weight: 500;
+                        border-top: 1px solid #eee;
+                    }
+
+                    .logindesignerwp-preset-actions {
+                        margin-top: 20px;
+                        display: flex;
+                        gap: 10px;
+                        align-items: center;
+                    }
+                </style>
+
+                <div id="logindesignerwp-presets-grid" class="logindesignerwp-presets-grid">
+                    <?php
+                    // Built-in presets
+                    foreach ($this->built_in_presets as $key => $preset):
+                        $bg = isset($preset['settings']['background_color']) ? $preset['settings']['background_color'] : '#f0f0f1';
+                        if (isset($preset['settings']['background_mode']) && $preset['settings']['background_mode'] === 'gradient') {
+                            $bg = 'linear-gradient(135deg, ' . $preset['settings']['background_gradient_1'] . ', ' . $preset['settings']['background_gradient_2'] . ')';
+                        }
+                        $form_bg = isset($preset['settings']['form_bg_color']) ? $preset['settings']['form_bg_color'] : '#fff';
+                        $btn_bg = isset($preset['settings']['button_bg']) ? $preset['settings']['button_bg'] : '#2271b1';
+                        ?>
+                        <div class="logindesignerwp-preset-card" data-preset="<?php echo esc_attr($key); ?>">
+                            <div class="logindesignerwp-preset-preview" style="background: <?php echo esc_attr($bg); ?>;">
+                                <div class="logindesignerwp-preset-preview-form"
+                                    style="background: <?php echo esc_attr($form_bg); ?>;">
+                                    <div class="logindesignerwp-preset-preview-input"></div>
+                                    <div class="logindesignerwp-preset-preview-input"></div>
+                                    <div class="logindesignerwp-preset-preview-btn"
+                                        style="background: <?php echo esc_attr($btn_bg); ?>;"></div>
+                                </div>
+                            </div>
+                            <div class="logindesignerwp-preset-name">
+                                <?php echo esc_html($preset['name']); ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+
+                    <?php
+                    // Custom presets
+                    if (!empty($custom_presets)) {
+                        foreach ($custom_presets as $key => $preset):
+                            $bg = isset($preset['settings']['background_color']) ? $preset['settings']['background_color'] : '#f0f0f1';
+                            if (isset($preset['settings']['background_mode']) && $preset['settings']['background_mode'] === 'gradient') {
+                                $bg = 'linear-gradient(135deg, ' . $preset['settings']['background_gradient_1'] . ', ' . $preset['settings']['background_gradient_2'] . ')';
+                            }
+                            $form_bg = isset($preset['settings']['form_bg_color']) ? $preset['settings']['form_bg_color'] : '#fff';
+                            $btn_bg = isset($preset['settings']['button_bg']) ? $preset['settings']['button_bg'] : '#2271b1';
+                            ?>
+                            <div class="logindesignerwp-preset-card" data-preset="<?php echo esc_attr($key); ?>" data-is-custom="true">
+                                <div class="logindesignerwp-preset-preview" style="background: <?php echo esc_attr($bg); ?>;">
+                                    <div class="logindesignerwp-preset-preview-form"
+                                        style="background: <?php echo esc_attr($form_bg); ?>;">
+                                        <div class="logindesignerwp-preset-preview-input"></div>
+                                        <div class="logindesignerwp-preset-preview-input"></div>
+                                        <div class="logindesignerwp-preset-preview-btn"
+                                            style="background: <?php echo esc_attr($btn_bg); ?>;"></div>
+                                    </div>
+                                </div>
+                                <div class="logindesignerwp-preset-name">
+                                    <?php echo esc_html($preset['name']); ?>
+                                </div>
+                            </div>
+                        <?php endforeach;
+                    }
+                    ?>
+                </div>
+
+                <div class="logindesignerwp-preset-actions">
+                    <input type="hidden" id="logindesignerwp-preset-select" value="">
+
+                    <button type="button" class="button button-primary button-large" id="logindesignerwp-apply-preset" disabled>
+                        <?php esc_html_e('Apply Selected Preset', 'logindesignerwp-pro'); ?>
+                    </button>
+
+                    <button type="button" class="button button-link button-large" id="logindesignerwp-delete-preset"
+                        style="color: #b32d2e; display: none;">
+                        <?php esc_html_e('Delete Preset', 'logindesignerwp-pro'); ?>
+                    </button>
+
+                    <span class="description" style="margin-left: 10px;">
+                        <?php esc_html_e('or save current as new:', 'logindesignerwp-pro'); ?>
+                    </span>
+
+                    <input type="text" id="logindesignerwp-preset-name" class="regular-text" style="width: 200px;"
+                        placeholder="<?php esc_attr_e('New Preset Name', 'logindesignerwp-pro'); ?>" />
+                    <button type="button" class="button" id="logindesignerwp-save-preset">
+                        <?php esc_html_e('Save', 'logindesignerwp-pro'); ?>
+                    </button>
+                </div>
+
+            </div>
         </div>
 
         <script>
             jQuery(document).ready(function ($) {
+                // Card selection
+                $('.logindesignerwp-preset-card').on('click', function () {
+                    $('.logindesignerwp-preset-card').removeClass('active');
+                    $(this).addClass('active');
+
+                    var preset = $(this).data('preset');
+                    var isCustom = $(this).data('is-custom');
+
+                    $('#logindesignerwp-preset-select').val(preset);
+                    $('#logindesignerwp-apply-preset').prop('disabled', false);
+
+                    if (isCustom) {
+                        $('#logindesignerwp-delete-preset').show();
+                    } else {
+                        $('#logindesignerwp-delete-preset').hide();
+                    }
+                });
+
                 // Apply preset
                 $('#logindesignerwp-apply-preset').on('click', function () {
                     var preset = $('#logindesignerwp-preset-select').val();
@@ -279,7 +416,31 @@ class LoginDesignerWP_Pro_Presets
                             location.reload();
                         } else {
                             alert(response.data);
-                            $btn.prop('disabled', false).text('<?php echo esc_js(__('Apply', 'logindesignerwp-pro')); ?>');
+                            $btn.prop('disabled', false).text('<?php echo esc_js(__('Apply Selected Preset', 'logindesignerwp-pro')); ?>');
+                        }
+                    });
+                });
+
+                // Delete preset
+                $('#logindesignerwp-delete-preset').on('click', function () {
+                    var preset = $('#logindesignerwp-preset-select').val();
+                    if (!confirm('<?php echo esc_js(__('Are you sure you want to delete this preset?', 'logindesignerwp-pro')); ?>')) {
+                        return;
+                    }
+
+                    var $btn = $(this);
+                    $btn.prop('disabled', true).text('<?php echo esc_js(__('Deleting...', 'logindesignerwp-pro')); ?>');
+
+                    $.post(ajaxurl, {
+                        action: 'logindesignerwp_delete_preset',
+                        preset: preset,
+                        nonce: '<?php echo wp_create_nonce('logindesignerwp_preset_nonce'); ?>'
+                    }, function (response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            alert(response.data);
+                            $btn.prop('disabled', false).text('<?php echo esc_js(__('Delete Preset', 'logindesignerwp-pro')); ?>');
                         }
                     });
                 });

@@ -718,31 +718,366 @@
     }
 
     /**
-     * Document ready.
+     * Initialize AI Background Generator.
      */
-    $(document).ready(function () {
-        // Only initialize if we're on the settings page
-        if ($('.logindesignerwp-wrap').length === 0) {
-            return;
+    function initAIGenerator() {
+        $(document).on('click', '.logindesignerwp-ai-generate-bg', function (e) {
+            e.preventDefault();
+
+            var $button = $(this);
+            var $icon = $button.find('.dashicons');
+            var $container = $button.closest('td');
+
+            var prompt = window.prompt("Describe the background image you want created by AI:");
+            if (!prompt) return;
+
+            // Remove any existing status message
+            $container.find('.logindesignerwp-ai-status').remove();
+
+            // Create inline status message with solid blue background
+            var $status = $('<div class="logindesignerwp-ai-status" style="margin-top: 10px; padding: 12px 16px; background: #2271b1; color: #fff; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 13px; box-shadow: 0 2px 8px rgba(34, 113, 177, 0.3);"><span class="dashicons dashicons-update" style="animation: rotation 1s infinite linear;"></span><span class="status-text">Generating your image with AI... This may take 15-30 seconds.</span></div>');
+            $button.after($status);
+
+            // Set button loading state with spinning icon
+            $button.prop('disabled', true);
+            $icon.removeClass('dashicons-superhero').addClass('dashicons-update dashicons-spin');
+
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'logindesignerwp_generate_background',
+                    nonce: logindesignerwp_ajax.nonce,
+                    prompt: prompt
+                },
+                success: function (response) {
+
+                    if (response.success) {
+                        var data = response.data;
+                        var $input = $container.find('.logindesignerwp-image-id');
+                        var $preview = $container.find('.logindesignerwp-image-preview');
+                        var $removeBtn = $container.find('.logindesignerwp-remove-image');
+
+                        // Update inputs
+                        $input.val(data.id);
+                        $preview.find('img').attr('src', data.medium_url);
+                        $preview.show();
+                        $removeBtn.show();
+
+                        // Update live preview
+                        updatePreview('background_image', data.url);
+
+                        // Show success toast
+                        showAIToast('success', data.message || 'Image generated successfully!');
+                    } else {
+                        showAIToast('error', response.data || 'Failed to generate image.');
+                    }
+                },
+                error: function () {
+                    showAIToast('error', 'Request failed. Please check your connection and try again.');
+                },
+                complete: function () {
+                    $status.remove();
+                    $button.prop('disabled', false);
+                    $icon.removeClass('dashicons-update dashicons-spin').addClass('dashicons-superhero');
+                }
+            });
+        });
+    }
+
+    /**
+     * Initialize Text to Theme AI functionality.
+     */
+    function initTextToTheme() {
+        $(document).on('click', '.logindesignerwp-ai-text-to-theme', function (e) {
+            e.preventDefault();
+
+            var $button = $(this);
+            var $icon = $button.find('.dashicons');
+            var $card = $button.closest('.logindesignerwp-ai-tool-card');
+
+            var prompt = window.prompt("Describe your ideal login page theme:\n\nExamples:\n• Dark mode with neon green accents\n• Minimal and clean with soft blues\n• Corporate professional with navy and gold\n• Warm sunset gradient feel");
+            if (!prompt) return;
+
+            // Remove any existing status message
+            $card.find('.logindesignerwp-ai-status').remove();
+
+            // Create inline status message
+            var $status = $('<div class="logindesignerwp-ai-status" style="margin-top: 10px; padding: 12px 16px; background: #2271b1; color: #fff; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 13px; box-shadow: 0 2px 8px rgba(34, 113, 177, 0.3);"><span class="dashicons dashicons-update" style="animation: rotation 1s infinite linear;"></span><span class="status-text">Generating your theme with AI...</span></div>');
+            $button.after($status);
+
+            // Set button loading state
+            $button.prop('disabled', true);
+            $icon.removeClass('dashicons-edit').addClass('dashicons-update dashicons-spin');
+
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'logindesignerwp_generate_theme',
+                    nonce: logindesignerwp_ajax.nonce,
+                    prompt: prompt
+                },
+                success: function (response) {
+                    if (response.success) {
+                        var theme = response.data.theme;
+
+                        // Ask if user wants to include background color
+                        var includeBackground = window.confirm(
+                            "Theme generated! 🎨\n\n" +
+                            "Do you also want to update the page background color?\n\n" +
+                            "• Click OK to apply the full theme (including background)\n" +
+                            "• Click Cancel to keep your current background"
+                        );
+
+                        if (!includeBackground) {
+                            // Remove background-related settings from theme
+                            delete theme.background_color;
+                            delete theme.background_mode;
+                        }
+
+                        // Apply theme to form fields and preview
+                        applyAITheme(theme);
+
+                        // Show success toast
+                        showAIToast('success', response.data.message || 'Theme applied! Click Save to keep it.');
+                    } else {
+                        showAIToast('error', response.data || 'Failed to generate theme.');
+                    }
+                },
+                error: function () {
+                    showAIToast('error', 'Request failed. Please check your connection and try again.');
+                },
+                complete: function () {
+                    $status.remove();
+                    $button.prop('disabled', false);
+                    $icon.removeClass('dashicons-update dashicons-spin').addClass('dashicons-edit');
+                }
+            });
+        });
+    }
+
+    /**
+     * Apply AI-generated theme to form fields and live preview.
+     * @param {Object} theme - Theme settings object
+     */
+    function applyAITheme(theme) {
+        // First, validate contrast for all text/background pairs
+        var contrastIssues = validateThemeContrast(theme);
+
+        if (contrastIssues.length > 0) {
+            var message = 'Contrast issues detected:\n';
+            contrastIssues.forEach(function (issue) {
+                message += '• ' + issue.pair + ': ' + issue.ratio.toFixed(1) + ':1 (needs 4.5:1)\n';
+            });
+            message += '\nAuto-adjusting text colors for better readability...';
+            console.warn('[LoginDesignerWP AI] ' + message);
+
+            // Auto-fix contrast issues
+            contrastIssues.forEach(function (issue) {
+                theme[issue.textKey] = getContrastingColor(theme[issue.bgKey]);
+            });
         }
 
-        initPreviewCache();
-        initColorPickers();
-        initMediaUploaders();
-        initBackgroundToggle();
-        initNumberInputs();
-        initCheckboxes();
-        initButtonHover();
-        initStickyPreview();
-        initTabs();
-        initCollapsibleSections();
-        initSortableSections();
-        initGlassmorphismPreview();
-        initLogoControls();
+        // Map theme keys to form field names and preview updates
+        // Field names must match exactly what's in class-settings.php
+        var fieldMappings = {
+            'background_color': { field: 'background_color', preview: 'background_color' },
+            'form_background': { field: 'form_bg_color', preview: 'form_bg_color' },
+            'form_border_radius': { field: 'form_border_radius', preview: 'form_border_radius' },
+            'label_color': { field: 'label_text_color', preview: 'label_text_color' },
+            'input_background': { field: 'input_bg_color', preview: 'input_bg_color' },
+            'input_border_color': { field: 'input_border_color', preview: 'input_border_color' },
+            'input_text_color': { field: 'input_text_color', preview: 'input_text_color' },
+            'button_color': { field: 'button_bg', preview: 'button_bg' },
+            'button_text_color': { field: 'button_text_color', preview: 'button_text_color' },
+            'button_border_radius': { field: 'button_border_radius', preview: 'button_border_radius' },
+            'link_color': { field: 'below_form_link_color', preview: 'below_form_link_color' }
+        };
 
-        // Apply initial preview after a short delay to ensure color pickers are ready
-        setTimeout(applyInitialPreview, 100);
-    });
+        // Apply each theme value
+        $.each(theme, function (key, value) {
+            var mapping = fieldMappings[key];
+            if (!mapping) return;
+
+            // Update form field
+            var $field = $('[name="logindesignerwp_settings[' + mapping.field + ']"]');
+            if ($field.length) {
+                $field.val(value);
+
+                // Trigger color picker update if it's a color field
+                if (typeof value === 'string' && value.startsWith('#')) {
+                    $field.wpColorPicker('color', value);
+                }
+            }
+
+            // Update live preview
+            if (typeof updatePreview === 'function') {
+                updatePreview(mapping.preview, value);
+            }
+        });
+
+        // Handle background mode - force to 'solid' when applying a background color
+        // (Image mode would ignore the color, and we're not generating images here)
+        if (theme.background_color) {
+            // Select the "Solid Color" radio button (value="solid")
+            var $solidModeField = $('[name="logindesignerwp_settings[background_mode]"][value="solid"]');
+            if ($solidModeField.length) {
+                $solidModeField.prop('checked', true).trigger('change');
+            }
+
+            // Also explicitly update the preview for background mode and color
+            if (typeof updatePreview === 'function') {
+                updatePreview('background_mode', 'solid');
+                updatePreview('background_color', theme.background_color);
+            }
+
+            // Update the background color picker
+            var $bgColorField = $('[name="logindesignerwp_settings[background_color]"]');
+            if ($bgColorField.length) {
+                $bgColorField.val(theme.background_color);
+                try {
+                    $bgColorField.wpColorPicker('color', theme.background_color);
+                } catch (e) {
+                    console.log('Color picker update failed, but value was set');
+                }
+            }
+        }
+
+        // Handle form shadow
+        if (typeof theme.form_shadow !== 'undefined') {
+            var $shadowField = $('[name="logindesignerwp_settings[form_shadow_enable]"]');
+            if ($shadowField.length) {
+                $shadowField.prop('checked', theme.form_shadow);
+                if (typeof updatePreview === 'function') {
+                    updatePreview('form_shadow_enable', theme.form_shadow ? '1' : '');
+                }
+            }
+        }
+    }
+
+    /**
+     * Validate contrast ratios for all text/background pairs in a theme.
+     * @param {Object} theme - Theme object
+     * @returns {Array} Array of contrast issues
+     */
+    function validateThemeContrast(theme) {
+        var issues = [];
+        var minRatio = 4.5; // WCAG AA standard for normal text
+
+        // Define text/background pairs to check
+        var pairs = [
+            { textKey: 'label_color', bgKey: 'form_background', pair: 'Label on Form' },
+            { textKey: 'input_text_color', bgKey: 'input_background', pair: 'Input Text on Input' },
+            { textKey: 'button_text_color', bgKey: 'button_color', pair: 'Button Text on Button' },
+            { textKey: 'link_color', bgKey: 'form_background', pair: 'Link on Form' }
+        ];
+
+        pairs.forEach(function (check) {
+            var textColor = theme[check.textKey];
+            var bgColor = theme[check.bgKey];
+
+            if (textColor && bgColor) {
+                var ratio = getContrastRatio(textColor, bgColor);
+                if (ratio < minRatio) {
+                    issues.push({
+                        textKey: check.textKey,
+                        bgKey: check.bgKey,
+                        pair: check.pair,
+                        ratio: ratio
+                    });
+                }
+            }
+        });
+
+        return issues;
+    }
+
+    /**
+     * Calculate WCAG contrast ratio between two colors.
+     * @param {string} color1 - Hex color
+     * @param {string} color2 - Hex color
+     * @returns {number} Contrast ratio
+     */
+    function getContrastRatio(color1, color2) {
+        var lum1 = getLuminance(color1);
+        var lum2 = getLuminance(color2);
+        var lighter = Math.max(lum1, lum2);
+        var darker = Math.min(lum1, lum2);
+        return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    /**
+     * Get relative luminance of a color.
+     * @param {string} hex - Hex color
+     * @returns {number} Luminance value
+     */
+    function getLuminance(hex) {
+        var rgb = hexToRgb(hex);
+        if (!rgb) return 0;
+
+        var r = rgb.r / 255;
+        var g = rgb.g / 255;
+        var b = rgb.b / 255;
+
+        r = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
+        g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
+        b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    }
+
+    /**
+     * Convert hex color to RGB.
+     * @param {string} hex - Hex color
+     * @returns {Object|null} RGB object
+     */
+    function hexToRgb(hex) {
+        if (!hex) return null;
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    }
+
+    /**
+     * Get a contrasting color (black or white) for a given background.
+     * @param {string} bgColor - Background hex color
+     * @returns {string} Contrasting text color
+     */
+    function getContrastingColor(bgColor) {
+        var luminance = getLuminance(bgColor);
+        return luminance > 0.179 ? '#1a1a1a' : '#ffffff';
+    }
+
+    /**
+     * Show a styled toast notification for AI actions.
+     * @param {string} type - 'success' or 'error'
+     * @param {string} message - The message to display
+     */
+    function showAIToast(type, message) {
+        var bgColor = type === 'success' ? '#2271b1' : '#dc2626';
+        var icon = type === 'success' ? 'dashicons-yes-alt' : 'dashicons-warning';
+
+        var $toast = $('<div class="logindesignerwp-ai-toast" style="position: fixed; top: 50px; right: 20px; z-index: 999999; background: ' + bgColor + '; color: #fff; padding: 14px 20px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; transform: translateX(120%); transition: transform 0.3s ease;"><span class="dashicons ' + icon + '"></span><span>' + message + '</span></div>');
+
+        $('body').append($toast);
+
+        // Animate in
+        setTimeout(function () {
+            $toast.css('transform', 'translateX(0)');
+        }, 50);
+
+        // Auto-dismiss after 4 seconds
+        setTimeout(function () {
+            $toast.css('transform', 'translateX(120%)');
+            setTimeout(function () {
+                $toast.remove();
+            }, 300);
+        }, 4000);
+    }
 
     /**
      * Initialize tab navigation.
@@ -785,7 +1120,8 @@
      * Initialize collapsible settings sections.
      */
     function initCollapsibleSections() {
-        var $cards = $('.logindesignerwp-card');
+        // Only target cards in the Design tab form
+        var $cards = $('#logindesignerwp-settings-form .logindesignerwp-card');
 
         // Add toggle indicator to each card header
         $cards.each(function () {
@@ -798,7 +1134,7 @@
                 $header.append('<span class="dashicons dashicons-arrow-down-alt2 toggle-indicator"></span>');
             }
 
-            // Wrap content if not already wrapped
+            // Wrap content if not already wrapped (fallback for older structure, though PHP handles this now)
             if ($card.find('.logindesignerwp-card-content').length === 0) {
                 $header.nextAll().wrapAll('<div class="logindesignerwp-card-content"></div>');
             }
@@ -810,7 +1146,7 @@
         });
 
         // Handle click on card header (but not on drag handle)
-        $(document).on('click', '.logindesignerwp-card h2', function (e) {
+        $(document).on('click', '#logindesignerwp-settings-form .logindesignerwp-card h2', function (e) {
             // Don't toggle if clicking on drag handle, button, or link
             if ($(e.target).closest('.drag-handle, button, a, input').length) {
                 return;
@@ -926,17 +1262,17 @@
     }
 
     /**
-     * Start the sortables.
+     * Initialize sortable sections.
      */
     function initSortableSections() {
-        var $settingsColumn = $('.logindesignerwp-settings-column');
-        var $form = $settingsColumn.find('form');
+        var $form = $('#logindesignerwp-settings-form');
+        var $actionsDiv = $('.logindesignerwp-actions');
 
         if ($form.length === 0) {
             return;
         }
 
-        // Add drag handles to card headers (only for free sections, not Pro locked)
+        // Add drag handles to all card headers (except locked)
         $('.logindesignerwp-card:not(.logindesignerwp-pro-locked) h2').each(function () {
             var $header = $(this);
             if ($header.find('.drag-handle').length === 0) {
@@ -944,21 +1280,19 @@
             }
         });
 
-        // Restore saved order from localStorage (only for free sections)
+        // Restore saved order from localStorage
         var savedOrder = localStorage.getItem('ldwp_section_order');
-        var $freeCards = $form.find('.logindesignerwp-card:not(.logindesignerwp-pro-locked)');
-        var $proCards = $form.find('.logindesignerwp-pro-locked');
-        var $actionsDiv = $form.find('.logindesignerwp-actions');
+        var $allCards = $form.find('.logindesignerwp-card');
 
         if (savedOrder) {
             try {
                 var order = JSON.parse(savedOrder);
 
-                // Reorder only free cards based on saved order
+                // Reorder cards based on saved order
                 order.forEach(function (sectionId) {
-                    var $card = $freeCards.filter('[data-section-id="' + sectionId + '"]');
+                    var $card = $allCards.filter('[data-section-id="' + sectionId + '"]');
                     if ($card.length) {
-                        $proCards.first().before($card);
+                        $actionsDiv.before($card);
                     }
                 });
             } catch (e) {
@@ -966,14 +1300,23 @@
             }
         }
 
-        // Ensure Pro sections are always at the bottom (before actions)
-        $proCards.each(function () {
-            $actionsDiv.before($(this));
+        // Ensure any cards not in saved order (e.g. new ones) are also before actions
+        $allCards.each(function () {
+            if (!$(this).next().is($actionsDiv) && !$(this).next().hasClass('logindesignerwp-card')) {
+                $actionsDiv.before($(this));
+            }
         });
+        // Actually, just ensuring they are all siblings before actions is enough, existing order is preserved for non-sorted items
 
-        // Make cards sortable (exclude Pro locked sections)
+        // Make cards sortable (exclude locked sections from being dragged, but maybe allow them to be reordered? 
+        // User said "re ordering of the boxes when pro are enabled" -> implies unlocked pro features.
+        // Locked features usually act as a teaser block. Let's allowing sorting everything except strict "locked" teasers if desired, 
+        // but typically we just exclude ".logindesignerwp-pro-locked".
+        // Unlocked pro sections don't have that class, so they will be included automatically.
         $form.sortable({
-            items: '.logindesignerwp-card:not(.logindesignerwp-pro-locked)',
+            items: '.logindesignerwp-card', // Allow sorting all cards
+            cancel: '.logindesignerwp-pro-locked', // Locked ones shouldn't be draggable if they are just teasers? or maybe they can be? Let's assume unlocked are not locked class.
+            // If the user wants to reorder Pro boxes that are ENABLED, they won't have the locked class.
             handle: '.drag-handle',
             placeholder: 'logindesignerwp-card ui-sortable-placeholder',
             tolerance: 'pointer',
@@ -992,5 +1335,136 @@
             }
         });
     }
+
+
+
+    /**
+     * Initialize AJAX save for settings form.
+     */
+    function initAjaxSave() {
+        var $form = $('.logindesignerwp-settings-column form').not('#logindesignerwp-ai-settings-form');
+        var $submitBtn = $form.find('#submit');
+
+        if ($form.length === 0) {
+            return;
+        }
+
+        $form.on('submit', function (e) {
+            e.preventDefault();
+
+            // Add spinner
+            var $spinner = $('<span class="spinner is-active" style="float:none; margin-left: 5px;"></span>');
+            $submitBtn.prop('disabled', true).after($spinner);
+
+            // Append action and nonce for AJAX handler
+            var serializedData = $form.serialize();
+            serializedData += '&action=logindesignerwp_save_settings';
+            serializedData += '&nonce=' + (window.logindesignerwp_ajax ? window.logindesignerwp_ajax.nonce : '');
+
+            // Send AJAX request
+            $.post(ajaxurl, serializedData, function (response) {
+                $spinner.remove();
+                $submitBtn.prop('disabled', false);
+
+                if (response.success) {
+                    // Show success toast
+                    var $notice = $('<div class="notice notice-success is-dismissible" style="position: fixed; top: 40px; right: 20px; z-index: 9999; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"><p>' + (response.data.message || 'Settings saved') + '</p></div>');
+                    $('body').append($notice);
+                    setTimeout(function () {
+                        $notice.fadeOut(function () { $(this).remove(); });
+                    }, 3000);
+                } else {
+                    alert(response.data || 'Error saving settings.');
+                }
+            }).fail(function () {
+                $spinner.remove();
+                $submitBtn.prop('disabled', false);
+                alert('Ajax error. Please try again.');
+            });
+        });
+    }
+
+    /**
+     * Initialize AI Settings AJAX save.
+     */
+    function initAISettingsSave() {
+        var $form = $('#logindesignerwp-ai-settings-form');
+        var $submitBtn = $form.find('#submit');
+
+        if ($form.length === 0) {
+            return;
+        }
+
+        $form.on('submit', function (e) {
+            e.preventDefault();
+
+            var $spinner = $('<span class="spinner is-active" style="float:none; margin-left: 5px;"></span>');
+            $submitBtn.prop('disabled', true).after($spinner);
+
+            var serializedData = $form.serialize();
+            serializedData += '&action=logindesignerwp_save_ai_settings';
+            serializedData += '&nonce=' + (window.logindesignerwp_ajax ? window.logindesignerwp_ajax.nonce : '');
+
+            $.post(ajaxurl, serializedData, function (response) {
+                $spinner.remove();
+                $submitBtn.prop('disabled', false);
+
+                if (response.success) {
+                    // Update badge
+                    var $badge = $('.logindesignerwp-ai-active-badge');
+                    if (response.data.active) {
+                        if ($badge.length === 0) {
+                            $('.logindesignerwp-card-title-wrapper').append('<span class="logindesignerwp-ai-active-badge" style="background:#46b450; color:white; padding:2px 8px; border-radius:10px; font-size:10px; margin-left:10px; vertical-align:middle; text-transform:uppercase;">Active</span>');
+                        }
+                    } else {
+                        $badge.remove();
+                    }
+
+                    var $notice = $('<div class="notice notice-success is-dismissible" style="position: fixed; top: 40px; right: 20px; z-index: 9999; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"><p>' + (response.data.message || 'Settings saved') + '</p></div>');
+                    $('body').append($notice);
+                    setTimeout(function () {
+                        $notice.fadeOut(function () { $(this).remove(); });
+                    }, 3000);
+                } else {
+                    alert(response.data || 'Error saving settings.');
+                }
+            }).fail(function () {
+                $spinner.remove();
+                $submitBtn.prop('disabled', false);
+                alert('Ajax error. Please try again.');
+            });
+        });
+    }
+
+    /**
+     * Document ready.
+     */
+    $(document).ready(function () {
+        // Only initialize if we're on the settings page
+        if ($('.logindesignerwp-wrap').length === 0) {
+            return;
+        }
+
+        initPreviewCache();
+        initColorPickers();
+        initMediaUploaders();
+        initBackgroundToggle();
+        initNumberInputs();
+        initCheckboxes();
+        initButtonHover();
+        initStickyPreview();
+        initTabs();
+        initCollapsibleSections();
+        initSortableSections();
+        initAjaxSave();
+        initGlassmorphismPreview();
+        initLogoControls();
+        initAIGenerator();
+        initTextToTheme();
+        initAISettingsSave();
+
+        // Apply initial preview after a short delay to ensure color pickers are ready
+        setTimeout(applyInitialPreview, 100);
+    });
 
 })(jQuery);

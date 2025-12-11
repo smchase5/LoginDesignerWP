@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
  */
 function logindesignerwp_is_pro_active()
 {
-    return apply_filters('logindesignerwp_is_pro_active', false);
+    return apply_filters('logindesignerwp_is_pro_active', true);
 }
 
 /**

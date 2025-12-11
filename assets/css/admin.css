@@ -604,3 +604,100 @@
     width: 16px;
     height: 16px;
 }
+
+/* ========================================
+   Visual Presets
+   ======================================== */
+.logindesignerwp-presets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.logindesignerwp-preset-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    background: #fff;
+}
+
+.logindesignerwp-preset-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #2271b1;
+}
+
+.logindesignerwp-preset-card.active {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 2px #2271b1;
+}
+
+.logindesignerwp-preset-preview {
+    height: 120px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f0f1;
+}
+
+.logindesignerwp-preset-preview-form {
+    width: 60%;
+    height: 60%;
+    background: #fff;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.logindesignerwp-preset-preview-btn {
+    width: 80%;
+    height: 8px;
+    background: #2271b1;
+    border-radius: 2px;
+    margin-top: 5px;
+}
+
+.logindesignerwp-preset-preview-input {
+    width: 80%;
+    height: 6px;
+    background: #f0f0f1;
+    margin-bottom: 5px;
+    border-radius: 2px;
+}
+
+.logindesignerwp-preset-name {
+    padding: 10px;
+    text-align: center;
+    font-weight: 500;
+    border-top: 1px solid #eee;
+}
+
+.logindesignerwp-preset-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* ========================================
+   AI Loading Animation
+   ======================================== */
+@keyframes rotation {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

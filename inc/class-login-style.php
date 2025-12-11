@@ -40,6 +40,12 @@ class LoginDesignerWP_Login_Style
      */
     public function output_login_styles()
     {
+        // Don't apply any custom styles until user has saved settings at least once
+        // This keeps the default WordPress login page untouched on fresh installs
+        if (!get_option('logindesignerwp_settings_saved', false)) {
+            return;
+        }
+
         $this->settings = logindesignerwp_get_settings();
         $s = $this->settings;
 
