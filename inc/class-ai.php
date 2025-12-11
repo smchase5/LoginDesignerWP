@@ -386,6 +386,12 @@ Choose colors that work well together and match the mood/theme described. Ensure
      */
     public function render_ai_settings()
     {
+        // If Pro is not active, show locked placeholder instead
+        if (!logindesignerwp_is_pro_active()) {
+            $this->render_ai_settings_locked();
+            return;
+        }
+
         $settings = $this->get_settings();
         ?>
         <div class="logindesignerwp-card" data-section-id="ai_configuration">
@@ -393,9 +399,11 @@ Choose colors that work well together and match the mood/theme described. Ensure
                 <span class="logindesignerwp-card-title-wrapper">
                     <span class="dashicons dashicons-superhero"></span>
                     <?php esc_html_e('AI Configuration', 'logindesignerwp'); ?>
+                    <span
+                        style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 2px 8px; border-radius: 100px; font-size: 10px; margin-left: 10px; vertical-align: middle; text-transform: uppercase;"><?php esc_html_e('Pro', 'logindesignerwp'); ?></span>
                     <?php if (!empty($settings['openai_key'])): ?>
-                        <span class="logindesignerwp-ai-active-badge"
-                            style="background:#46b450; color:white; padding:2px 8px; border-radius:10px; font-size:10px; margin-left:10px; vertical-align:middle; text-transform:uppercase;"><?php esc_html_e('Active', 'logindesignerwp'); ?></span>
+                        <span
+                            style="background: #22c55e; color: white; padding: 2px 8px; border-radius: 100px; font-size: 10px; margin-left: 5px; vertical-align: middle; text-transform: uppercase;"><?php esc_html_e('Active', 'logindesignerwp'); ?></span>
                     <?php endif; ?>
                 </span>
             </h2>
@@ -415,6 +423,53 @@ Choose colors that work well together and match the mood/theme described. Ensure
     }
 
     /**
+     * Render locked AI settings placeholder for non-Pro users.
+     */
+    private function render_ai_settings_locked()
+    {
+        $upgrade_url = 'https://frontierwp.com/logindesignerwp-pro';
+        ?>
+        <div class="logindesignerwp-pro-locked">
+            <div class="logindesignerwp-pro-locked-header">
+                <h2 class="logindesignerwp-pro-locked-title">
+                    <span class="dashicons dashicons-lock"></span>
+                    <?php esc_html_e('AI Configuration', 'logindesignerwp'); ?>
+                </h2>
+                <span class="logindesignerwp-pro-badge">
+                    <span class="dashicons dashicons-star-filled"></span>
+                    <?php esc_html_e('Pro', 'logindesignerwp'); ?>
+                </span>
+            </div>
+            <div class="logindesignerwp-pro-locked-content">
+                <p style="margin-bottom: 16px; color: #64748b;">
+                    <?php esc_html_e('Configure AI settings to enable DALL-E background generation and theme analysis.', 'logindesignerwp'); ?>
+                </p>
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><?php esc_html_e('OpenAI API Key', 'logindesignerwp'); ?></th>
+                        <td>
+                            <input type="password" class="regular-text" placeholder="sk-..." disabled>
+                            <p class="description">
+                                <?php esc_html_e('Enter your OpenAI API key to unlock AI features.', 'logindesignerwp'); ?>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="logindesignerwp-pro-locked-footer">
+                <a href="<?php echo esc_url($upgrade_url); ?>" class="logindesignerwp-pro-upgrade-btn" target="_blank">
+                    <span class="dashicons dashicons-unlock"></span>
+                    <?php esc_html_e('Unlock with LoginDesignerWP Pro', 'logindesignerwp'); ?>
+                </a>
+                <p class="logindesignerwp-pro-upgrade-text">
+                    <?php esc_html_e('Generate backgrounds and themes with AI', 'logindesignerwp'); ?>
+                </p>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
      * Render AI Tools card for the Design tab.
      */
     public function render_ai_tools_card()
@@ -427,9 +482,12 @@ Choose colors that work well together and match the mood/theme described. Ensure
                 <span class="logindesignerwp-card-title-wrapper">
                     <span class="dashicons dashicons-superhero"></span>
                     <?php esc_html_e('AI Tools', 'logindesignerwp'); ?>
+                    <span class="logindesignerwp-pro-badge""><?php esc_html_e('Pro', 'logindesignerwp'); ?></span>
                     <?php if ($has_api_key): ?>
-                        <span class="logindesignerwp-ai-active-badge"
-                            style="background:#2271b1; color:white; padding:2px 8px; border-radius:10px; font-size:10px; margin-left:10px; vertical-align:middle; text-transform:uppercase;"><?php esc_html_e('Active', 'logindesignerwp'); ?></span>
+                        <span
+                            style=" background: #22c55e; color: white; padding: 2px 8px; border-radius: 100px;
+                            font-size: 10px; margin-left: 5px; vertical-align: middle; text-transform:
+                            uppercase;"><?php esc_html_e('Active', 'logindesignerwp'); ?></span>
                     <?php endif; ?>
                 </span>
             </h2>

@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
  */
 function logindesignerwp_is_pro_active()
 {
-    return apply_filters('logindesignerwp_is_pro_active', true);
+    return apply_filters('logindesignerwp_is_pro_active', false);
 }
 
 /**
@@ -33,6 +33,7 @@ function logindesignerwp_get_defaults()
         'background_color' => '#0f172a',
         'background_gradient_1' => '#0f172a',
         'background_gradient_2' => '#111827',
+        'background_gradient_3' => '#1e3a5f',
         'gradient_type' => 'linear',
         'gradient_angle' => 135,
         'gradient_position' => 'center center',
@@ -118,6 +119,7 @@ function logindesignerwp_sanitize_settings($input)
         'background_color',
         'background_gradient_1',
         'background_gradient_2',
+        'background_gradient_3',
         'form_bg_color',
         'form_border_color',
         'label_text_color',

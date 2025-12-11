@@ -58,6 +58,12 @@
             }
         });
 
+        $('input[name="logindesignerwp_settings[background_gradient_3]"]').wpColorPicker({
+            change: function (event, ui) {
+                updatePreview('background_gradient_3', ui.color.toString());
+            }
+        });
+
         // Form colors
         $('input[name="logindesignerwp_settings[form_bg_color]"]').wpColorPicker({
             change: function (event, ui) {
@@ -263,6 +269,13 @@
             $('.logindesignerwp-gradient-opt').hide();
             $('.logindesignerwp-gradient-' + type).show();
 
+            // Show/hide the 3rd color picker for mesh gradients
+            if (type === 'mesh') {
+                $('.logindesignerwp-mesh-color-3').show();
+            } else {
+                $('.logindesignerwp-mesh-color-3').hide();
+            }
+
             // Update preview immediately
             updatePreview('gradient_type', type);
         });
@@ -309,10 +322,12 @@
     /**
      * Helper to generate Mesh Gradient CSS.
      */
-    function generateMeshGradient(c1, c2) {
-        // A fluid mesh effect using radial gradients
+    function generateMeshGradient(c1, c2, c3) {
+        // A fluid mesh effect using radial gradients with 3 colors
+        c3 = c3 || c1; // Fallback to c1 if c3 not provided
         return 'radial-gradient(at top left, ' + c1 + ', transparent 70%), ' +
             'radial-gradient(at bottom right, ' + c2 + ', transparent 70%), ' +
+            'radial-gradient(at top right, ' + c3 + ', transparent 70%), ' +
             'linear-gradient(135deg, ' + c2 + ', ' + c1 + ')';
     }
 
@@ -394,6 +409,11 @@
 
             case 'background_gradient_2':
                 $previewContainer.data('gradient-2', value);
+                applyBackgroundPreview();
+                break;
+
+            case 'background_gradient_3':
+                $previewContainer.data('gradient-3', value);
                 applyBackgroundPreview();
                 break;
 
@@ -581,7 +601,8 @@
                 } else if (gradType === 'radial') {
                     gradientCss = 'radial-gradient(circle at ' + gradPos + ', ' + gradient1 + ', ' + gradient2 + ')';
                 } else if (gradType === 'mesh') {
-                    gradientCss = generateMeshGradient(gradient1, gradient2);
+                    var gradient3 = $('input[name="logindesignerwp_settings[background_gradient_3]"]').val() || gradient1;
+                    gradientCss = generateMeshGradient(gradient1, gradient2, gradient3);
                 }
 
                 $previewBg.css('background', gradientCss);
@@ -1272,66 +1293,73 @@
             return;
         }
 
-        // Add drag handles to all card headers (except locked)
-        $('.logindesignerwp-card:not(.logindesignerwp-pro-locked) h2').each(function () {
-            var $header = $(this);
-            if ($header.find('.drag-handle').length === 0) {
-                $header.prepend('<span class="dashicons dashicons-move drag-handle" title="Drag to reorder"></span>');
-            }
-        });
-
-        // Restore saved order from localStorage
-        var savedOrder = localStorage.getItem('ldwp_section_order');
         var $allCards = $form.find('.logindesignerwp-card');
+        var $lockedSections = $form.find('.logindesignerwp-pro-locked');
+        var hasLockedSections = $lockedSections.length > 0;
 
-        if (savedOrder) {
-            try {
-                var order = JSON.parse(savedOrder);
+        // When Pro is NOT active (locked sections present), we need to:
+        // 1. Clear any saved order so PHP order is used (free sections first)
+        // 2. Still allow drag-drop for reordering free sections
+        // 3. Keep locked sections at the bottom
+        if (hasLockedSections) {
+            localStorage.removeItem('ldwp_section_order');
 
-                // Reorder cards based on saved order
-                order.forEach(function (sectionId) {
-                    var $card = $allCards.filter('[data-section-id="' + sectionId + '"]');
-                    if ($card.length) {
-                        $actionsDiv.before($card);
-                    }
-                });
-            } catch (e) {
-                // Invalid JSON, ignore
+            // Ensure all .logindesignerwp-card items come before locked sections
+            $allCards.each(function () {
+                var $card = $(this);
+                var $firstLocked = $form.find('.logindesignerwp-pro-locked').first();
+                if ($firstLocked.length && $card.index() > $firstLocked.index()) {
+                    $firstLocked.before($card);
+                }
+            });
+        } else {
+            // Restore saved order from localStorage (Pro is active)
+            var savedOrder = localStorage.getItem('ldwp_section_order');
+
+            if (savedOrder) {
+                try {
+                    var order = JSON.parse(savedOrder);
+
+                    // Reorder cards based on saved order
+                    order.forEach(function (sectionId) {
+                        var $card = $allCards.filter('[data-section-id="' + sectionId + '"]');
+                        if ($card.length) {
+                            $actionsDiv.before($card);
+                        }
+                    });
+                } catch (e) {
+                    // Invalid JSON, ignore
+                }
             }
+
+            // Ensure any cards not in saved order (e.g. new ones) are also before actions
+            $allCards.each(function () {
+                if (!$(this).next().is($actionsDiv) && !$(this).next().hasClass('logindesignerwp-card')) {
+                    $actionsDiv.before($(this));
+                }
+            });
         }
 
-        // Ensure any cards not in saved order (e.g. new ones) are also before actions
-        $allCards.each(function () {
-            if (!$(this).next().is($actionsDiv) && !$(this).next().hasClass('logindesignerwp-card')) {
-                $actionsDiv.before($(this));
-            }
-        });
-        // Actually, just ensuring they are all siblings before actions is enough, existing order is preserved for non-sorted items
-
-        // Make cards sortable (exclude locked sections from being dragged, but maybe allow them to be reordered? 
-        // User said "re ordering of the boxes when pro are enabled" -> implies unlocked pro features.
-        // Locked features usually act as a teaser block. Let's allowing sorting everything except strict "locked" teasers if desired, 
-        // but typically we just exclude ".logindesignerwp-pro-locked".
-        // Unlocked pro sections don't have that class, so they will be included automatically.
+        // Make cards sortable - drag-drop always works for .logindesignerwp-card elements
         $form.sortable({
-            items: '.logindesignerwp-card', // Allow sorting all cards
-            cancel: '.logindesignerwp-pro-locked', // Locked ones shouldn't be draggable if they are just teasers? or maybe they can be? Let's assume unlocked are not locked class.
-            // If the user wants to reorder Pro boxes that are ENABLED, they won't have the locked class.
+            items: '.logindesignerwp-card', // Only sort actual cards, not locked sections
             handle: '.drag-handle',
             placeholder: 'logindesignerwp-card ui-sortable-placeholder',
             tolerance: 'pointer',
             cursor: 'grabbing',
             opacity: 0.9,
             update: function () {
-                // Save new order to localStorage
-                var order = [];
-                $form.find('.logindesignerwp-card').each(function () {
-                    var sectionId = $(this).attr('data-section-id');
-                    if (sectionId) {
-                        order.push(sectionId);
-                    }
-                });
-                localStorage.setItem('ldwp_section_order', JSON.stringify(order));
+                // Only save order if Pro is active (no locked sections)
+                if (!hasLockedSections) {
+                    var order = [];
+                    $form.find('.logindesignerwp-card').each(function () {
+                        var sectionId = $(this).attr('data-section-id');
+                        if (sectionId) {
+                            order.push(sectionId);
+                        }
+                    });
+                    localStorage.setItem('ldwp_section_order', JSON.stringify(order));
+                }
             }
         });
     }
@@ -1414,7 +1442,7 @@
                     var $badge = $('.logindesignerwp-ai-active-badge');
                     if (response.data.active) {
                         if ($badge.length === 0) {
-                            $('.logindesignerwp-card-title-wrapper').append('<span class="logindesignerwp-ai-active-badge" style="background:#46b450; color:white; padding:2px 8px; border-radius:10px; font-size:10px; margin-left:10px; vertical-align:middle; text-transform:uppercase;">Active</span>');
+                            $('.logindesignerwp-card-title-wrapper').append('<span class="logindesignerwp-ai-active-badge" style="background:#46b450; color:white; padding:2px 8px; border-radius:100px; font-size:10px; margin-left:10px; vertical-align:middle; text-transform:uppercase;">Active</span>');
                         }
                     } else {
                         $badge.remove();

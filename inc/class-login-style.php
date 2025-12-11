@@ -80,9 +80,11 @@ class LoginDesignerWP_Login_Style
             } elseif ('radial' === $gradient_type) {
                 $css .= "    background: radial-gradient(circle at " . esc_attr($gradient_pos) . ", " . $col1 . ", " . $col2 . ") !important;\n";
             } elseif ('mesh' === $gradient_type) {
-                // Pseudo-mesh using multiple radial gradients
+                // Pseudo-mesh using multiple radial gradients with 3 colors
+                $col3 = esc_attr(isset($s['background_gradient_3']) ? $s['background_gradient_3'] : $col1);
                 $css .= "    background: radial-gradient(at top left, " . $col1 . ", transparent 70%),\n";
                 $css .= "                radial-gradient(at bottom right, " . $col2 . ", transparent 70%),\n";
+                $css .= "                radial-gradient(at top right, " . $col3 . ", transparent 70%),\n";
                 $css .= "                linear-gradient(135deg, " . $col2 . ", " . $col1 . ") !important;\n";
             } else {
                 // Fallback

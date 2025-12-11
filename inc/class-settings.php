@@ -178,8 +178,12 @@ class LoginDesignerWP_Settings
                                     <?php $this->render_logo_section($settings); ?>
 
                                     <?php
-                                    // Render AI Tools section if AI class is loaded.
-                                    do_action('logindesignerwp_render_ai_tools_section');
+                                    // Render AI Tools section if Pro is active, otherwise show locked placeholder.
+                                    if (logindesignerwp_is_pro_active()) {
+                                        do_action('logindesignerwp_render_ai_tools_section');
+                                    } else {
+                                        $this->render_ai_tools_locked_section();
+                                    }
                                     ?>
 
                                     <?php
@@ -291,8 +295,14 @@ class LoginDesignerWP_Settings
                         if (!has_action('logindesignerwp_render_settings_tab')):
                             ?>
                             <div class="logindesignerwp-card">
-                                <h2><span class="dashicons dashicons-admin-network"></span>
-                                    <?php esc_html_e('Pro License', 'logindesignerwp'); ?></h2>
+                                <h2>
+                                    <span></span>
+                                    <span class="logindesignerwp-card-title-wrapper">
+                                        <span class="dashicons dashicons-admin-network"></span>
+                                        <?php esc_html_e('Pro License', 'logindesignerwp'); ?>
+                                    </span>
+                                    <span class="toggle-indicator dashicons dashicons-arrow-down-alt2"></span>
+                                </h2>
                                 <p><?php esc_html_e('Activate LoginDesignerWP Pro to unlock additional design presets, glassmorphism effects, custom CSS, and more.', 'logindesignerwp'); ?>
                                 </p>
                                 <a href="https://frontierwp.com/logindesignerwp-pro" target="_blank" class="button button-primary">
@@ -302,8 +312,14 @@ class LoginDesignerWP_Settings
                         <?php endif; ?>
 
                         <div class="logindesignerwp-card">
-                            <h2><span class="dashicons dashicons-info"></span>
-                                <?php esc_html_e('About', 'logindesignerwp'); ?></h2>
+                            <h2>
+                                <span></span>
+                                <span class="logindesignerwp-card-title-wrapper">
+                                    <span class="dashicons dashicons-info"></span>
+                                    <?php esc_html_e('About', 'logindesignerwp'); ?>
+                                </span>
+                                <span class="toggle-indicator dashicons dashicons-arrow-down-alt2"></span>
+                            </h2>
                             <table class="form-table">
                                 <tr>
                                     <th><?php esc_html_e('Version', 'logindesignerwp'); ?></th>
@@ -459,6 +475,15 @@ class LoginDesignerWP_Settings
                                 <input type="text" class="logindesignerwp-color-picker"
                                     name="<?php echo esc_attr($this->option_name); ?>[background_gradient_2]"
                                     value="<?php echo esc_attr($settings['background_gradient_2']); ?>">
+                            </td>
+                        </tr>
+                        <tr class="logindesignerwp-mesh-color-3" <?php echo $settings['gradient_type'] !== 'mesh' ? 'style="display:none;"' : ''; ?>>
+                            <th scope="row"><?php esc_html_e('Third Color (Mesh)', 'logindesignerwp'); ?></th>
+                            <td>
+                                <input type="text" class="logindesignerwp-color-picker"
+                                    name="<?php echo esc_attr($this->option_name); ?>[background_gradient_3]"
+                                    value="<?php echo esc_attr($settings['background_gradient_3']); ?>">
+                                <p class="description"><?php esc_html_e('Adds a third color blob to the mesh gradient.', 'logindesignerwp'); ?></p>
                             </td>
                         </tr>
                     </table>
@@ -821,6 +846,76 @@ class LoginDesignerWP_Settings
                         </td>
                     </tr>
                 </table>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * Render AI Tools locked placeholder section.
+     */
+    private function render_ai_tools_locked_section()
+    {
+        $upgrade_url = 'https://frontierwp.com/logindesignerwp-pro';
+        ?>
+        <div class="logindesignerwp-pro-locked">
+            <div class="logindesignerwp-pro-locked-header">
+                <h2 class="logindesignerwp-pro-locked-title">
+                    <span class="dashicons dashicons-lock"></span>
+                    <?php esc_html_e('AI Tools', 'logindesignerwp'); ?>
+                </h2>
+                <span class="logindesignerwp-pro-badge">
+                    <span class="dashicons dashicons-star-filled"></span>
+                    <?php esc_html_e('Pro', 'logindesignerwp'); ?>
+                </span>
+            </div>
+            <div class="logindesignerwp-pro-locked-content">
+                <div class="logindesignerwp-ai-tools-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; opacity: 0.6;">
+                    <!-- AI Background Generator -->
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; text-align:center;">
+                        <div style="background:#6b7280; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;">
+                            <span class="dashicons dashicons-format-image" style="color:#fff; font-size:20px;"></span>
+                        </div>
+                        <h4 style="margin:0 0 6px; font-size:13px; font-weight:600;">
+                            <?php esc_html_e('Background Generator', 'logindesignerwp'); ?>
+                        </h4>
+                        <p style="margin:0; font-size:11px; color:#94a3b8;">
+                            <?php esc_html_e('Create unique backgrounds with DALL-E AI', 'logindesignerwp'); ?>
+                        </p>
+                    </div>
+                    <!-- Magic Import -->
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; text-align:center;">
+                        <div style="background:#6b7280; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;">
+                            <span class="dashicons dashicons-upload" style="color:#fff; font-size:20px;"></span>
+                        </div>
+                        <h4 style="margin:0 0 6px; font-size:13px; font-weight:600;">
+                            <?php esc_html_e('Magic Import', 'logindesignerwp'); ?>
+                        </h4>
+                        <p style="margin:0; font-size:11px; color:#94a3b8;">
+                            <?php esc_html_e('Upload an image to extract colors', 'logindesignerwp'); ?>
+                        </p>
+                    </div>
+                    <!-- Text to Theme -->
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; text-align:center;">
+                        <div style="background:#6b7280; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;">
+                            <span class="dashicons dashicons-edit" style="color:#fff; font-size:20px;"></span>
+                        </div>
+                        <h4 style="margin:0 0 6px; font-size:13px; font-weight:600;">
+                            <?php esc_html_e('Text to Theme', 'logindesignerwp'); ?>
+                        </h4>
+                        <p style="margin:0; font-size:11px; color:#94a3b8;">
+                            <?php esc_html_e('Describe your theme in words', 'logindesignerwp'); ?>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="logindesignerwp-pro-locked-footer">
+                <a href="<?php echo esc_url($upgrade_url); ?>" class="logindesignerwp-pro-upgrade-btn" target="_blank">
+                    <span class="dashicons dashicons-unlock"></span>
+                    <?php esc_html_e('Unlock with LoginDesignerWP Pro', 'logindesignerwp'); ?>
+                </a>
+                <p class="logindesignerwp-pro-upgrade-text">
+                    <?php esc_html_e('Generate backgrounds and themes with AI', 'logindesignerwp'); ?></p>
             </div>
         </div>
         <?php

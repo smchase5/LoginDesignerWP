@@ -124,13 +124,17 @@ class LoginDesignerWP_Pro_License {
         ?>
         <div class="logindesignerwp-card" data-section-id="license" style="border-left: 4px solid <?php echo $is_active ? '#22c55e' : '#f59e0b'; ?>;">
             <h2>
-                <span class="dashicons dashicons-admin-network"></span>
-                <?php esc_html_e( 'Pro License', 'logindesignerwp-pro' ); ?>
-                <?php if ( $is_active ) : ?>
-                    <span style="background: #22c55e; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 3px; margin-left: 8px;">
-                        <?php esc_html_e( 'Active', 'logindesignerwp-pro' ); ?>
-                    </span>
-                <?php endif; ?>
+                <span></span>
+                <span class="logindesignerwp-card-title-wrapper">
+                    <span class="dashicons dashicons-admin-network"></span>
+                    <?php esc_html_e( 'Pro License', 'logindesignerwp-pro' ); ?>
+                    <?php if ( $is_active ) : ?>
+                        <span style="background: #22c55e; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 100px;">
+                            <?php esc_html_e( 'Active', 'logindesignerwp-pro' ); ?>
+                        </span>
+                    <?php endif; ?>
+                </span>
+                <span class="toggle-indicator dashicons dashicons-arrow-down-alt2"></span>
             </h2>
             
             <table class="form-table">
