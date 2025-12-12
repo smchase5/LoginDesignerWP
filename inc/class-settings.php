@@ -106,6 +106,28 @@ class LoginDesignerWP_Settings
         wp_localize_script('logindesignerwp-admin', 'logindesignerwp_ajax', array(
             'nonce' => wp_create_nonce('logindesignerwp_save_nonce'),
         ));
+
+        // Wizard styles.
+        wp_enqueue_style(
+            'logindesignerwp-wizard',
+            LOGINDESIGNERWP_URL . 'assets/css/wizard.css',
+            array(),
+            LOGINDESIGNERWP_VERSION
+        );
+
+        // Wizard scripts.
+        wp_enqueue_script(
+            'logindesignerwp-wizard',
+            LOGINDESIGNERWP_URL . 'assets/js/wizard.js',
+            array('jquery', 'wp-color-picker'),
+            LOGINDESIGNERWP_VERSION,
+            true
+        );
+
+        // Localize wizard script.
+        wp_localize_script('logindesignerwp-wizard', 'logindesignerwp_wizard', array(
+            'isPro' => apply_filters('logindesignerwp_is_pro', false),
+        ));
     }
 
     /**
@@ -165,10 +187,302 @@ class LoginDesignerWP_Settings
         $logo_url = $settings['logo_id'] ? wp_get_attachment_image_url($settings['logo_id'], 'medium') : '';
         ?>
         <div class="wrap logindesignerwp-wrap">
-            <h1><?php esc_html_e('LoginDesignerWP', 'logindesignerwp'); ?></h1>
-            <p class="description">
-                <?php esc_html_e('Customize your WordPress login screen with simple, lightweight controls.', 'logindesignerwp'); ?>
-            </p>
+            <div class="logindesignerwp-header-row"
+                style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                <div>
+                    <h1><?php esc_html_e('LoginDesignerWP', 'logindesignerwp'); ?></h1>
+                    <p class="description">
+                        <?php esc_html_e('Customize your WordPress login screen with simple, lightweight controls.', 'logindesignerwp'); ?>
+                    </p>
+                </div>
+                <button type="button" class="ldwp-start-wizard-btn">
+                    <span class="dashicons dashicons-admin-customizer"></span>
+                    <?php esc_html_e('Start Wizard', 'logindesignerwp'); ?>
+                </button>
+            </div>
+
+            <!-- Design Wizard Modal (placed at top level, outside forms) -->
+            <div class="ldwp-wizard-overlay">
+                <div class="ldwp-wizard-modal">
+                    <div class="ldwp-wizard-header">
+                        <h3 class="ldwp-wizard-title"><?php esc_html_e('Login Page Design Wizard', 'logindesignerwp'); ?></h3>
+                        <span class="ldwp-wizard-step-indicator">Step 1 of 5</span>
+                        <button type="button" class="ldwp-wizard-close">&times;</button>
+                    </div>
+                    <div class="ldwp-wizard-body">
+                        <!-- Step 1: Welcome -->
+                        <div class="ldwp-wizard-step is-active" data-step="1">
+                            <div class="ldwp-wizard-welcome">
+                                <div class="ldwp-wizard-welcome-icon">✨</div>
+                                <h2><?php esc_html_e('Welcome to the Design Wizard', 'logindesignerwp'); ?></h2>
+                                <p><?php esc_html_e('Create a stunning login page in just a few steps. Choose a style preset, customize colors, upload your logo, and preview your design.', 'logindesignerwp'); ?>
+                                </p>
+                                <div class="ldwp-wizard-welcome-features">
+                                    <div class="ldwp-wizard-welcome-feature">
+                                        <span class="dashicons dashicons-art"></span>
+                                        <span><?php esc_html_e('Style Presets', 'logindesignerwp'); ?></span>
+                                    </div>
+                                    <div class="ldwp-wizard-welcome-feature">
+                                        <span class="dashicons dashicons-admin-appearance"></span>
+                                        <span><?php esc_html_e('Custom Colors', 'logindesignerwp'); ?></span>
+                                    </div>
+                                    <div class="ldwp-wizard-welcome-feature">
+                                        <span class="dashicons dashicons-format-image"></span>
+                                        <span><?php esc_html_e('Logo Upload', 'logindesignerwp'); ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Step 2: Choose Style -->
+                        <div class="ldwp-wizard-step" data-step="2">
+                            <h3 style="margin-top: 0;"><?php esc_html_e('Choose Your Style', 'logindesignerwp'); ?></h3>
+                            <p style="color: #6b7280; margin-bottom: 20px;">
+                                <?php esc_html_e('Select a preset to get started.', 'logindesignerwp'); ?>
+                            </p>
+                            <div class="ldwp-wizard-presets">
+                                <div class="ldwp-wizard-preset" data-preset="modern-light">
+                                    <div class="ldwp-wizard-preset-preview" style="background: #f8fafc;">
+                                        <div class="mini-form" style="background: #fff; border: 1px solid #e2e8f0;">
+                                            <div class="mini-input" style="background: #f1f5f9;"></div>
+                                            <div class="mini-input" style="background: #f1f5f9;"></div>
+                                            <div class="mini-button" style="background: #3b82f6;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="ldwp-wizard-preset-name"><?php esc_html_e('Modern Light', 'logindesignerwp'); ?>
+                                    </div>
+                                </div>
+                                <div class="ldwp-wizard-preset" data-preset="modern-dark">
+                                    <div class="ldwp-wizard-preset-preview" style="background: #0f172a;">
+                                        <div class="mini-form" style="background: #1e293b; border: 1px solid #334155;">
+                                            <div class="mini-input" style="background: #0f172a;"></div>
+                                            <div class="mini-input" style="background: #0f172a;"></div>
+                                            <div class="mini-button" style="background: #3b82f6;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="ldwp-wizard-preset-name"><?php esc_html_e('Modern Dark', 'logindesignerwp'); ?>
+                                    </div>
+                                </div>
+                                <div class="ldwp-wizard-preset" data-preset="minimal">
+                                    <div class="ldwp-wizard-preset-preview" style="background: #fff;">
+                                        <div class="mini-form" style="background: #fff; border: 1px solid #e5e7eb;">
+                                            <div class="mini-input" style="background: #f9fafb;"></div>
+                                            <div class="mini-input" style="background: #f9fafb;"></div>
+                                            <div class="mini-button" style="background: #111827;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="ldwp-wizard-preset-name"><?php esc_html_e('Minimal', 'logindesignerwp'); ?>
+                                    </div>
+                                </div>
+                                <div class="ldwp-wizard-preset is-locked" data-preset="glassmorphism">
+                                    <div class="ldwp-wizard-preset-lock"><span class="dashicons dashicons-lock"></span> Pro
+                                    </div>
+                                    <div class="ldwp-wizard-preset-preview"
+                                        style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                                        <div class="mini-form"
+                                            style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);">
+                                            <div class="mini-input" style="background: rgba(255,255,255,0.2);"></div>
+                                            <div class="mini-input" style="background: rgba(255,255,255,0.2);"></div>
+                                            <div class="mini-button" style="background: #fff;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="ldwp-wizard-preset-name">
+                                        <?php esc_html_e('Glassmorphism', 'logindesignerwp'); ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Step 3: Colors -->
+                        <div class="ldwp-wizard-step" data-step="3">
+                            <h3 style="margin-top: 0;"><?php esc_html_e('Customize Colors', 'logindesignerwp'); ?></h3>
+                            <div class="ldwp-wizard-colors">
+                                <div class="ldwp-wizard-color-group">
+                                    <h4><?php esc_html_e('Background & Form', 'logindesignerwp'); ?></h4>
+                                    <div class="ldwp-wizard-color-row">
+                                        <label><?php esc_html_e('Background', 'logindesignerwp'); ?></label>
+                                        <input type="text" class="ldwp-wizard-color" name="wizard_background_color"
+                                            data-setting="background_color" value="#f0f0f1">
+                                    </div>
+                                    <div class="ldwp-wizard-color-row">
+                                        <label><?php esc_html_e('Form Background', 'logindesignerwp'); ?></label>
+                                        <input type="text" class="ldwp-wizard-color" name="wizard_form_bg_color"
+                                            data-setting="form_bg_color" value="#ffffff">
+                                    </div>
+                                </div>
+                                <div class="ldwp-wizard-color-group">
+                                    <h4><?php esc_html_e('Button', 'logindesignerwp'); ?></h4>
+                                    <div class="ldwp-wizard-color-row">
+                                        <label><?php esc_html_e('Button Color', 'logindesignerwp'); ?></label>
+                                        <input type="text" class="ldwp-wizard-color" name="wizard_button_bg"
+                                            data-setting="button_bg" value="#2271b1">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- AI Pro Upsell -->
+                            <div class="ldwp-wizard-pro-upsell">
+                                <div class="ldwp-wizard-pro-upsell-icon">🎨</div>
+                                <div class="ldwp-wizard-pro-upsell-content">
+                                    <h4><?php esc_html_e('AI Smart Color Suggestions', 'logindesignerwp'); ?></h4>
+                                    <p><?php esc_html_e('Let AI analyze your brand and suggest perfect color harmonies.', 'logindesignerwp'); ?>
+                                    </p>
+                                </div>
+                                <a href="#" class="ldwp-wizard-pro-upsell-btn">
+                                    <span class="dashicons dashicons-lock"></span>
+                                    <?php esc_html_e('Pro Feature', 'logindesignerwp'); ?>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- Step 4: Logo -->
+                        <div class="ldwp-wizard-step" data-step="4">
+                            <h3 style="margin-top: 0;"><?php esc_html_e('Logo & Branding', 'logindesignerwp'); ?></h3>
+                            <div class="ldwp-wizard-logo-section">
+                                <div class="ldwp-wizard-logo-upload">
+                                    <span class="dashicons dashicons-upload"></span>
+                                    <p><?php esc_html_e('Upload your logo', 'logindesignerwp'); ?></p>
+                                    <button type="button"
+                                        class="button ldwp-wizard-logo-upload-btn"><?php esc_html_e('Select Logo', 'logindesignerwp'); ?></button>
+                                </div>
+                                <div class="ldwp-wizard-logo-preview" style="display: none;"></div>
+                            </div>
+
+                            <div class="ldwp-wizard-extra-settings"
+                                style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
+                                <h4 style="margin: 0 0 16px 0;"><?php esc_html_e('Form Styling', 'logindesignerwp'); ?></h4>
+                                <div class="ldwp-wizard-slider-row"
+                                    style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
+                                    <label
+                                        style="min-width: 120px;"><?php esc_html_e('Border Radius', 'logindesignerwp'); ?></label>
+                                    <input type="range" class="ldwp-wizard-slider" name="wizard_form_border_radius"
+                                        data-setting="form_border_radius" min="0" max="30" value="4" style="flex: 1;">
+                                    <span class="ldwp-wizard-slider-value"
+                                        style="min-width: 40px; text-align: right;">4px</span>
+                                </div>
+                                <div class="ldwp-wizard-slider-row" style="display: flex; align-items: center; gap: 16px;">
+                                    <label
+                                        style="min-width: 120px;"><?php esc_html_e('Button Radius', 'logindesignerwp'); ?></label>
+                                    <input type="range" class="ldwp-wizard-slider" name="wizard_button_border_radius"
+                                        data-setting="button_border_radius" min="0" max="30" value="3" style="flex: 1;">
+                                    <span class="ldwp-wizard-slider-value"
+                                        style="min-width: 40px; text-align: right;">3px</span>
+                                </div>
+                            </div>
+
+                            <!-- AI Pro Upsell -->
+                            <div class="ldwp-wizard-pro-upsell" style="margin-top: 24px;">
+                                <div class="ldwp-wizard-pro-upsell-icon">🤖</div>
+                                <div class="ldwp-wizard-pro-upsell-content">
+                                    <h4><?php esc_html_e('AI Background Generator', 'logindesignerwp'); ?></h4>
+                                    <p><?php esc_html_e('Generate stunning AI backgrounds and get smart color suggestions.', 'logindesignerwp'); ?>
+                                    </p>
+                                </div>
+                                <a href="#" class="ldwp-wizard-pro-upsell-btn">
+                                    <span class="dashicons dashicons-lock"></span>
+                                    <?php esc_html_e('Pro Feature', 'logindesignerwp'); ?>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- Step 5: Apply -->
+                        <div class="ldwp-wizard-step" data-step="5">
+                            <h3 style="margin-top: 0;"><?php esc_html_e('Preview & Apply', 'logindesignerwp'); ?></h3>
+                            <p style="color: #6b7280; margin-bottom: 16px;">
+                                <?php esc_html_e('Review your design and apply it to your login page.', 'logindesignerwp'); ?>
+                            </p>
+
+                            <div class="ldwp-wizard-final-preview"
+                                style="background: #f0f0f1; padding: 40px 20px; border-radius: 8px; margin-bottom: 20px;">
+                                <div class="ldwp-wizard-final-preview-box"
+                                    style="max-width: 280px; margin: 0 auto; background: #fff; padding: 24px; border-radius: 4px; border: 1px solid #c3c4c7;">
+                                    <div class="preview-logo" style="text-align: center; margin-bottom: 20px;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.52 122.523" width="48"
+                                            height="48">
+                                            <circle fill="#2271b1" cx="61.26" cy="61.26" r="61.26" />
+                                            <path fill="#fff"
+                                                d="M61.262 8.805c28.939 0 52.455 23.516 52.455 52.455s-23.516 52.455-52.455 52.455S8.807 90.199 8.807 61.26 32.323 8.805 61.262 8.805z" />
+                                            <path fill="#2271b1"
+                                                d="M61.262 14.805c25.663 0 46.455 20.792 46.455 46.455s-20.792 46.455-46.455 46.455S14.807 86.923 14.807 61.26s20.792-46.455 46.455-46.455z" />
+                                        </svg>
+                                    </div>
+                                    <div style="margin-bottom: 14px;">
+                                        <label class="preview-label"
+                                            style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 5px;"><?php esc_html_e('Username or Email', 'logindesignerwp'); ?></label>
+                                        <input type="text" class="preview-input" readonly
+                                            style="width: 100%; padding: 6px 10px; font-size: 14px; border: 1px solid #8c8f94; border-radius: 4px; box-sizing: border-box;">
+                                    </div>
+                                    <div style="margin-bottom: 16px;">
+                                        <label class="preview-label"
+                                            style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 5px;"><?php esc_html_e('Password', 'logindesignerwp'); ?></label>
+                                        <input type="password" class="preview-input" value="•••••" readonly
+                                            style="width: 100%; padding: 6px 10px; font-size: 14px; border: 1px solid #8c8f94; border-radius: 4px; box-sizing: border-box;">
+                                    </div>
+                                    <button type="button" class="preview-button"
+                                        style="width: 100%; padding: 8px 12px; font-size: 13px; border: none; border-radius: 3px; background: #2271b1; color: #fff; cursor: default;"><?php esc_html_e('Log In', 'logindesignerwp'); ?></button>
+                                </div>
+                            </div>
+
+                            <div class="ldwp-wizard-summary"
+                                style="background: #f9fafb; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                                <h4 style="margin: 0 0 12px 0; font-size: 14px;">
+                                    <?php esc_html_e('Design Summary', 'logindesignerwp'); ?>
+                                </h4>
+                                <div class="ldwp-wizard-summary-grid"
+                                    style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; text-align: center;">
+                                    <div class="ldwp-wizard-summary-item">
+                                        <span
+                                            style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;"><?php esc_html_e('Style', 'logindesignerwp'); ?></span>
+                                        <strong class="ldwp-wizard-summary-preset" style="font-size: 12px;">-</strong>
+                                    </div>
+                                    <div class="ldwp-wizard-summary-item">
+                                        <span
+                                            style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;"><?php esc_html_e('Background', 'logindesignerwp'); ?></span>
+                                        <div class="ldwp-wizard-summary-bg"
+                                            style="width: 24px; height: 24px; border-radius: 4px; margin: 0 auto; border: 1px solid #e5e7eb; background: #f0f0f1;">
+                                        </div>
+                                    </div>
+                                    <div class="ldwp-wizard-summary-item">
+                                        <span
+                                            style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;"><?php esc_html_e('Form', 'logindesignerwp'); ?></span>
+                                        <div class="ldwp-wizard-summary-form"
+                                            style="width: 24px; height: 24px; border-radius: 4px; margin: 0 auto; border: 1px solid #e5e7eb; background: #fff;">
+                                        </div>
+                                    </div>
+                                    <div class="ldwp-wizard-summary-item">
+                                        <span
+                                            style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;"><?php esc_html_e('Button', 'logindesignerwp'); ?></span>
+                                        <div class="ldwp-wizard-summary-button"
+                                            style="width: 24px; height: 24px; border-radius: 4px; margin: 0 auto; background: #2271b1;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ldwp-wizard-footer">
+                        <button type="button" class="ldwp-wizard-btn ldwp-wizard-btn-secondary ldwp-wizard-btn-prev"
+                            style="display: none;">
+                            <span class="dashicons dashicons-arrow-left-alt2"></span>
+                            <?php esc_html_e('Back', 'logindesignerwp'); ?>
+                        </button>
+                        <div class="ldwp-wizard-dots">
+                            <div class="ldwp-wizard-dot is-active"></div>
+                            <div class="ldwp-wizard-dot"></div>
+                            <div class="ldwp-wizard-dot"></div>
+                            <div class="ldwp-wizard-dot"></div>
+                            <div class="ldwp-wizard-dot"></div>
+                        </div>
+                        <div class="ldwp-wizard-nav">
+                            <button type="button" class="ldwp-wizard-btn ldwp-wizard-btn-primary ldwp-wizard-btn-next">
+                                <?php esc_html_e('Next', 'logindesignerwp'); ?> <span
+                                    class="dashicons dashicons-arrow-right-alt2"></span>
+                            </button>
+                            <button type="button" class="ldwp-wizard-btn ldwp-wizard-btn-success ldwp-wizard-btn-apply"
+                                style="display: none;">
+                                <span class="dashicons dashicons-yes"></span>
+                                <?php esc_html_e('Apply Design', 'logindesignerwp'); ?>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="logindesignerwp-layout">
                 <!-- Settings Column -->
@@ -1385,6 +1699,334 @@ class LoginDesignerWP_Settings
                 <p class="logindesignerwp-pro-upgrade-text">
                     <?php esc_html_e('Export settings and add custom CSS', 'logindesignerwp'); ?>
                 </p>
+            </div>
+        </div>
+
+        <!-- Design Wizard Modal -->
+        <div class="ldwp-wizard-overlay">
+            <div class="ldwp-wizard-modal">
+                <div class="ldwp-wizard-header">
+                    <h3 class="ldwp-wizard-title"><?php esc_html_e('Login Page Design Wizard', 'logindesignerwp'); ?></h3>
+                    <span class="ldwp-wizard-step-indicator">Step 1 of 5</span>
+                    <button type="button" class="ldwp-wizard-close">&times;</button>
+                </div>
+
+                <div class="ldwp-wizard-body">
+                    <!-- Step 1: Welcome -->
+                    <div class="ldwp-wizard-step is-active" data-step="1">
+                        <div class="ldwp-wizard-welcome">
+                            <div class="ldwp-wizard-welcome-icon">✨</div>
+                            <h2><?php esc_html_e('Welcome to the Design Wizard', 'logindesignerwp'); ?></h2>
+                            <p><?php esc_html_e('Create a stunning login page in just a few steps. Choose a style preset, customize colors, upload your logo, and preview your design.', 'logindesignerwp'); ?>
+                            </p>
+                            <div class="ldwp-wizard-welcome-features">
+                                <div class="ldwp-wizard-welcome-feature">
+                                    <span class="dashicons dashicons-art"></span>
+                                    <span><?php esc_html_e('Style Presets', 'logindesignerwp'); ?></span>
+                                </div>
+                                <div class="ldwp-wizard-welcome-feature">
+                                    <span class="dashicons dashicons-admin-appearance"></span>
+                                    <span><?php esc_html_e('Custom Colors', 'logindesignerwp'); ?></span>
+                                </div>
+                                <div class="ldwp-wizard-welcome-feature">
+                                    <span class="dashicons dashicons-format-image"></span>
+                                    <span><?php esc_html_e('Logo Upload', 'logindesignerwp'); ?></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Choose Style -->
+                    <div class="ldwp-wizard-step" data-step="2">
+                        <h3 style="margin-top: 0;"><?php esc_html_e('Choose Your Style', 'logindesignerwp'); ?></h3>
+                        <p style="color: #6b7280; margin-bottom: 20px;">
+                            <?php esc_html_e('Select a preset to get started. You can customize colors in the next step.', 'logindesignerwp'); ?>
+                        </p>
+
+                        <div class="ldwp-wizard-presets">
+                            <!-- Free Presets -->
+                            <div class="ldwp-wizard-preset" data-preset="modern-light">
+                                <div class="ldwp-wizard-preset-preview" style="background: #f8fafc;">
+                                    <div class="mini-form" style="background: #fff; border: 1px solid #e2e8f0;">
+                                        <div class="mini-input" style="background: #f1f5f9;"></div>
+                                        <div class="mini-input" style="background: #f1f5f9;"></div>
+                                        <div class="mini-button" style="background: #3b82f6;"></div>
+                                    </div>
+                                </div>
+                                <div class="ldwp-wizard-preset-name"><?php esc_html_e('Modern Light', 'logindesignerwp'); ?>
+                                </div>
+                            </div>
+
+                            <div class="ldwp-wizard-preset" data-preset="modern-dark">
+                                <div class="ldwp-wizard-preset-preview" style="background: #0f172a;">
+                                    <div class="mini-form" style="background: #1e293b; border: 1px solid #334155;">
+                                        <div class="mini-input" style="background: #0f172a;"></div>
+                                        <div class="mini-input" style="background: #0f172a;"></div>
+                                        <div class="mini-button" style="background: #3b82f6;"></div>
+                                    </div>
+                                </div>
+                                <div class="ldwp-wizard-preset-name"><?php esc_html_e('Modern Dark', 'logindesignerwp'); ?>
+                                </div>
+                            </div>
+
+                            <div class="ldwp-wizard-preset" data-preset="minimal">
+                                <div class="ldwp-wizard-preset-preview" style="background: #fff;">
+                                    <div class="mini-form" style="background: #fff; border: 1px solid #e5e7eb;">
+                                        <div class="mini-input" style="background: #f9fafb;"></div>
+                                        <div class="mini-input" style="background: #f9fafb;"></div>
+                                        <div class="mini-button" style="background: #111827;"></div>
+                                    </div>
+                                </div>
+                                <div class="ldwp-wizard-preset-name"><?php esc_html_e('Minimal', 'logindesignerwp'); ?></div>
+                            </div>
+
+                            <!-- Pro Presets (Locked) -->
+                            <div class="ldwp-wizard-preset is-locked" data-preset="glassmorphism">
+                                <div class="ldwp-wizard-preset-lock"><span class="dashicons dashicons-lock"></span> Pro</div>
+                                <div class="ldwp-wizard-preset-preview"
+                                    style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                                    <div class="mini-form"
+                                        style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px);">
+                                        <div class="mini-input" style="background: rgba(255,255,255,0.2);"></div>
+                                        <div class="mini-input" style="background: rgba(255,255,255,0.2);"></div>
+                                        <div class="mini-button" style="background: #fff;"></div>
+                                    </div>
+                                </div>
+                                <div class="ldwp-wizard-preset-name"><?php esc_html_e('Glassmorphism', 'logindesignerwp'); ?>
+                                </div>
+                            </div>
+
+                            <div class="ldwp-wizard-preset is-locked" data-preset="neon-glow">
+                                <div class="ldwp-wizard-preset-lock"><span class="dashicons dashicons-lock"></span> Pro</div>
+                                <div class="ldwp-wizard-preset-preview" style="background: #0a0a0a;">
+                                    <div class="mini-form"
+                                        style="background: #141414; border: 1px solid #22d3ee; box-shadow: 0 0 10px rgba(34,211,238,0.3);">
+                                        <div class="mini-input" style="background: #0a0a0a; border: 1px solid #22d3ee;"></div>
+                                        <div class="mini-input" style="background: #0a0a0a; border: 1px solid #22d3ee;"></div>
+                                        <div class="mini-button" style="background: #22d3ee;"></div>
+                                    </div>
+                                </div>
+                                <div class="ldwp-wizard-preset-name"><?php esc_html_e('Neon Glow', 'logindesignerwp'); ?></div>
+                            </div>
+
+                            <div class="ldwp-wizard-preset is-locked" data-preset="corporate">
+                                <div class="ldwp-wizard-preset-lock"><span class="dashicons dashicons-lock"></span> Pro</div>
+                                <div class="ldwp-wizard-preset-preview" style="background: #1e3a5f;">
+                                    <div class="mini-form" style="background: #fff; border: 1px solid #d1d5db;">
+                                        <div class="mini-input" style="background: #f9fafb;"></div>
+                                        <div class="mini-input" style="background: #f9fafb;"></div>
+                                        <div class="mini-button" style="background: #1e3a5f;"></div>
+                                    </div>
+                                </div>
+                                <div class="ldwp-wizard-preset-name"><?php esc_html_e('Corporate', 'logindesignerwp'); ?></div>
+                            </div>
+
+                            <div class="ldwp-wizard-preset is-locked" data-preset="creative">
+                                <div class="ldwp-wizard-preset-lock"><span class="dashicons dashicons-lock"></span> Pro</div>
+                                <div class="ldwp-wizard-preset-preview"
+                                    style="background: linear-gradient(135deg, #f97316, #ec4899);">
+                                    <div class="mini-form"
+                                        style="background: #fff; border: 1px solid #fecdd3; border-radius: 12px;">
+                                        <div class="mini-input" style="background: #fff1f2;"></div>
+                                        <div class="mini-input" style="background: #fff1f2;"></div>
+                                        <div class="mini-button" style="background: #ec4899; border-radius: 20px;"></div>
+                                    </div>
+                                </div>
+                                <div class="ldwp-wizard-preset-name"><?php esc_html_e('Creative', 'logindesignerwp'); ?></div>
+                            </div>
+                        </div>
+
+                        <?php if (!apply_filters('logindesignerwp_is_pro', false)): ?>
+                            <div class="ldwp-wizard-pro-upsell">
+                                <div class="ldwp-wizard-pro-upsell-icon">🎨</div>
+                                <div class="ldwp-wizard-pro-upsell-content">
+                                    <h4><?php esc_html_e('Unlock Premium Presets', 'logindesignerwp'); ?></h4>
+                                    <p><?php esc_html_e('Get access to Glassmorphism, Neon Glow, Corporate, Creative presets and more with Pro.', 'logindesignerwp'); ?>
+                                    </p>
+                                </div>
+                                <a href="#"
+                                    class="ldwp-wizard-pro-upsell-btn"><?php esc_html_e('Upgrade to Pro', 'logindesignerwp'); ?></a>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Step 3: Customize Colors -->
+                    <div class="ldwp-wizard-step" data-step="3">
+                        <h3 style="margin-top: 0;"><?php esc_html_e('Customize Colors', 'logindesignerwp'); ?></h3>
+                        <p style="color: #6b7280; margin-bottom: 20px;">
+                            <?php esc_html_e('Fine-tune the colors to match your brand.', 'logindesignerwp'); ?>
+                        </p>
+
+                        <div class="ldwp-wizard-colors">
+                            <div class="ldwp-wizard-color-group">
+                                <h4><?php esc_html_e('Background & Form', 'logindesignerwp'); ?></h4>
+                                <div class="ldwp-wizard-color-row">
+                                    <label><?php esc_html_e('Background', 'logindesignerwp'); ?></label>
+                                    <input type="text" class="ldwp-wizard-color" name="wizard_background_color"
+                                        data-setting="background_color" value="#f0f0f1">
+                                </div>
+                                <div class="ldwp-wizard-color-row">
+                                    <label><?php esc_html_e('Form Background', 'logindesignerwp'); ?></label>
+                                    <input type="text" class="ldwp-wizard-color" name="wizard_form_bg_color"
+                                        data-setting="form_bg_color" value="#ffffff">
+                                </div>
+                            </div>
+
+                            <div class="ldwp-wizard-color-group">
+                                <h4><?php esc_html_e('Text & Inputs', 'logindesignerwp'); ?></h4>
+                                <div class="ldwp-wizard-color-row">
+                                    <label><?php esc_html_e('Label Color', 'logindesignerwp'); ?></label>
+                                    <input type="text" class="ldwp-wizard-color" name="wizard_label_text_color"
+                                        data-setting="label_text_color" value="#1e1e1e">
+                                </div>
+                                <div class="ldwp-wizard-color-row">
+                                    <label><?php esc_html_e('Input Background', 'logindesignerwp'); ?></label>
+                                    <input type="text" class="ldwp-wizard-color" name="wizard_input_bg_color"
+                                        data-setting="input_bg_color" value="#ffffff">
+                                </div>
+                            </div>
+
+                            <div class="ldwp-wizard-color-group">
+                                <h4><?php esc_html_e('Button', 'logindesignerwp'); ?></h4>
+                                <div class="ldwp-wizard-color-row">
+                                    <label><?php esc_html_e('Button Color', 'logindesignerwp'); ?></label>
+                                    <input type="text" class="ldwp-wizard-color" name="wizard_button_bg"
+                                        data-setting="button_bg" value="#2271b1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <?php if (!apply_filters('logindesignerwp_is_pro', false)): ?>
+                            <div class="ldwp-wizard-pro-upsell" style="margin-top: 24px;">
+                                <div class="ldwp-wizard-pro-upsell-icon">🤖</div>
+                                <div class="ldwp-wizard-pro-upsell-content">
+                                    <h4><?php esc_html_e('AI Color Suggestions', 'logindesignerwp'); ?></h4>
+                                    <p><?php esc_html_e('Let AI analyze your brand and suggest harmonious color palettes.', 'logindesignerwp'); ?>
+                                    </p>
+                                </div>
+                                <a href="#"
+                                    class="ldwp-wizard-pro-upsell-btn"><?php esc_html_e('Get AI Features', 'logindesignerwp'); ?></a>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Step 4: Logo & Branding -->
+                    <div class="ldwp-wizard-step" data-step="4">
+                        <h3 style="margin-top: 0;"><?php esc_html_e('Logo & Branding', 'logindesignerwp'); ?></h3>
+                        <p style="color: #6b7280; margin-bottom: 20px;">
+                            <?php esc_html_e('Upload your logo to replace the WordPress logo on the login page.', 'logindesignerwp'); ?>
+                        </p>
+
+                        <div class="ldwp-wizard-logo-section">
+                            <div class="ldwp-wizard-logo-upload">
+                                <span class="dashicons dashicons-upload"></span>
+                                <p><?php esc_html_e('Drag and drop or click to upload', 'logindesignerwp'); ?></p>
+                                <button type="button"
+                                    class="button ldwp-wizard-logo-upload-btn"><?php esc_html_e('Select Logo', 'logindesignerwp'); ?></button>
+                            </div>
+                            <div class="ldwp-wizard-logo-preview" style="display: none;">
+                                <!-- Logo preview will appear here -->
+                            </div>
+                        </div>
+
+                        <?php if (!apply_filters('logindesignerwp_is_pro', false)): ?>
+                            <div class="ldwp-wizard-pro-upsell" style="margin-top: 24px;">
+                                <div class="ldwp-wizard-pro-upsell-icon">🎨</div>
+                                <div class="ldwp-wizard-pro-upsell-content">
+                                    <h4><?php esc_html_e('AI Background Generator', 'logindesignerwp'); ?></h4>
+                                    <p><?php esc_html_e('Generate stunning backgrounds with AI that match your brand colors.', 'logindesignerwp'); ?>
+                                    </p>
+                                </div>
+                                <a href="#"
+                                    class="ldwp-wizard-pro-upsell-btn"><?php esc_html_e('Unlock AI', 'logindesignerwp'); ?></a>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Step 5: Preview & Apply -->
+                    <div class="ldwp-wizard-step" data-step="5">
+                        <h3 style="margin-top: 0;"><?php esc_html_e('Preview & Apply', 'logindesignerwp'); ?></h3>
+                        <p style="color: #6b7280; margin-bottom: 20px;">
+                            <?php esc_html_e('Review your design and apply it to your login page.', 'logindesignerwp'); ?>
+                        </p>
+
+                        <div class="ldwp-wizard-final-preview">
+                            <div class="ldwp-wizard-final-preview-box">
+                                <div style="text-align: center; margin-bottom: 16px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.52 122.523" width="48" height="48">
+                                        <path fill="#2271b1"
+                                            d="M8.708 61.26c0 20.802 12.089 38.779 29.619 47.298L13.258 39.872a52.354 52.354 0 00-4.55 21.388z" />
+                                        <path fill="#2271b1"
+                                            d="M61.262 0C27.483 0 0 27.481 0 61.26c0 33.783 27.483 61.263 61.262 61.263 33.778 0 61.265-27.48 61.265-61.263C122.526 27.481 95.04 0 61.262 0zm0 119.715c-32.23 0-58.453-26.223-58.453-58.455 0-32.23 26.222-58.451 58.453-58.451 32.229 0 58.45 26.221 58.45 58.451 0 32.232-26.221 58.455-58.45 58.455z" />
+                                    </svg>
+                                </div>
+                                <div style="margin-bottom: 12px;">
+                                    <label class="preview-label"
+                                        style="display: block; font-size: 12px; margin-bottom: 4px;"><?php esc_html_e('Username', 'logindesignerwp'); ?></label>
+                                    <input type="text" class="preview-input" readonly
+                                        style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                </div>
+                                <div style="margin-bottom: 16px;">
+                                    <label class="preview-label"
+                                        style="display: block; font-size: 12px; margin-bottom: 4px;"><?php esc_html_e('Password', 'logindesignerwp'); ?></label>
+                                    <input type="password" class="preview-input" value="password" readonly
+                                        style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                </div>
+                                <button type="button" class="preview-button"
+                                    style="width: 100%; padding: 10px; border: none; cursor: default;"><?php esc_html_e('Log In', 'logindesignerwp'); ?></button>
+                            </div>
+                        </div>
+
+                        <div class="ldwp-wizard-summary">
+                            <h4><?php esc_html_e('Summary', 'logindesignerwp'); ?></h4>
+                            <div class="ldwp-wizard-summary-grid">
+                                <div class="ldwp-wizard-summary-item">
+                                    <span><?php esc_html_e('Style', 'logindesignerwp'); ?></span>
+                                    <strong class="ldwp-wizard-summary-preset">-</strong>
+                                </div>
+                                <div class="ldwp-wizard-summary-item">
+                                    <span><?php esc_html_e('Background', 'logindesignerwp'); ?></span>
+                                    <div class="ldwp-wizard-summary-bg"
+                                        style="width: 24px; height: 24px; border-radius: 4px; margin: 0 auto; border: 1px solid #e5e7eb;">
+                                    </div>
+                                </div>
+                                <div class="ldwp-wizard-summary-item">
+                                    <span><?php esc_html_e('Button', 'logindesignerwp'); ?></span>
+                                    <div class="ldwp-wizard-summary-button"
+                                        style="width: 24px; height: 24px; border-radius: 4px; margin: 0 auto;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ldwp-wizard-footer">
+                    <button type="button" class="ldwp-wizard-btn ldwp-wizard-btn-secondary ldwp-wizard-btn-prev"
+                        style="display: none;">
+                        <span class="dashicons dashicons-arrow-left-alt2"></span>
+                        <?php esc_html_e('Back', 'logindesignerwp'); ?>
+                    </button>
+
+                    <div class="ldwp-wizard-dots">
+                        <div class="ldwp-wizard-dot is-active"></div>
+                        <div class="ldwp-wizard-dot"></div>
+                        <div class="ldwp-wizard-dot"></div>
+                        <div class="ldwp-wizard-dot"></div>
+                        <div class="ldwp-wizard-dot"></div>
+                    </div>
+
+                    <div class="ldwp-wizard-nav">
+                        <button type="button" class="ldwp-wizard-btn ldwp-wizard-btn-primary ldwp-wizard-btn-next">
+                            <?php esc_html_e('Next', 'logindesignerwp'); ?>
+                            <span class="dashicons dashicons-arrow-right-alt2"></span>
+                        </button>
+                        <button type="button" class="ldwp-wizard-btn ldwp-wizard-btn-success ldwp-wizard-btn-apply"
+                            style="display: none;">
+                            <span class="dashicons dashicons-yes"></span>
+                            <?php esc_html_e('Apply Design', 'logindesignerwp'); ?>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
