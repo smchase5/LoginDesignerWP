@@ -163,6 +163,10 @@ class LoginDesignerWP_Settings
                             <span class="dashicons dashicons-admin-generic"></span>
                             <?php esc_html_e('Settings', 'logindesignerwp'); ?>
                         </a>
+                        <a href="#" class="logindesignerwp-tab" data-tab="social">
+                            <span class="dashicons dashicons-share"></span>
+                            <?php esc_html_e('Social', 'logindesignerwp'); ?>
+                        </a>
                     </nav>
 
                     <!-- Design Tab -->
@@ -176,6 +180,7 @@ class LoginDesignerWP_Settings
                                     <?php $this->render_background_section($settings); ?>
                                     <?php $this->render_form_section($settings); ?>
                                     <?php $this->render_logo_section($settings); ?>
+                                    <?php $this->render_social_section($settings); ?>
 
                                     <?php
                                     // Render AI Tools section if Pro is active, otherwise show locked placeholder.
@@ -265,6 +270,34 @@ class LoginDesignerWP_Settings
                                                     <a
                                                         href="#"><?php esc_html_e('Lost your password?', 'logindesignerwp'); ?></a>
                                                 </div>
+
+                                                <!-- Social Login Preview -->
+                                                <?php if (!empty($settings['google_login_enable']) || !empty($settings['github_login_enable'])): ?>
+                                                    <div class="logindesignerwp-preview-social" id="ldwp-preview-social"
+                                                        data-layout="<?php echo esc_attr($settings['social_login_layout'] ?? 'column'); ?>"
+                                                        data-shape="<?php echo esc_attr($settings['social_login_shape'] ?? 'rounded'); ?>"
+                                                        data-style="<?php echo esc_attr($settings['social_login_style'] ?? 'branding'); ?>">
+                                                        <div class="logindesignerwp-preview-social-divider">
+                                                            <span><?php esc_html_e('or', 'logindesignerwp'); ?></span>
+                                                        </div>
+                                                        <div class="logindesignerwp-preview-social-buttons">
+                                                            <?php if (!empty($settings['google_login_enable'])): ?>
+                                                                <button type="button"
+                                                                    class="ldwp-preview-social-btn ldwp-preview-google">
+                                                                    <span class="dashicons dashicons-google"></span>
+                                                                    <span><?php esc_html_e('Google', 'logindesignerwp'); ?></span>
+                                                                </button>
+                                                            <?php endif; ?>
+                                                            <?php if (!empty($settings['github_login_enable'])): ?>
+                                                                <button type="button"
+                                                                    class="ldwp-preview-social-btn ldwp-preview-github">
+                                                                    <span class="dashicons dashicons-admin-network"></span>
+                                                                    <span><?php esc_html_e('GitHub', 'logindesignerwp'); ?></span>
+                                                                </button>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     </div>
@@ -416,11 +449,14 @@ class LoginDesignerWP_Settings
                                 <select name="<?php echo esc_attr($this->option_name); ?>[gradient_type]"
                                     class="logindesignerwp-gradient-type">
                                     <option value="linear" <?php selected($settings['gradient_type'], 'linear'); ?>>
-                                        <?php esc_html_e('Linear', 'logindesignerwp'); ?></option>
+                                        <?php esc_html_e('Linear', 'logindesignerwp'); ?>
+                                    </option>
                                     <option value="radial" <?php selected($settings['gradient_type'], 'radial'); ?>>
-                                        <?php esc_html_e('Radial', 'logindesignerwp'); ?></option>
+                                        <?php esc_html_e('Radial', 'logindesignerwp'); ?>
+                                    </option>
                                     <option value="mesh" <?php selected($settings['gradient_type'], 'mesh'); ?>>
-                                        <?php esc_html_e('Mesh (Pro)', 'logindesignerwp'); ?></option>
+                                        <?php esc_html_e('Mesh (Pro)', 'logindesignerwp'); ?>
+                                    </option>
                                 </select>
                                 <button type="button" class="button logindesignerwp-randomize-gradient"
                                     title="<?php esc_attr_e('Generate Random Colors', 'logindesignerwp'); ?>">
@@ -447,10 +483,13 @@ class LoginDesignerWP_Settings
                                 <select name="<?php echo esc_attr($this->option_name); ?>[gradient_position]">
                                     <option value="center center" <?php selected($settings['gradient_position'], 'center center'); ?>><?php esc_html_e('Center', 'logindesignerwp'); ?></option>
                                     <option value="top left" <?php selected($settings['gradient_position'], 'top left'); ?>>
-                                        <?php esc_html_e('Top Left', 'logindesignerwp'); ?></option>
-                                    <option value="top center" <?php selected($settings['gradient_position'], 'top center'); ?>><?php esc_html_e('Top Center', 'logindesignerwp'); ?></option>
+                                        <?php esc_html_e('Top Left', 'logindesignerwp'); ?>
+                                    </option>
+                                    <option value="top center" <?php selected($settings['gradient_position'], 'top center'); ?>>
+                                        <?php esc_html_e('Top Center', 'logindesignerwp'); ?></option>
                                     <option value="top right" <?php selected($settings['gradient_position'], 'top right'); ?>>
-                                        <?php esc_html_e('Top Right', 'logindesignerwp'); ?></option>
+                                        <?php esc_html_e('Top Right', 'logindesignerwp'); ?>
+                                    </option>
                                     <option value="center left" <?php selected($settings['gradient_position'], 'center left'); ?>><?php esc_html_e('Center Left', 'logindesignerwp'); ?></option>
                                     <option value="center right" <?php selected($settings['gradient_position'], 'center right'); ?>><?php esc_html_e('Center Right', 'logindesignerwp'); ?></option>
                                     <option value="bottom left" <?php selected($settings['gradient_position'], 'bottom left'); ?>><?php esc_html_e('Bottom Left', 'logindesignerwp'); ?></option>
@@ -483,7 +522,8 @@ class LoginDesignerWP_Settings
                                 <input type="text" class="logindesignerwp-color-picker"
                                     name="<?php echo esc_attr($this->option_name); ?>[background_gradient_3]"
                                     value="<?php echo esc_attr($settings['background_gradient_3']); ?>">
-                                <p class="description"><?php esc_html_e('Adds a third color blob to the mesh gradient.', 'logindesignerwp'); ?></p>
+                                <p class="description">
+                                    <?php esc_html_e('Adds a third color blob to the mesh gradient.', 'logindesignerwp'); ?></p>
                             </td>
                         </tr>
                     </table>
@@ -523,11 +563,14 @@ class LoginDesignerWP_Settings
                             <td>
                                 <select name="<?php echo esc_attr($this->option_name); ?>[background_image_size]">
                                     <option value="cover" <?php selected($settings['background_image_size'], 'cover'); ?>>
-                                        <?php esc_html_e('Cover', 'logindesignerwp'); ?></option>
+                                        <?php esc_html_e('Cover', 'logindesignerwp'); ?>
+                                    </option>
                                     <option value="contain" <?php selected($settings['background_image_size'], 'contain'); ?>>
-                                        <?php esc_html_e('Contain', 'logindesignerwp'); ?></option>
+                                        <?php esc_html_e('Contain', 'logindesignerwp'); ?>
+                                    </option>
                                     <option value="auto" <?php selected($settings['background_image_size'], 'auto'); ?>>
-                                        <?php esc_html_e('Auto', 'logindesignerwp'); ?></option>
+                                        <?php esc_html_e('Auto', 'logindesignerwp'); ?>
+                                    </option>
                                 </select>
                             </td>
                         </tr>
@@ -536,11 +579,14 @@ class LoginDesignerWP_Settings
                             <td>
                                 <select name="<?php echo esc_attr($this->option_name); ?>[background_image_pos]">
                                     <option value="center" <?php selected($settings['background_image_pos'], 'center'); ?>>
-                                        <?php esc_html_e('Center', 'logindesignerwp'); ?></option>
+                                        <?php esc_html_e('Center', 'logindesignerwp'); ?>
+                                    </option>
                                     <option value="top" <?php selected($settings['background_image_pos'], 'top'); ?>>
-                                        <?php esc_html_e('Top', 'logindesignerwp'); ?></option>
+                                        <?php esc_html_e('Top', 'logindesignerwp'); ?>
+                                    </option>
                                     <option value="bottom" <?php selected($settings['background_image_pos'], 'bottom'); ?>>
-                                        <?php esc_html_e('Bottom', 'logindesignerwp'); ?></option>
+                                        <?php esc_html_e('Bottom', 'logindesignerwp'); ?>
+                                    </option>
                                 </select>
                             </td>
                         </tr>
@@ -550,8 +596,22 @@ class LoginDesignerWP_Settings
                                 <select name="<?php echo esc_attr($this->option_name); ?>[background_image_repeat]">
                                     <option value="no-repeat" <?php selected($settings['background_image_repeat'], 'no-repeat'); ?>><?php esc_html_e('No Repeat', 'logindesignerwp'); ?></option>
                                     <option value="repeat" <?php selected($settings['background_image_repeat'], 'repeat'); ?>>
-                                        <?php esc_html_e('Repeat', 'logindesignerwp'); ?></option>
+                                        <?php esc_html_e('Repeat', 'logindesignerwp'); ?>
+                                    </option>
                                 </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php esc_html_e('Background Blur', 'logindesignerwp'); ?></th>
+                            <td>
+                                <div class="logindesignerwp-range-slider">
+                                    <input type="range" min="0" max="20" step="1"
+                                        name="<?php echo esc_attr($this->option_name); ?>[background_blur]"
+                                        id="logindesignerwp-bg-blur"
+                                        value="<?php echo esc_attr($settings['background_blur'] ?? 0); ?>">
+                                    <span class="logindesignerwp-range-value"><?php echo esc_html($settings['background_blur'] ?? 0); ?>px</span>
+                                </div>
+                                <p class="description"><?php esc_html_e('Apply blur effect to background image (0-20px)', 'logindesignerwp'); ?></p>
                             </td>
                         </tr>
                     </table>
@@ -692,7 +752,8 @@ class LoginDesignerWP_Settings
                                 value="<?php echo esc_attr($settings['button_border_radius']); ?>" min="0" max="999" step="1">
                             px
                             <p class="description">
-                                <?php esc_html_e('Use 999 for fully rounded (pill) buttons.', 'logindesignerwp'); ?></p>
+                                <?php esc_html_e('Use 999 for fully rounded (pill) buttons.', 'logindesignerwp'); ?>
+                            </p>
                         </td>
                     </tr>
                     <tr>
@@ -773,7 +834,8 @@ class LoginDesignerWP_Settings
                             <input type="number" name="logindesignerwp_settings[logo_height]"
                                 value="<?php echo esc_attr($settings['logo_height']); ?>" min="0" max="500">
                             <p class="description">
-                                <?php esc_html_e('Set to 0 or 84 (default) to keep WP standard.', 'logindesignerwp'); ?></p>
+                                <?php esc_html_e('Set to 0 or 84 (default) to keep WP standard.', 'logindesignerwp'); ?>
+                            </p>
                         </td>
                     </tr>
 
@@ -830,7 +892,8 @@ class LoginDesignerWP_Settings
                             <input type="text" class="regular-text" name="logindesignerwp_settings[logo_url]"
                                 value="<?php echo esc_url($settings['logo_url']); ?>">
                             <p class="description">
-                                <?php esc_html_e('Link when clicking the logo. Default: Homepage.', 'logindesignerwp'); ?></p>
+                                <?php esc_html_e('Link when clicking the logo. Default: Homepage.', 'logindesignerwp'); ?>
+                            </p>
                         </td>
                     </tr>
 
@@ -843,6 +906,134 @@ class LoginDesignerWP_Settings
                             <p class="description">
                                 <?php esc_html_e('Title attribute for the logo link. Default: Site Title.', 'logindesignerwp'); ?>
                             </p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * Render Social Login settings section.
+     *
+     * @param array $settings
+     */
+    private function render_social_section($settings)
+    {
+        // Logic:
+        // 1. If Pro is NOT active -> Show locked teaser (always).
+        // 2. If Pro IS active -> Show controls ONLY if providers are enabled (to avoid clutter).
+
+        if (!logindesignerwp_is_pro_active()) {
+            $upgrade_url = 'https://logindesigner.com/pricing/?utm_source=plugin&utm_medium=design_tab&utm_campaign=social_login_locked';
+            ?>
+            <div class="logindesignerwp-pro-locked">
+                <div class="logindesignerwp-pro-locked-header">
+                    <h2 class="logindesignerwp-pro-locked-title">
+                        <span class="dashicons dashicons-share"></span>
+                        <?php esc_html_e('Social Login Buttons', 'logindesignerwp'); ?>
+                    </h2>
+                    <span class="logindesignerwp-pro-badge">
+                        <span class="dashicons dashicons-star-filled"></span>
+                        <?php esc_html_e('Pro', 'logindesignerwp'); ?>
+                    </span>
+                </div>
+                <div class="logindesignerwp-pro-locked-content">
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row"><?php esc_html_e('Layout', 'logindesignerwp'); ?></th>
+                            <td>
+                                <select disabled>
+                                    <option><?php esc_html_e('Stacked (Column)', 'logindesignerwp'); ?></option>
+                                    <option><?php esc_html_e('Inline (Row)', 'logindesignerwp'); ?></option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php esc_html_e('Button Shape', 'logindesignerwp'); ?></th>
+                            <td>
+                                <select disabled>
+                                    <option><?php esc_html_e('Rounded', 'logindesignerwp'); ?></option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="logindesignerwp-pro-locked-footer">
+                    <a href="<?php echo esc_url($upgrade_url); ?>" class="logindesignerwp-pro-upgrade-btn" target="_blank">
+                        <span class="dashicons dashicons-unlock"></span>
+                        <?php esc_html_e('Unlock with LoginDesignerWP Pro', 'logindesignerwp'); ?>
+                    </a>
+                    <p class="logindesignerwp-pro-upgrade-text">
+                        <?php esc_html_e('Allow users to login with Google & GitHub', 'logindesignerwp'); ?>
+                    </p>
+                </div>
+            </div>
+            <?php
+            return;
+        }
+
+        // Pro is Active: Check if any provider is enabled.
+        if (empty($settings['google_login_enable']) && empty($settings['github_login_enable'])) {
+            return;
+        }
+        ?>
+        <div class="logindesignerwp-card" data-section-id="social">
+            <h2>
+                <span class="logindesignerwp-card-title-wrapper">
+                    <span class="dashicons dashicons-share"></span>
+                    <?php esc_html_e('Social Login Buttons', 'logindesignerwp'); ?>
+                </span>
+            </h2>
+            <div class="logindesignerwp-card-content">
+                <table class="form-table" role="presentation">
+                    <!-- Layout -->
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Layout', 'logindesignerwp'); ?></th>
+                        <td>
+                            <select name="logindesignerwp_settings[social_login_layout]" id="logindesignerwp-social-layout">
+                                <option value="column" <?php selected($settings['social_login_layout'], 'column'); ?>>
+                                    <?php esc_html_e('Stacked (Column)', 'logindesignerwp'); ?>
+                                </option>
+                                <option value="row" <?php selected($settings['social_login_layout'], 'row'); ?>>
+                                    <?php esc_html_e('Inline (Row)', 'logindesignerwp'); ?>
+                                </option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <!-- Shape -->
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Button Shape', 'logindesignerwp'); ?></th>
+                        <td>
+                            <select name="logindesignerwp_settings[social_login_shape]" id="logindesignerwp-social-shape">
+                                <option value="rounded" <?php selected($settings['social_login_shape'], 'rounded'); ?>>
+                                    <?php esc_html_e('Rounded', 'logindesignerwp'); ?>
+                                </option>
+                                <option value="pill" <?php selected($settings['social_login_shape'], 'pill'); ?>>
+                                    <?php esc_html_e('Pill', 'logindesignerwp'); ?>
+                                </option>
+                                <option value="square" <?php selected($settings['social_login_shape'], 'square'); ?>>
+                                    <?php esc_html_e('Square', 'logindesignerwp'); ?>
+                                </option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <!-- Style -->
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Button Style', 'logindesignerwp'); ?></th>
+                        <td>
+                            <select name="logindesignerwp_settings[social_login_style]" id="logindesignerwp-social-style">
+                                <option value="branding" <?php selected($settings['social_login_style'], 'branding'); ?>>
+                                    <?php esc_html_e('Branding Colors', 'logindesignerwp'); ?>
+                                </option>
+                                <!-- Custom style option present but no colors yet -->
+                                <option value="custom" <?php selected($settings['social_login_style'], 'custom'); ?>>
+                                    <?php esc_html_e('Custom Colors', 'logindesignerwp'); ?>
+                                </option>
+                            </select>
                         </td>
                     </tr>
                 </table>
@@ -870,10 +1061,13 @@ class LoginDesignerWP_Settings
                 </span>
             </div>
             <div class="logindesignerwp-pro-locked-content">
-                <div class="logindesignerwp-ai-tools-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; opacity: 0.6;">
+                <div class="logindesignerwp-ai-tools-grid"
+                    style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; opacity: 0.6;">
                     <!-- AI Background Generator -->
-                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; text-align:center;">
-                        <div style="background:#6b7280; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;">
+                    <div
+                        style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; text-align:center;">
+                        <div
+                            style="background:#6b7280; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;">
                             <span class="dashicons dashicons-format-image" style="color:#fff; font-size:20px;"></span>
                         </div>
                         <h4 style="margin:0 0 6px; font-size:13px; font-weight:600;">
@@ -884,8 +1078,10 @@ class LoginDesignerWP_Settings
                         </p>
                     </div>
                     <!-- Magic Import -->
-                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; text-align:center;">
-                        <div style="background:#6b7280; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;">
+                    <div
+                        style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; text-align:center;">
+                        <div
+                            style="background:#6b7280; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;">
                             <span class="dashicons dashicons-upload" style="color:#fff; font-size:20px;"></span>
                         </div>
                         <h4 style="margin:0 0 6px; font-size:13px; font-weight:600;">
@@ -896,8 +1092,10 @@ class LoginDesignerWP_Settings
                         </p>
                     </div>
                     <!-- Text to Theme -->
-                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; text-align:center;">
-                        <div style="background:#6b7280; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;">
+                    <div
+                        style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; text-align:center;">
+                        <div
+                            style="background:#6b7280; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;">
                             <span class="dashicons dashicons-edit" style="color:#fff; font-size:20px;"></span>
                         </div>
                         <h4 style="margin:0 0 6px; font-size:13px; font-weight:600;">
@@ -915,7 +1113,8 @@ class LoginDesignerWP_Settings
                     <?php esc_html_e('Unlock with LoginDesignerWP Pro', 'logindesignerwp'); ?>
                 </a>
                 <p class="logindesignerwp-pro-upgrade-text">
-                    <?php esc_html_e('Generate backgrounds and themes with AI', 'logindesignerwp'); ?></p>
+                    <?php esc_html_e('Generate backgrounds and themes with AI', 'logindesignerwp'); ?>
+                </p>
             </div>
         </div>
         <?php
@@ -964,7 +1163,8 @@ class LoginDesignerWP_Settings
                     <?php esc_html_e('Unlock with LoginDesignerWP Pro', 'logindesignerwp'); ?>
                 </a>
                 <p class="logindesignerwp-pro-upgrade-text">
-                    <?php esc_html_e('Create stunning glass-like form effects', 'logindesignerwp'); ?></p>
+                    <?php esc_html_e('Create stunning glass-like form effects', 'logindesignerwp'); ?>
+                </p>
             </div>
         </div>
 
@@ -1015,7 +1215,8 @@ class LoginDesignerWP_Settings
                     <?php esc_html_e('Unlock with LoginDesignerWP Pro', 'logindesignerwp'); ?>
                 </a>
                 <p class="logindesignerwp-pro-upgrade-text">
-                    <?php esc_html_e('Position and style your login form', 'logindesignerwp'); ?></p>
+                    <?php esc_html_e('Position and style your login form', 'logindesignerwp'); ?>
+                </p>
             </div>
         </div>
 
@@ -1057,7 +1258,8 @@ class LoginDesignerWP_Settings
                     <?php esc_html_e('Unlock with LoginDesignerWP Pro', 'logindesignerwp'); ?>
                 </a>
                 <p class="logindesignerwp-pro-upgrade-text">
-                    <?php esc_html_e('One-click beautiful designs', 'logindesignerwp'); ?></p>
+                    <?php esc_html_e('One-click beautiful designs', 'logindesignerwp'); ?>
+                </p>
             </div>
         </div>
 
@@ -1096,10 +1298,21 @@ class LoginDesignerWP_Settings
                     <?php esc_html_e('Unlock with LoginDesignerWP Pro', 'logindesignerwp'); ?>
                 </a>
                 <p class="logindesignerwp-pro-upgrade-text">
-                    <?php esc_html_e('Control where users go after login/logout', 'logindesignerwp'); ?></p>
+                    <?php esc_html_e('Control where users go after login/logout', 'logindesignerwp'); ?>
+                </p>
             </div>
         </div>
 
+        <!-- Social Tab -->
+        <div class="logindesignerwp-tab-content" id="tab-social">
+            <form method="post" action="options.php" id="logindesignerwp-social-settings-form">
+                <?php
+                settings_fields('logindesignerwp_settings_group');
+                $social_login = new LoginDesignerWP_Social_Login();
+                $social_login->render_settings_tab();
+                ?>
+            </form>
+        </div>
         <!-- Advanced Tools Section -->
         <div class="logindesignerwp-pro-locked">
             <div class="logindesignerwp-pro-locked-header">
@@ -1136,7 +1349,8 @@ class LoginDesignerWP_Settings
                     <?php esc_html_e('Unlock with LoginDesignerWP Pro', 'logindesignerwp'); ?>
                 </a>
                 <p class="logindesignerwp-pro-upgrade-text">
-                    <?php esc_html_e('Export settings and add custom CSS', 'logindesignerwp'); ?></p>
+                    <?php esc_html_e('Export settings and add custom CSS', 'logindesignerwp'); ?>
+                </p>
             </div>
         </div>
 

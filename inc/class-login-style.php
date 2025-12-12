@@ -93,12 +93,33 @@ class LoginDesignerWP_Login_Style
 
             $css .= "    min-height: 100vh;\n";
         } elseif ('image' === $s['background_mode'] && $bg_image_url) {
-            $css .= "    background-color: " . esc_attr($s['background_color']) . " !important;\n";
-            $css .= "    background-image: url('" . esc_url($bg_image_url) . "') !important;\n";
-            $css .= "    background-size: " . esc_attr($s['background_image_size']) . " !important;\n";
-            $css .= "    background-position: " . esc_attr($s['background_image_pos']) . " !important;\n";
-            $css .= "    background-repeat: " . esc_attr($s['background_image_repeat']) . " !important;\n";
-            $css .= "    background-attachment: fixed !important;\n";
+            $blur_amount = isset($s['background_blur']) ? intval($s['background_blur']) : 0;
+
+            if ($blur_amount > 0) {
+                // Use pseudo-element for blurred background to keep form content sharp
+                $css .= "    position: relative;\n";
+                $css .= "    background-color: " . esc_attr($s['background_color']) . " !important;\n";
+                $css .= "}\n";
+                $css .= "body.login::before {\n";
+                $css .= "    content: '';\n";
+                $css .= "    position: fixed;\n";
+                $css .= "    top: 0; left: 0; right: 0; bottom: 0;\n";
+                $css .= "    z-index: -1;\n";
+                $css .= "    background-image: url('" . esc_url($bg_image_url) . "');\n";
+                $css .= "    background-size: " . esc_attr($s['background_image_size']) . ";\n";
+                $css .= "    background-position: " . esc_attr($s['background_image_pos']) . ";\n";
+                $css .= "    background-repeat: " . esc_attr($s['background_image_repeat']) . ";\n";
+                $css .= "    filter: blur(" . $blur_amount . "px);\n";
+                $css .= "    transform: scale(1.1);\n"; // Prevent blur edges showing
+            } else {
+                // No blur - apply background directly to body
+                $css .= "    background-color: " . esc_attr($s['background_color']) . " !important;\n";
+                $css .= "    background-image: url('" . esc_url($bg_image_url) . "') !important;\n";
+                $css .= "    background-size: " . esc_attr($s['background_image_size']) . " !important;\n";
+                $css .= "    background-position: " . esc_attr($s['background_image_pos']) . " !important;\n";
+                $css .= "    background-repeat: " . esc_attr($s['background_image_repeat']) . " !important;\n";
+                $css .= "    background-attachment: fixed !important;\n";
+            }
         }
         $css .= "}\n";
 

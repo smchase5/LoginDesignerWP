@@ -16,6 +16,8 @@
         $previewButton,
         $previewLinks,
         $previewRemember,
+        $previewSocial,
+        $previewSocialBtns,
         $previewContainer;
 
     /**
@@ -31,7 +33,10 @@
         $previewInputs = $('#ldwp-preview-input-user, #ldwp-preview-input-pass');
         $previewButton = $('#ldwp-preview-button');
         $previewLinks = $('#ldwp-preview-links a');
+        $previewLinks = $('#ldwp-preview-links a');
         $previewRemember = $('.logindesignerwp-preview-remember label');
+        $previewSocial = $('.logindesignerwp-preview-social');
+        $previewSocialBtns = $('.ldwp-preview-social-btn');
     }
 
     /**
@@ -288,6 +293,13 @@
         $('select[name="logindesignerwp_settings[gradient_position]"]').on('change', function () {
             updatePreview('gradient_position', $(this).val());
         });
+
+        // Blur slider
+        $('#logindesignerwp-bg-blur').on('input', function () {
+            var val = $(this).val();
+            $(this).siblings('.logindesignerwp-range-value').text(val + 'px');
+            updatePreview('background_blur', val);
+        });
     }
 
     /**
@@ -388,6 +400,26 @@
     }
 
     /**
+     * Initialize Social Login Controls.
+     */
+    function initSocialLoginControls() {
+        // Layout
+        $('#logindesignerwp-social-layout').on('change', function () {
+            updatePreview('social_login_layout', $(this).val());
+        });
+
+        // Shape
+        $('#logindesignerwp-social-shape').on('change', function () {
+            updatePreview('social_login_shape', $(this).val());
+        });
+
+        // Style
+        $('#logindesignerwp-social-style').on('change', function () {
+            updatePreview('social_login_style', $(this).val());
+        });
+    }
+
+    /**
      * Update preview based on setting change.
      */
     function updatePreview(setting, value) {
@@ -425,6 +457,10 @@
 
             case 'background_image':
                 $previewContainer.data('bg-image', value);
+                applyBackgroundPreview();
+                break;
+
+            case 'background_blur':
                 applyBackgroundPreview();
                 break;
 
@@ -558,6 +594,25 @@
                 // Ensure background-image (logo) sits ON TOP of color. 
                 // Default WP CSS puts image in background-image. Color works fine with that.
                 break;
+
+            // Social Login
+            case 'social_login_layout':
+                if ($previewSocial.length) {
+                    $previewSocial.attr('data-layout', value);
+                }
+                break;
+
+            case 'social_login_shape':
+                if ($previewSocial.length) {
+                    $previewSocial.attr('data-shape', value);
+                }
+                break;
+
+            case 'social_login_style':
+                if ($previewSocial.length) {
+                    $previewSocial.attr('data-style', value);
+                }
+                break;
         }
     }
 
@@ -586,7 +641,8 @@
             'background-image': '',
             'background-size': '',
             'background-position': '',
-            'background-repeat': ''
+            'background-repeat': '',
+            'filter': ''
         });
 
         switch (mode) {
@@ -611,12 +667,24 @@
             case 'image':
                 $previewBg.css('background-color', bgColor);
                 if (bgImage) {
+                    var blurAmount = $('#logindesignerwp-bg-blur').val() || 0;
+                    // Use CSS custom properties for ::before pseudo-element blur
                     $previewBg.css({
-                        'background-image': 'url(' + bgImage + ')',
-                        'background-size': 'cover',
-                        'background-position': 'center',
-                        'background-repeat': 'no-repeat'
+                        '--bg-image': 'url(' + bgImage + ')',
+                        '--bg-blur': blurAmount + 'px'
                     });
+                    // Toggle class to activate blur mode
+                    if (parseInt(blurAmount) > 0) {
+                        $previewBg.addClass('has-blur');
+                    } else {
+                        $previewBg.removeClass('has-blur');
+                        $previewBg.css({
+                            'background-image': 'url(' + bgImage + ')',
+                            'background-size': 'cover',
+                            'background-position': 'center',
+                            'background-repeat': 'no-repeat'
+                        });
+                    }
                 }
                 break;
         }
@@ -662,7 +730,11 @@
             logo_padding: $('input[name="logindesignerwp_settings[logo_padding]"]').val(),
             logo_border_radius: $('input[name="logindesignerwp_settings[logo_border_radius]"]').val(),
             logo_bottom_margin: $('input[name="logindesignerwp_settings[logo_bottom_margin]"]').val(),
-            logo_background_color: $('input[name="logindesignerwp_settings[logo_background_color]"]').val()
+            logo_background_color: $('input[name="logindesignerwp_settings[logo_background_color]"]').val(),
+            social_login_layout: $('select[name="logindesignerwp_settings[social_login_layout]"]').val(),
+            social_login_shape: $('select[name="logindesignerwp_settings[social_login_shape]"]').val(),
+            social_login_style: $('select[name="logindesignerwp_settings[social_login_style]"]').val(),
+            background_blur: $('#logindesignerwp-bg-blur').val()
         };
 
         // Apply each setting
@@ -1487,6 +1559,7 @@
         initAjaxSave();
         initGlassmorphismPreview();
         initLogoControls();
+        initSocialLoginControls();
         initAIGenerator();
         initTextToTheme();
         initAISettingsSave();

@@ -1,0 +1,14 @@
+name = "logindesigner-oauth-proxy"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# Environment variables - set these in Cloudflare dashboard or use wrangler secret
+# [vars]
+# GOOGLE_CLIENT_ID = "your-client-id"
+# GOOGLE_CLIENT_SECRET = "your-client-secret" 
+# HMAC_SECRET = "random-secret-for-signing"
+
+# For production, use secrets instead:
+# wrangler secret put GOOGLE_CLIENT_ID
+# wrangler secret put GOOGLE_CLIENT_SECRET
+# wrangler secret put HMAC_SECRET

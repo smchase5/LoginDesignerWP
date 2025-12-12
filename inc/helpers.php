@@ -41,12 +41,27 @@ function logindesignerwp_get_defaults()
         'background_image_size' => 'cover',
         'background_image_pos' => 'center',
         'background_image_repeat' => 'no-repeat',
+        'background_blur' => 0,
 
         // Form container settings.
         'form_bg_color' => '#020617',
         'form_border_radius' => 12,
-        'form_border_color' => '#1f2933',
-        'form_shadow_enable' => true,
+        'form_border_color' => '#1e293b',
+        'form_shadow_enable' => 1,
+
+        // Social Login settings.
+        'google_login_enable' => 0,
+        'google_auth_mode' => 'proxy', // 'proxy' or 'custom'
+        'google_client_id' => '',
+        'google_client_secret' => '',
+        'github_login_enable' => 0,
+        'github_auth_mode' => 'proxy', // 'proxy' or 'custom'
+        'github_client_id' => '',
+        'github_client_secret' => '',
+        'social_login_layout' => 'column', // column, row
+        'social_login_shape' => 'rounded', // rounded, pill, square
+        'social_login_style' => 'branding', // branding, custom
+        'social_proxy_url' => 'https://auth.logindesigner.com', // Configurable proxy URL
 
         // Label and input settings.
         'label_text_color' => '#e5e7eb',
@@ -140,6 +155,21 @@ function logindesignerwp_sanitize_settings($input)
     // Image ID.
     $sanitized['background_image_id'] = absint($input['background_image_id'] ?? 0);
 
+    // Social Login.
+    $sanitized['google_login_enable'] = isset($input['google_login_enable']) ? 1 : 0;
+    $sanitized['google_client_id'] = sanitize_text_field($input['google_client_id'] ?? '');
+    $sanitized['google_client_secret'] = sanitize_text_field($input['google_client_secret'] ?? '');
+    $sanitized['github_login_enable'] = isset($input['github_login_enable']) ? 1 : 0;
+    $sanitized['github_client_id'] = sanitize_text_field($input['github_client_id'] ?? '');
+    $sanitized['github_login_enable'] = isset($input['github_login_enable']) ? 1 : 0;
+    $sanitized['github_client_id'] = sanitize_text_field($input['github_client_id'] ?? '');
+    $sanitized['github_client_secret'] = sanitize_text_field($input['github_client_secret'] ?? '');
+
+    // Social Login Design.
+    $sanitized['social_login_layout'] = in_array($input['social_login_layout'] ?? '', array('column', 'row'), true) ? $input['social_login_layout'] : $defaults['social_login_layout'];
+    $sanitized['social_login_shape'] = in_array($input['social_login_shape'] ?? '', array('rounded', 'pill', 'square'), true) ? $input['social_login_shape'] : $defaults['social_login_shape'];
+    $sanitized['social_login_style'] = in_array($input['social_login_style'] ?? '', array('branding', 'custom'), true) ? $input['social_login_style'] : $defaults['social_login_style'];
+
     // Image size.
     $sanitized['background_image_size'] = in_array($input['background_image_size'] ?? '', array('cover', 'contain', 'auto'), true)
         ? $input['background_image_size']
@@ -155,6 +185,9 @@ function logindesignerwp_sanitize_settings($input)
     $sanitized['background_image_repeat'] = in_array($input['background_image_repeat'] ?? '', array('no-repeat', 'repeat', 'repeat-x', 'repeat-y'), true)
         ? $input['background_image_repeat']
         : $defaults['background_image_repeat'];
+
+    // Background blur (0-20).
+    $sanitized['background_blur'] = max(0, min(20, absint($input['background_blur'] ?? $defaults['background_blur'])));
 
     // Gradient settings.
     $sanitized['gradient_type'] = in_array($input['gradient_type'] ?? '', array('linear', 'radial', 'mesh'), true)

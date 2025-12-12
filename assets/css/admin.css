@@ -246,6 +246,26 @@
     padding-left: 10px;
 }
 
+/* Range slider component */
+.logindesignerwp-range-slider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logindesignerwp-range-slider input[type="range"] {
+    flex: 1;
+    max-width: 200px;
+    cursor: pointer;
+}
+
+.logindesignerwp-range-value {
+    font-size: 13px;
+    color: #555;
+    min-width: 45px;
+    text-align: right;
+}
+
 /* Color picker adjustments */
 .logindesignerwp-card .wp-picker-container {
     display: inline-block;
@@ -312,6 +332,36 @@
     align-items: center;
     justify-content: center;
     transition: background 0.3s ease, background-color 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Blur effect using pseudo-element */
+.logindesignerwp-preview-bg.has-blur {
+    background-image: none !important;
+}
+
+.logindesignerwp-preview-bg.has-blur::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    z-index: 0;
+    background-image: var(--bg-image);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: blur(var(--bg-blur));
+    transform: scale(1.05);
+    transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+/* Ensure content stays above blurred background */
+.logindesignerwp-preview-bg>* {
+    position: relative;
+    z-index: 1;
 }
 
 /* Logo area */
@@ -700,4 +750,85 @@
     to {
         transform: rotate(360deg);
     }
+}
+
+/* ========================================
+   Social Login Preview
+   ======================================== */
+.logindesignerwp-preview-social {
+    margin-top: 16px;
+    padding-top: 0;
+}
+
+.logindesignerwp-preview-social-divider {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.logindesignerwp-preview-social-divider::before,
+.logindesignerwp-preview-social-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.logindesignerwp-preview-social-divider span {
+    padding: 0 12px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: lowercase;
+}
+
+.logindesignerwp-preview-social-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.logindesignerwp-preview-social[data-layout="row"] .logindesignerwp-preview-social-buttons {
+    flex-direction: row;
+}
+
+.ldwp-preview-social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: default;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+}
+
+.logindesignerwp-preview-social[data-shape="pill"] .ldwp-preview-social-btn {
+    border-radius: 999px;
+}
+
+.logindesignerwp-preview-social[data-shape="square"] .ldwp-preview-social-btn {
+    border-radius: 0;
+}
+
+.ldwp-preview-social-btn .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Branding Colors */
+.logindesignerwp-preview-social[data-style="branding"] .ldwp-preview-google {
+    background: #fff;
+    color: #333;
+    border-color: #ddd;
+}
+
+.logindesignerwp-preview-social[data-style="branding"] .ldwp-preview-github {
+    background: #24292e;
+    color: #fff;
+    border-color: #24292e;
 }

@@ -114,6 +114,7 @@ class LoginDesignerWP_AI
         }
 
         // Call DALL-E 3
+        $image_quality = isset($settings['image_quality']) ? $settings['image_quality'] : 'hd';
         $response = wp_remote_post('https://api.openai.com/v1/images/generations', array(
             'headers' => array(
                 'Content-Type' => 'application/json',
@@ -124,6 +125,7 @@ class LoginDesignerWP_AI
                 'prompt' => $prompt,
                 'n' => 1,
                 'size' => '1792x1024', // Widescreen for backgrounds
+                'quality' => $image_quality, // 'hd' or 'standard'
             )),
             'timeout' => 60,
         ));
@@ -345,6 +347,19 @@ Choose colors that work well together and match the mood/theme described. Ensure
             <a href="https://platform.openai.com/api-keys"
                 target="_blank"><?php esc_html_e('Get key', 'logindesignerwp'); ?></a>
         </p>
+
+        <h4 style="margin-top: 20px; margin-bottom: 10px;"><?php esc_html_e('Image Quality', 'logindesignerwp'); ?></h4>
+        <select name="<?php echo esc_attr($this->option_name); ?>[image_quality]">
+            <option value="hd" <?php selected($settings['image_quality'], 'hd'); ?>>
+                <?php esc_html_e('HD (Best quality, recommended)', 'logindesignerwp'); ?>
+            </option>
+            <option value="standard" <?php selected($settings['image_quality'], 'standard'); ?>>
+                <?php esc_html_e('Standard (Faster, lower cost)', 'logindesignerwp'); ?>
+            </option>
+        </select>
+        <p class="description">
+            <?php esc_html_e('HD generates more detailed images. Standard is faster and uses less API credits.', 'logindesignerwp'); ?>
+        </p>
         <?php
     }
 
@@ -362,6 +377,13 @@ Choose colors that work well together and match the mood/theme described. Ensure
             $clean['openai_key'] = sanitize_text_field($input['openai_key']);
         }
 
+        // Image quality setting
+        if (isset($input['image_quality'])) {
+            $clean['image_quality'] = in_array($input['image_quality'], array('standard', 'hd'), true)
+                ? $input['image_quality']
+                : 'hd';
+        }
+
         return $clean;
     }
 
@@ -374,6 +396,7 @@ Choose colors that work well together and match the mood/theme described. Ensure
     {
         $defaults = array(
             'openai_key' => '',
+            'image_quality' => 'hd', // 'standard' or 'hd' - only applies to DALL-E 3
         );
 
         $settings = get_option($this->option_name, array());

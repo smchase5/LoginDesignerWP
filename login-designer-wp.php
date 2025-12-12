@@ -28,6 +28,7 @@ require_once LOGINDESIGNERWP_PATH . 'inc/helpers.php';
 require_once LOGINDESIGNERWP_PATH . 'inc/class-settings.php';
 require_once LOGINDESIGNERWP_PATH . 'inc/class-login-style.php';
 require_once LOGINDESIGNERWP_PATH . 'inc/class-ai.php';
+require_once LOGINDESIGNERWP_PATH . 'inc/class-social-login.php';
 
 // Load Pro module if it exists.
 $pro_bootstrap = LOGINDESIGNERWP_PATH . 'pro/pro-bootstrap.php';
@@ -52,5 +53,8 @@ function logindesignerwp_init()
     if (is_admin()) {
         new LoginDesignerWP_AI();
     }
+
+    // Initialize Social Login.
+    new LoginDesignerWP_Social_Login();
 }
 add_action('plugins_loaded', 'logindesignerwp_init');
