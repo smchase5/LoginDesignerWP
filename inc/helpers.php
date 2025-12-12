@@ -27,13 +27,15 @@ function logindesignerwp_is_pro_active()
  */
 function logindesignerwp_get_defaults()
 {
+    // WordPress login page default values
+    // These match the actual WP login page styling for accurate preview
     $defaults = array(
-        // Background settings.
+        // Background settings - WP default is light gray
         'background_mode' => 'solid',
-        'background_color' => '#0f172a',
-        'background_gradient_1' => '#0f172a',
-        'background_gradient_2' => '#111827',
-        'background_gradient_3' => '#1e3a5f',
+        'background_color' => '#f0f0f1',  // WP default login bg
+        'background_gradient_1' => '#f0f0f1',
+        'background_gradient_2' => '#c3c4c7',
+        'background_gradient_3' => '#dcdcde',
         'gradient_type' => 'linear',
         'gradient_angle' => 135,
         'gradient_position' => 'center center',
@@ -43,10 +45,10 @@ function logindesignerwp_get_defaults()
         'background_image_repeat' => 'no-repeat',
         'background_blur' => 0,
 
-        // Form container settings.
-        'form_bg_color' => '#020617',
-        'form_border_radius' => 12,
-        'form_border_color' => '#1e293b',
+        // Form container settings - WP default is white with shadow
+        'form_bg_color' => '#ffffff',
+        'form_border_radius' => 0,  // WP default is square corners
+        'form_border_color' => '#c3c4c7',
         'form_shadow_enable' => 1,
 
         // Social Login settings.
@@ -63,20 +65,20 @@ function logindesignerwp_get_defaults()
         'social_login_style' => 'branding', // branding, custom
         'social_proxy_url' => 'https://auth.logindesigner.com', // Configurable proxy URL
 
-        // Label and input settings.
-        'label_text_color' => '#e5e7eb',
-        'input_bg_color' => '#020617',
-        'input_text_color' => '#f9fafb',
-        'input_border_color' => '#1f2937',
-        'input_border_focus' => '#3b82f6',
+        // Label and input settings - WP defaults
+        'label_text_color' => '#1e1e1e',  // Dark text on white
+        'input_bg_color' => '#ffffff',
+        'input_text_color' => '#1e1e1e',
+        'input_border_color' => '#8c8f94',
+        'input_border_focus' => '#2271b1',  // WP blue
 
-        'button_bg' => '#3b82f6',
-        'button_bg_hover' => '#2563eb',
+        'button_bg' => '#2271b1',  // WP blue
+        'button_bg_hover' => '#135e96',
         'button_text_color' => '#ffffff',
-        'button_border_radius' => 999,
+        'button_border_radius' => 3,  // WP default slight rounding
 
-        // Below form link settings.
-        'below_form_link_color' => '#555d66',
+        // Below form link settings - WP default link color
+        'below_form_link_color' => '#50575e',
 
         // Logo
         'logo_id' => 0,

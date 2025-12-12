@@ -35,6 +35,7 @@ class LoginDesignerWP_AI
         add_action('logindesignerwp_render_ai_tools_section', array($this, 'render_ai_tools_card'));
         add_action('wp_ajax_logindesignerwp_generate_background', array($this, 'ajax_generate_background'));
         add_action('wp_ajax_logindesignerwp_generate_theme', array($this, 'ajax_generate_theme'));
+        add_action('wp_ajax_logindesignerwp_generate_theme_from_bg', array($this, 'ajax_generate_theme_from_background'));
         add_action('wp_ajax_logindesignerwp_save_ai_settings', array($this, 'ajax_save_settings'));
     }
 
@@ -223,7 +224,11 @@ class LoginDesignerWP_AI
         }
 
         // System prompt for theme generation
-        $system_prompt = 'You are a professional UI designer. Generate a login page theme based on the user\'s description. Return ONLY valid JSON with these exact keys (no explanation, just JSON):
+        $system_prompt = 'You are a professional UI designer. Generate a login page theme based on the user\'s description. 
+
+IMPORTANT: The "link_color" is for links that appear OUTSIDE the form, directly on the page background (like "Lost your password?" and "Back to site"). It MUST contrast with the "background_color", NOT the form_background. For dark backgrounds use light link colors, for light backgrounds use dark link colors.
+
+Return ONLY valid JSON with these exact keys (no explanation, just JSON):
 {
   "background_color": "#hexcolor",
   "background_mode": "color",
@@ -238,7 +243,7 @@ class LoginDesignerWP_AI
   "button_color": "#hexcolor",
   "button_text_color": "#hexcolor",
   "button_border_radius": number (0-30),
-  "link_color": "#hexcolor"
+  "link_color": "#hexcolor (MUST contrast with background_color)"
 }
 Choose colors that work well together and match the mood/theme described. Ensure good contrast for accessibility.';
 
@@ -330,6 +335,209 @@ Choose colors that work well together and match the mood/theme described. Ensure
         wp_send_json_success(array(
             'theme' => $valid_theme,
             'message' => __('Theme generated successfully! Preview updated.', 'logindesignerwp'),
+        ));
+    }
+
+    /**
+     * AJAX: Generate theme from current background settings.
+     */
+    public function ajax_generate_theme_from_background()
+    {
+        check_ajax_referer('logindesignerwp_save_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(__('Permission denied.', 'logindesignerwp'));
+        }
+
+        $ai_settings = $this->get_settings();
+        $api_key = $ai_settings['openai_key'];
+
+        if (empty($api_key)) {
+            wp_send_json_error(__('OpenAI API Key is missing. Please configure it in the Settings tab.', 'logindesignerwp'));
+        }
+
+        // Get current design settings
+        $settings = logindesignerwp_get_settings();
+        $bg_mode = $settings['background_mode'];
+
+        // Build context based on background mode
+        $context = '';
+        $use_vision = false;
+        $image_url = '';
+
+        switch ($bg_mode) {
+            case 'color':
+                $context = sprintf(
+                    'The login page has a solid background color: %s',
+                    $settings['background_color']
+                );
+                break;
+
+            case 'gradient':
+                $gradient_type = $settings['gradient_type'] ?? 'linear';
+                $context = sprintf(
+                    'The login page has a %s gradient background going from %s to %s',
+                    $gradient_type,
+                    $settings['background_gradient_1'],
+                    $settings['background_gradient_2']
+                );
+                if (!empty($settings['background_gradient_3'])) {
+                    $context .= ' with a third color: ' . $settings['background_gradient_3'];
+                }
+                break;
+
+            case 'image':
+                if (!empty($settings['background_image_id'])) {
+                    // Get the file path for the image (not URL) so we can read it locally
+                    $image_path = get_attached_file($settings['background_image_id']);
+
+                    if ($image_path && file_exists($image_path)) {
+                        // Read the image and convert to base64
+                        $image_data = file_get_contents($image_path);
+                        $image_mime = wp_check_filetype($image_path)['type'] ?? 'image/jpeg';
+                        $image_base64 = base64_encode($image_data);
+                        $image_data_url = 'data:' . $image_mime . ';base64,' . $image_base64;
+
+                        $use_vision = true;
+                        $context = 'Analyze this login page background image and suggest colors that complement it.';
+                    } else {
+                        wp_send_json_error(__('Could not load the background image file. Please try again.', 'logindesignerwp'));
+                    }
+                } else {
+                    wp_send_json_error(__('No background image is set. Please select a background first.', 'logindesignerwp'));
+                }
+                break;
+
+            default:
+                wp_send_json_error(__('Please set a background (color, gradient, or image) first.', 'logindesignerwp'));
+        }
+
+        // System prompt for theme generation
+        $system_prompt = 'You are a professional UI/UX designer specializing in login page design. Based on the background described or shown, generate a cohesive color scheme for the login form elements.
+
+Consider:
+- Contrast and readability (WCAG accessibility guidelines)
+- Visual harmony with the background
+- Modern, professional appearance
+- Form should be clearly visible against the background
+- IMPORTANT: The "below_form_link_color" is for links that appear OUTSIDE the form, directly on the page background. It must have high contrast with the PAGE BACKGROUND, not the form background. For dark backgrounds use light colors, for light backgrounds use dark colors.
+
+Return ONLY valid JSON with these exact keys (no markdown, no explanation, just JSON):
+{
+  "form_bg_color": "#hexcolor",
+  "form_border_color": "#hexcolor",
+  "button_bg": "#hexcolor",
+  "button_text_color": "#hexcolor",
+  "label_text_color": "#hexcolor",
+  "input_bg_color": "#hexcolor",
+  "input_text_color": "#hexcolor",
+  "input_border_color": "#hexcolor",
+  "below_form_link_color": "#hexcolor (MUST contrast with PAGE background)",
+  "form_shadow": true or false,
+  "explanation": "Brief 1-2 sentence explanation of why these colors work well"
+}';
+
+        // Prepare API request
+        if ($use_vision) {
+            // Use GPT-4 Vision for image analysis
+            $messages = array(
+                array('role' => 'system', 'content' => $system_prompt),
+                array(
+                    'role' => 'user',
+                    'content' => array(
+                        array('type' => 'text', 'text' => $context),
+                        array(
+                            'type' => 'image_url',
+                            'image_url' => array('url' => $image_data_url)
+                        )
+                    )
+                )
+            );
+            $model = 'gpt-4o'; // GPT-4o has vision capabilities
+        } else {
+            // Use standard GPT-4 for color/gradient
+            $messages = array(
+                array('role' => 'system', 'content' => $system_prompt),
+                array('role' => 'user', 'content' => $context)
+            );
+            $model = 'gpt-4o-mini';
+        }
+
+        $response = wp_remote_post('https://api.openai.com/v1/chat/completions', array(
+            'headers' => array(
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $api_key,
+            ),
+            'body' => json_encode(array(
+                'model' => $model,
+                'messages' => $messages,
+                'temperature' => 0.7,
+                'max_tokens' => 500,
+            )),
+            'timeout' => 60,
+        ));
+
+        if (is_wp_error($response)) {
+            wp_send_json_error($response->get_error_message());
+        }
+
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+
+        if (isset($data['error'])) {
+            wp_send_json_error($data['error']['message']);
+        }
+
+        if (empty($data['choices'][0]['message']['content'])) {
+            wp_send_json_error(__('No response from AI.', 'logindesignerwp'));
+        }
+
+        $ai_content = $data['choices'][0]['message']['content'];
+
+        // Parse JSON from response (handle markdown code blocks)
+        $ai_content = preg_replace('/```json\s*/', '', $ai_content);
+        $ai_content = preg_replace('/```\s*/', '', $ai_content);
+        $ai_content = trim($ai_content);
+
+        $theme = json_decode($ai_content, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($theme)) {
+            wp_send_json_error(__('Failed to parse AI response. Please try again.', 'logindesignerwp'));
+        }
+
+        // Validate and sanitize theme values
+        $valid_theme = array();
+        $color_keys = array(
+            'form_bg_color',
+            'form_border_color',
+            'button_bg',
+            'button_text_color',
+            'label_text_color',
+            'input_bg_color',
+            'input_text_color',
+            'input_border_color',
+            'below_form_link_color'
+        );
+
+        foreach ($color_keys as $key) {
+            if (isset($theme[$key]) && preg_match('/^#[a-fA-F0-9]{6}$/', $theme[$key])) {
+                $valid_theme[$key] = $theme[$key];
+            }
+        }
+
+        // Boolean values
+        if (isset($theme['form_shadow'])) {
+            $valid_theme['form_shadow'] = (bool) $theme['form_shadow'];
+        }
+
+        // Get explanation
+        $explanation = isset($theme['explanation']) ? sanitize_text_field($theme['explanation']) : '';
+
+        wp_send_json_success(array(
+            'theme' => $valid_theme,
+            'explanation' => $explanation,
+            'background_mode' => $bg_mode,
+            'message' => __('Theme generated based on your background!', 'logindesignerwp'),
         ));
     }
 
@@ -550,21 +758,23 @@ Choose colors that work well together and match the mood/theme described. Ensure
                         </button>
                     </div>
 
-                    <!-- Magic Import (Coming Soon) -->
+                    <!-- Smart Theme from Background -->
                     <div class="logindesignerwp-ai-tool-card"
-                        style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:20px; text-align:center; opacity:0.7;">
+                        style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:20px; text-align:center;">
                         <div
-                            style="background:#6b7280; width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
-                            <span class="dashicons dashicons-upload" style="color:#fff; font-size:24px;"></span>
+                            style="background:#9333ea; width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+                            <span class="dashicons dashicons-art" style="color:#fff; font-size:24px;"></span>
                         </div>
                         <h4 style="margin:0 0 8px; font-size:14px; font-weight:600;">
-                            <?php esc_html_e('Magic Import', 'logindesignerwp'); ?>
+                            <?php esc_html_e('Smart Theme', 'logindesignerwp'); ?>
                         </h4>
                         <p style="margin:0 0 16px; font-size:12px; color:#64748b;">
-                            <?php esc_html_e('Upload an image to extract colors', 'logindesignerwp'); ?>
+                            <?php esc_html_e('Match form colors to your background', 'logindesignerwp'); ?>
                         </p>
-                        <span class="button button-secondary" disabled
-                            style="pointer-events:none;"><?php esc_html_e('Coming Soon', 'logindesignerwp'); ?></span>
+                        <button type="button" class="button button-primary logindesignerwp-ai-smart-theme" <?php echo !$has_api_key ? 'disabled' : ''; ?>>
+                            <span class="dashicons dashicons-art" style="line-height:1.4; margin-right:4px;"></span>
+                            <?php esc_html_e('Analyze', 'logindesignerwp'); ?>
+                        </button>
                     </div>
 
                     <!-- Text to Theme -->

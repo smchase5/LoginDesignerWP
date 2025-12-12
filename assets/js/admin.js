@@ -551,7 +551,7 @@
                         wpLogo.show();
                     } else {
                         // Re-add WP logo if it was removed
-                        $previewLogo.find('a').html('<svg id="ldwp-preview-logo-wp" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.52 122.523" width="84" height="84"><path fill="#fff" d="M8.708 61.26c0 20.802 12.089 38.779 29.619 47.298L13.258 39.872a52.354 52.354 0 00-4.55 21.388zM96.74 58.608c0-6.495-2.333-10.993-4.334-14.494-2.664-4.329-5.161-7.995-5.161-12.324 0-4.831 3.664-9.328 8.825-9.328.233 0 .454.029.681.042-9.35-8.566-21.807-13.796-35.489-13.796-18.36 0-34.513 9.42-43.91 23.688 1.233.037 2.395.063 3.382.063 5.497 0 14.006-.667 14.006-.667 2.833-.167 3.167 3.994.337 4.329 0 0-2.847.335-6.015.501L48.2 93.547l11.501-34.493-8.188-22.434c-2.83-.166-5.511-.501-5.511-.501-2.832-.166-2.5-4.496.332-4.329 0 0 8.679.667 13.843.667 5.496 0 14.006-.667 14.006-.667 2.835-.167 3.168 3.994.337 4.329 0 0-2.853.335-6.015.501l18.992 56.494 5.242-17.517c2.272-7.269 4.001-12.49 4.001-16.989z"/><path fill="#fff" d="M62.184 65.857l-15.768 45.819a52.552 52.552 0 0032.29-.838 4.693 4.693 0 01-.37-.712L62.184 65.857zM107.376 36.046a42.584 42.584 0 01.358 5.708c0 5.651-1.057 12.002-4.229 19.94l-16.973 49.082c16.519-9.627 27.618-27.628 27.618-48.18 0-9.762-2.499-18.929-6.774-26.55z"/><path fill="#fff" d="M61.262 0C27.483 0 0 27.481 0 61.26c0 33.783 27.483 61.263 61.262 61.263 33.778 0 61.265-27.48 61.265-61.263C122.526 27.481 95.04 0 61.262 0zm0 119.715c-32.23 0-58.453-26.223-58.453-58.455 0-32.23 26.222-58.451 58.453-58.451 32.229 0 58.45 26.221 58.45 58.451 0 32.232-26.221 58.455-58.45 58.455z"/></svg>');
+                        $previewLogo.find('a').html('<svg id="ldwp-preview-logo-wp" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.52 122.523" width="84" height="84"><path fill="#2271b1" d="M8.708 61.26c0 20.802 12.089 38.779 29.619 47.298L13.258 39.872a52.354 52.354 0 00-4.55 21.388zM96.74 58.608c0-6.495-2.333-10.993-4.334-14.494-2.664-4.329-5.161-7.995-5.161-12.324 0-4.831 3.664-9.328 8.825-9.328.233 0 .454.029.681.042-9.35-8.566-21.807-13.796-35.489-13.796-18.36 0-34.513 9.42-43.91 23.688 1.233.037 2.395.063 3.382.063 5.497 0 14.006-.667 14.006-.667 2.833-.167 3.167 3.994.337 4.329 0 0-2.847.335-6.015.501L48.2 93.547l11.501-34.493-8.188-22.434c-2.83-.166-5.511-.501-5.511-.501-2.832-.166-2.5-4.496.332-4.329 0 0 8.679.667 13.843.667 5.496 0 14.006-.667 14.006-.667 2.835-.167 3.168 3.994.337 4.329 0 0-2.853.335-6.015.501l18.992 56.494 5.242-17.517c2.272-7.269 4.001-12.49 4.001-16.989z"/><path fill="#2271b1" d="M62.184 65.857l-15.768 45.819a52.552 52.552 0 0032.29-.838 4.693 4.693 0 01-.37-.712L62.184 65.857zM107.376 36.046a42.584 42.584 0 01.358 5.708c0 5.651-1.057 12.002-4.229 19.94l-16.973 49.082c16.519-9.627 27.618-27.628 27.618-48.18 0-9.762-2.499-18.929-6.774-26.55z"/><path fill="#2271b1" d="M61.262 0C27.483 0 0 27.481 0 61.26c0 33.783 27.483 61.263 61.262 61.263 33.778 0 61.265-27.48 61.265-61.263C122.526 27.481 95.04 0 61.262 0zm0 119.715c-32.23 0-58.453-26.223-58.453-58.455 0-32.23 26.222-58.451 58.453-58.451 32.229 0 58.45 26.221 58.45 58.451 0 32.232-26.221 58.455-58.45 58.455z"/></svg>');
                     }
                 }
                 break;
@@ -634,7 +634,8 @@
         var gradAngle = $('input[name="logindesignerwp_settings[gradient_angle]"]').val() || '135';
         var gradPos = $('select[name="logindesignerwp_settings[gradient_position]"]').val() || 'center center';
 
-        // Reset background
+        // Reset background - ALWAYS remove blur class and clear CSS vars for non-image modes
+        $previewBg.removeClass('has-blur');
         $previewBg.css({
             'background': '',
             'background-color': '',
@@ -642,7 +643,9 @@
             'background-size': '',
             'background-position': '',
             'background-repeat': '',
-            'filter': ''
+            'filter': '',
+            '--bg-image': '',
+            '--bg-blur': ''
         });
 
         switch (mode) {
@@ -761,7 +764,7 @@
         }
 
         var adminBarHeight = $('#wpadminbar').length ? $('#wpadminbar').outerHeight() : 32;
-        var topOffset = adminBarHeight + 20; // Admin bar + padding
+        var topOffset = 50; // Fixed offset from top when sticky
 
         function updateStickyPosition() {
             var columnTop = $previewColumn.offset().top;
@@ -776,14 +779,14 @@
 
             if (scrollTop > stickyStart && scrollTop < stickyEnd) {
                 // Sticky state - fixed to top
-                $previewSticky.css({
+                $previewSticky.addClass('is-sticky').css({
                     'position': 'fixed',
                     'top': topOffset + 'px',
                     'width': columnWidth + 'px'
                 });
             } else if (scrollTop >= stickyEnd) {
                 // Bottom state - stick to bottom of container
-                $previewSticky.css({
+                $previewSticky.removeClass('is-sticky').css({
                     'position': 'absolute',
                     'top': (settingsHeight - previewHeight) + 'px',
                     'width': columnWidth + 'px'
@@ -791,7 +794,7 @@
                 $previewColumn.css('position', 'relative');
             } else {
                 // Normal state - at top
-                $previewSticky.css({
+                $previewSticky.removeClass('is-sticky').css({
                     'position': 'relative',
                     'top': '0',
                     'width': '100%'
@@ -808,6 +811,55 @@
 
         // Initial call
         updateStickyPosition();
+    }
+
+    /**
+     * Initialize Reset to Defaults button.
+     */
+    function initResetDefaults() {
+        $(document).on('click', '.logindesignerwp-reset-defaults', function (e) {
+            e.preventDefault();
+
+            // Show confirmation dialog
+            var confirmed = confirm(
+                'Are you sure you want to reset all login page settings to WordPress defaults?\n\n' +
+                'This will remove all your customizations and cannot be undone.'
+            );
+
+            if (!confirmed) return;
+
+            var $button = $(this);
+            var originalText = $button.html();
+
+            // Set loading state
+            $button.prop('disabled', true);
+            $button.html('<span class="dashicons dashicons-update dashicons-spin" style="line-height: 1.4; margin-right: 4px;"></span> Resetting...');
+
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'logindesignerwp_reset_defaults',
+                    nonce: logindesignerwp_ajax.nonce
+                },
+                success: function (response) {
+                    if (response.success) {
+                        // Show success message and reload page
+                        alert('Settings have been reset to WordPress defaults. The page will now reload.');
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + (response.data || 'Failed to reset settings.'));
+                        $button.prop('disabled', false);
+                        $button.html(originalText);
+                    }
+                },
+                error: function () {
+                    alert('Request failed. Please check your connection and try again.');
+                    $button.prop('disabled', false);
+                    $button.html(originalText);
+                }
+            });
+        });
     }
 
     /**
@@ -844,33 +896,97 @@
                     prompt: prompt
                 },
                 success: function (response) {
+                    $status.remove();
 
                     if (response.success) {
                         var data = response.data;
-                        var $input = $container.find('.logindesignerwp-image-id');
-                        var $preview = $container.find('.logindesignerwp-image-preview');
-                        var $removeBtn = $container.find('.logindesignerwp-remove-image');
 
-                        // Update inputs
-                        $input.val(data.id);
-                        $preview.find('img').attr('src', data.medium_url);
-                        $preview.show();
-                        $removeBtn.show();
+                        // Remove any existing AI notification in preview
+                        $('.logindesignerwp-ai-preview-notification').remove();
 
-                        // Update live preview
-                        updatePreview('background_image', data.url);
+                        // Show confirmation dialog in preview box with image thumbnail
+                        var $previewBox = $previewContainer;
+                        var $confirmDialog = $('<div class="logindesignerwp-ai-preview-notification" style="position: absolute; top: 10px; left: 10px; right: 10px; z-index: 100; padding: 16px; background: linear-gradient(135deg, #2271b1, #135e96); color: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(34, 113, 177, 0.4);">' +
+                            '<div style="display: flex; gap: 16px; align-items: flex-start;">' +
+                            '<div style="flex-shrink: 0; width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 2px 8px rgba(0,0,0,0.2);">' +
+                            '<img src="' + data.medium_url + '" style="width: 100%; height: 100%; object-fit: cover;">' +
+                            '</div>' +
+                            '<div style="flex: 1;">' +
+                            '<div style="font-weight: 600; font-size: 14px; margin-bottom: 6px;">✨ Image Generated!</div>' +
+                            '<div style="font-size: 12px; opacity: 0.9; margin-bottom: 12px;">Use this as your login page background?</div>' +
+                            '<div style="display: flex; gap: 8px;">' +
+                            '<button type="button" class="ai-bg-apply" style="background: #22c55e; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 13px; transition: all 0.2s;">Yes, Apply It</button>' +
+                            '<button type="button" class="ai-bg-cancel" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 13px; transition: all 0.2s;">No Thanks</button>' +
+                            '</div>' +
+                            '</div>' +
+                            '<button type="button" class="ai-bg-close" style="background: none; border: none; color: white; cursor: pointer; padding: 0; font-size: 20px; line-height: 1; opacity: 0.7;">×</button>' +
+                            '</div>' +
+                            '</div>');
 
-                        // Show success toast
-                        showAIToast('success', data.message || 'Image generated successfully!');
+                        $previewBox.css('position', 'relative').prepend($confirmDialog);
+
+                        // Handle "Yes, Apply It" click
+                        $confirmDialog.find('.ai-bg-apply').on('click', function () {
+                            // Use explicit selectors to find the background image fields
+                            var $bgSection = $('.logindesignerwp-bg-image');
+                            var $input = $('input[name="logindesignerwp_settings[background_image_id]"]');
+                            var $preview = $bgSection.find('.logindesignerwp-image-preview');
+                            var $removeBtn = $bgSection.find('.logindesignerwp-remove-image');
+
+                            // Update the hidden input with the new image ID
+                            $input.val(data.id);
+
+                            // Update the preview thumbnail
+                            $preview.find('img').attr('src', data.medium_url);
+                            $preview.show();
+                            $removeBtn.show();
+
+                            // Switch to image mode and show the image options
+                            $('input[name="logindesignerwp_settings[background_mode]"][value="image"]').prop('checked', true).trigger('change');
+
+                            // Update live preview
+                            $previewContainer.data('bg-image', data.url);
+                            updatePreview('background_image', data.url);
+
+                            // Show success message
+                            $confirmDialog.fadeOut(200, function () {
+                                $(this).remove();
+
+                                // Show brief success toast in preview
+                                var $success = $('<div class="logindesignerwp-ai-preview-notification" style="position: absolute; top: 10px; left: 10px; right: 10px; z-index: 100; padding: 12px 16px; background: #22c55e; color: #fff; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-size: 13px; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);"><span class="dashicons dashicons-yes-alt"></span><span>Background applied! Click Save to keep it.</span></div>');
+                                $previewBox.prepend($success);
+
+                                setTimeout(function () {
+                                    $success.fadeOut(300, function () { $(this).remove(); });
+                                }, 4000);
+                            });
+                        });
+
+                        // Handle "No Thanks" click
+                        $confirmDialog.find('.ai-bg-cancel, .ai-bg-close').on('click', function () {
+                            $confirmDialog.fadeOut(200, function () { $(this).remove(); });
+                        });
+
                     } else {
-                        showAIToast('error', response.data || 'Failed to generate image.');
+                        // Show inline error message
+                        var $error = $('<div class="logindesignerwp-ai-status" style="margin-top: 10px; padding: 12px 16px; background: #dc2626; color: #fff; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 13px;"><span class="dashicons dashicons-warning"></span><span>' + (response.data || 'Failed to generate image.') + '</span></div>');
+                        $button.after($error);
+
+                        setTimeout(function () {
+                            $error.fadeOut(300, function () { $(this).remove(); });
+                        }, 4000);
                     }
                 },
                 error: function () {
-                    showAIToast('error', 'Request failed. Please check your connection and try again.');
+                    $status.remove();
+                    var $error = $('<div class="logindesignerwp-ai-status" style="margin-top: 10px; padding: 12px 16px; background: #dc2626; color: #fff; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 13px;"><span class="dashicons dashicons-warning"></span><span>Request failed. Please check your connection.</span></div>');
+                    $button.after($error);
+
+                    setTimeout(function () {
+                        $error.fadeOut(300, function () { $(this).remove(); });
+                    }, 4000);
                 },
                 complete: function () {
-                    $status.remove();
                     $button.prop('disabled', false);
                     $icon.removeClass('dashicons-update dashicons-spin').addClass('dashicons-superhero');
                 }
@@ -912,6 +1028,8 @@
                     prompt: prompt
                 },
                 success: function (response) {
+                    $status.remove();
+
                     if (response.success) {
                         var theme = response.data.theme;
 
@@ -932,22 +1050,182 @@
                         // Apply theme to form fields and preview
                         applyAITheme(theme);
 
-                        // Show success toast
-                        showAIToast('success', response.data.message || 'Theme applied! Click Save to keep it.');
+                        // Show success banner in the preview box
+                        // Remove any existing AI notification in preview
+                        $('.logindesignerwp-ai-preview-notification').remove();
+
+                        var successMsg = response.data.message || 'Theme applied! Click Save to keep it.';
+                        var $previewBox = $previewContainer;
+                        var $success = $('<div class="logindesignerwp-ai-preview-notification" style="position: absolute; top: 10px; left: 10px; right: 10px; z-index: 100; padding: 12px 16px; background: #22c55e; color: #fff; border-radius: 8px; display: flex; align-items: flex-start; gap: 10px; font-size: 13px; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);"><span class="dashicons dashicons-yes-alt" style="flex-shrink: 0; margin-top: 2px;"></span><span style="flex: 1;">' + successMsg + '</span><button type="button" style="background: none; border: none; color: white; cursor: pointer; padding: 0; font-size: 18px; line-height: 1;" onclick="jQuery(this).parent().fadeOut(200, function(){jQuery(this).remove();})">×</button></div>');
+                        $previewBox.css('position', 'relative').prepend($success);
+
+                        setTimeout(function () {
+                            $success.fadeOut(300, function () { $(this).remove(); });
+                        }, 5000);
                     } else {
-                        showAIToast('error', response.data || 'Failed to generate theme.');
+                        var $error = $('<div class="logindesignerwp-ai-status" style="margin-top: 10px; padding: 12px 16px; background: #dc2626; color: #fff; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 13px;"><span class="dashicons dashicons-warning"></span><span>' + (response.data || 'Failed to generate theme.') + '</span></div>');
+                        $button.after($error);
+
+                        setTimeout(function () {
+                            $error.fadeOut(300, function () { $(this).remove(); });
+                        }, 4000);
                     }
                 },
                 error: function () {
-                    showAIToast('error', 'Request failed. Please check your connection and try again.');
+                    $status.remove();
+                    var $error = $('<div class="logindesignerwp-ai-status" style="margin-top: 10px; padding: 12px 16px; background: #dc2626; color: #fff; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 13px;"><span class="dashicons dashicons-warning"></span><span>Request failed. Please check your connection.</span></div>');
+                    $button.after($error);
+
+                    setTimeout(function () {
+                        $error.fadeOut(300, function () { $(this).remove(); });
+                    }, 4000);
                 },
                 complete: function () {
-                    $status.remove();
                     $button.prop('disabled', false);
                     $icon.removeClass('dashicons-update dashicons-spin').addClass('dashicons-edit');
                 }
             });
         });
+    }
+
+    /**
+     * Initialize Smart Theme (from current background) AI functionality.
+     */
+    function initSmartTheme() {
+        $(document).on('click', '.logindesignerwp-ai-smart-theme', function (e) {
+            e.preventDefault();
+
+            var $button = $(this);
+            var $icon = $button.find('.dashicons');
+            var $card = $button.closest('.logindesignerwp-ai-tool-card');
+
+            // Remove any existing status message
+            $card.find('.logindesignerwp-ai-status').remove();
+
+            // Create inline status message
+            var $status = $('<div class="logindesignerwp-ai-status" style="margin-top: 10px; padding: 12px 16px; background: #9333ea; color: #fff; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 13px; box-shadow: 0 2px 8px rgba(147, 51, 234, 0.3);"><span class="dashicons dashicons-update" style="animation: rotation 1s infinite linear;"></span><span class="status-text">Analyzing your background...</span></div>');
+            $button.after($status);
+
+            // Set button loading state
+            $button.prop('disabled', true);
+            $icon.removeClass('dashicons-art').addClass('dashicons-update dashicons-spin');
+
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'logindesignerwp_generate_theme_from_bg',
+                    nonce: logindesignerwp_ajax.nonce
+                },
+                success: function (response) {
+                    $status.remove();
+
+                    if (response.success) {
+                        var theme = response.data.theme;
+                        var explanation = response.data.explanation || '';
+
+                        // Apply theme to form fields and preview
+                        applySmartTheme(theme);
+
+                        // Show success banner in the preview box
+                        var successMsg = response.data.message || 'Theme applied!';
+                        if (explanation) {
+                            successMsg += ' 💡 ' + explanation;
+                        }
+
+                        // Remove any existing AI notification in preview
+                        $('.logindesignerwp-ai-preview-notification').remove();
+
+                        // Add notification to the preview box
+                        var $previewBox = $previewContainer;
+                        var $success = $('<div class="logindesignerwp-ai-preview-notification" style="position: absolute; top: 10px; left: 10px; right: 10px; z-index: 100; padding: 12px 16px; background: #22c55e; color: #fff; border-radius: 8px; display: flex; align-items: flex-start; gap: 10px; font-size: 13px; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);"><span class="dashicons dashicons-yes-alt" style="flex-shrink: 0; margin-top: 2px;"></span><span style="flex: 1;">' + successMsg + '</span><button type="button" style="background: none; border: none; color: white; cursor: pointer; padding: 0; font-size: 18px; line-height: 1;" onclick="jQuery(this).parent().fadeOut(200, function(){jQuery(this).remove();})">×</button></div>');
+                        $previewBox.css('position', 'relative').prepend($success);
+
+                        // Auto-dismiss after 6 seconds (longer for reading explanation)
+                        setTimeout(function () {
+                            $success.fadeOut(300, function () { $(this).remove(); });
+                        }, 6000);
+                    } else {
+                        // Show inline error message
+                        var $error = $('<div class="logindesignerwp-ai-status" style="margin-top: 10px; padding: 12px 16px; background: #dc2626; color: #fff; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 13px; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);"><span class="dashicons dashicons-warning"></span><span>' + (response.data || 'Failed to analyze background.') + '</span></div>');
+                        $button.after($error);
+
+                        setTimeout(function () {
+                            $error.fadeOut(300, function () { $(this).remove(); });
+                        }, 4000);
+                    }
+                },
+                error: function () {
+                    $status.remove();
+                    var $error = $('<div class="logindesignerwp-ai-status" style="margin-top: 10px; padding: 12px 16px; background: #dc2626; color: #fff; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 13px;"><span class="dashicons dashicons-warning"></span><span>Request failed. Please check your connection.</span></div>');
+                    $button.after($error);
+
+                    setTimeout(function () {
+                        $error.fadeOut(300, function () { $(this).remove(); });
+                    }, 4000);
+                },
+                complete: function () {
+                    $button.prop('disabled', false);
+                    $icon.removeClass('dashicons-update dashicons-spin').addClass('dashicons-art');
+                }
+            });
+        });
+    }
+
+    /**
+     * Apply Smart Theme (from background analysis) to form fields and live preview.
+     * @param {Object} theme - Theme settings object
+     */
+    function applySmartTheme(theme) {
+        // Map theme keys from the new API response to form field names
+        var fieldMappings = {
+            'form_bg_color': { field: 'form_bg_color', preview: 'form_bg_color' },
+            'form_border_color': { field: 'form_border_color', preview: 'form_border_color' },
+            'button_bg': { field: 'button_bg', preview: 'button_bg' },
+            'button_text_color': { field: 'button_text_color', preview: 'button_text_color' },
+            'label_text_color': { field: 'label_text_color', preview: 'label_text_color' },
+            'input_bg_color': { field: 'input_bg_color', preview: 'input_bg_color' },
+            'input_text_color': { field: 'input_text_color', preview: 'input_text_color' },
+            'input_border_color': { field: 'input_border_color', preview: 'input_border_color' },
+            'below_form_link_color': { field: 'below_form_link_color', preview: 'below_form_link_color' }
+        };
+
+        // Apply each theme value
+        $.each(theme, function (key, value) {
+            var mapping = fieldMappings[key];
+            if (!mapping) return;
+
+            // Update form field
+            var $field = $('[name="logindesignerwp_settings[' + mapping.field + ']"]');
+            if ($field.length) {
+                $field.val(value);
+
+                // Trigger color picker update if it's a color field
+                if (typeof value === 'string' && value.startsWith('#')) {
+                    try {
+                        $field.wpColorPicker('color', value);
+                    } catch (e) {
+                        console.log('Color picker update skipped for ' + key);
+                    }
+                }
+            }
+
+            // Update live preview
+            if (typeof updatePreview === 'function') {
+                updatePreview(mapping.preview, value);
+            }
+        });
+
+        // Handle form shadow
+        if (typeof theme.form_shadow !== 'undefined') {
+            var $shadowField = $('[name="logindesignerwp_settings[form_shadow_enable]"]');
+            if ($shadowField.length) {
+                $shadowField.prop('checked', theme.form_shadow);
+                if (typeof updatePreview === 'function') {
+                    updatePreview('form_shadow_enable', theme.form_shadow ? '1' : '');
+                }
+            }
+        }
     }
 
     /**
@@ -1562,7 +1840,9 @@
         initSocialLoginControls();
         initAIGenerator();
         initTextToTheme();
+        initSmartTheme();
         initAISettingsSave();
+        initResetDefaults();
 
         // Apply initial preview after a short delay to ensure color pickers are ready
         setTimeout(applyInitialPreview, 100);

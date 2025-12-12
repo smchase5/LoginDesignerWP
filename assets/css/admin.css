@@ -36,6 +36,10 @@
     /* JS handles sticky positioning - see initStickyPreview() */
 }
 
+.logindesignerwp-preview-sticky.is-sticky {
+    margin-top: 10px;
+}
+
 /* Tab Navigation */
 .logindesignerwp-tabs {
     display: flex;
@@ -98,7 +102,7 @@
     flex: 1;
     min-width: 0;
     position: sticky;
-    top: 32px;
+    top: 50px;
     /* Account for WP admin bar */
     align-self: flex-start;
 }
@@ -366,7 +370,8 @@
 
 /* Logo area */
 .logindesignerwp-preview-logo {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
+    /* WP default logo margin */
     text-align: center;
 }
 
@@ -422,31 +427,41 @@
     outline: none;
 }
 
-/* Remember me */
+/* Remember me + submit row (WP default layout) */
+.logindesignerwp-preview-submit-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+}
+
 .logindesignerwp-preview-remember {
-    margin-bottom: 16px;
+    margin-bottom: 0;
 }
 
 .logindesignerwp-preview-remember label {
-    font-size: 12px;
+    font-size: 13px;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     transition: color 0.3s ease;
 }
 
 .logindesignerwp-preview-remember input {
     margin: 0;
+    width: 16px;
+    height: 16px;
 }
 
-/* Button */
+/* Button - WP default style (not full width) */
 #ldwp-preview-button {
-    width: 100%;
-    padding: 8px 16px;
-    font-size: 14px;
-    font-weight: 500;
+    padding: 4px 12px;
+    font-size: 13px;
+    font-weight: 400;
     cursor: default;
     border: none;
+    line-height: 2;
+    min-height: 30px;
     transition: all 0.3s ease;
 }
 
