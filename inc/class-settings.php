@@ -347,23 +347,22 @@ class LoginDesignerWP_Settings
 
                             <div class="ldwp-wizard-extra-settings"
                                 style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
-                                <h4 style="margin: 0 0 16px 0;"><?php esc_html_e('Form Styling', 'logindesignerwp'); ?></h4>
-                                <div class="ldwp-wizard-slider-row"
+                                <h4 style="margin: 0 0 16px 0;"><?php esc_html_e('Additional Styling', 'logindesignerwp'); ?>
+                                </h4>
+                                <div class="ldwp-wizard-color-row"
                                     style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
                                     <label
-                                        style="min-width: 120px;"><?php esc_html_e('Border Radius', 'logindesignerwp'); ?></label>
+                                        style="min-width: 120px;"><?php esc_html_e('Logo Background', 'logindesignerwp'); ?></label>
+                                    <input type="text" class="ldwp-wizard-color" name="wizard_logo_bg_color"
+                                        data-setting="logo_bg_color" value="transparent">
+                                </div>
+                                <div class="ldwp-wizard-slider-row" style="display: flex; align-items: center; gap: 16px;">
+                                    <label
+                                        style="min-width: 120px;"><?php esc_html_e('Form Corners', 'logindesignerwp'); ?></label>
                                     <input type="range" class="ldwp-wizard-slider" name="wizard_form_border_radius"
                                         data-setting="form_border_radius" min="0" max="30" value="4" style="flex: 1;">
                                     <span class="ldwp-wizard-slider-value"
                                         style="min-width: 40px; text-align: right;">4px</span>
-                                </div>
-                                <div class="ldwp-wizard-slider-row" style="display: flex; align-items: center; gap: 16px;">
-                                    <label
-                                        style="min-width: 120px;"><?php esc_html_e('Button Radius', 'logindesignerwp'); ?></label>
-                                    <input type="range" class="ldwp-wizard-slider" name="wizard_button_border_radius"
-                                        data-setting="button_border_radius" min="0" max="30" value="3" style="flex: 1;">
-                                    <span class="ldwp-wizard-slider-value"
-                                        style="min-width: 40px; text-align: right;">3px</span>
                                 </div>
                             </div>
 

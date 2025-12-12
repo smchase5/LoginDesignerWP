@@ -28,7 +28,8 @@
             button_text_color: '#ffffff',
             button_border_radius: 3,
             logo_id: 0,
-            logo_url: ''
+            logo_url: '',
+            logo_bg_color: 'transparent'
         }
     };
 
