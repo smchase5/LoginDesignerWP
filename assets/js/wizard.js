@@ -327,6 +327,27 @@
             $applyBtn.hide();
         }
 
+        // Update logo preview background when on step 4 (Logo & Branding)
+        if (wizard.currentStep === 4) {
+            var s = wizard.settings;
+            var bgStyle = s.background_mode === 'gradient'
+                ? 'linear-gradient(135deg, ' + s.background_gradient_1 + ', ' + s.background_gradient_2 + ')'
+                : s.background_color;
+
+            // Apply background to the logo section to show realistic preview
+            $('.ldwp-wizard-logo-section').css({
+                'background': bgStyle,
+                'padding': '30px',
+                'border-radius': '12px'
+            });
+
+            // Style the logo upload area with the forms settings
+            $('.ldwp-wizard-logo-upload').css({
+                'background': s.form_bg_color,
+                'border-radius': (s.form_border_radius || 4) + 'px'
+            });
+        }
+
         // Update preview on final step
         if (wizard.currentStep === wizard.totalSteps) {
             updateFinalPreview();
@@ -482,9 +503,19 @@
         $('input[name="logindesignerwp_settings[button_text_color]"]').val(s.button_text_color).trigger('change');
         $('input[name="logindesignerwp_settings[button_border_radius]"]').val(s.button_border_radius).trigger('input');
 
-        // Handle logo if set
+        // Handle logo settings
         if (s.logo_id) {
             $('input[name="logindesignerwp_settings[logo_id]"]').val(s.logo_id);
+            // Update the logo preview in the main form if it exists
+            var $logoPreview = $('.logindesignerwp-logo-preview');
+            if ($logoPreview.length && s.logo_url) {
+                $logoPreview.html('<img src="' + s.logo_url + '" style="max-width: 200px;">');
+            }
+        }
+
+        // Apply logo background color if there's an input for it
+        if (s.logo_bg_color && s.logo_bg_color !== 'transparent') {
+            $('input[name="logindesignerwp_settings[logo_bg_color]"]').val(s.logo_bg_color).trigger('change');
         }
 
         // Update color pickers
