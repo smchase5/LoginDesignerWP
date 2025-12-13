@@ -244,25 +244,7 @@ class LoginDesignerWP_Social_Login
      */
     private function handle_google_login()
     {
-        $auth_mode = $this->settings['google_auth_mode'] ?? 'proxy';
-
-        if ($auth_mode === 'proxy') {
-            // Proxy Mode: Redirect to LoginDesigner OAuth proxy
-            $proxy_url = $this->settings['social_proxy_url'] ?? 'https://auth.logindesigner.com';
-            $state = wp_create_nonce('ldwp_proxy_google');
-
-            $params = array(
-                'site' => site_url(),
-                'callback' => site_url('wp-login.php?action=ldwp_proxy_callback&provider=google'),
-                'state' => $state,
-            );
-
-            $url = trailingslashit($proxy_url) . 'google?' . http_build_query($params);
-            wp_redirect($url);
-            exit;
-        }
-
-        // Custom Mode: Direct OAuth with user's credentials
+        // Direct OAuth with user's credentials
         if (empty($this->settings['google_client_id'])) {
             wp_die('Google Client ID not configured.');
         }
@@ -591,91 +573,30 @@ class LoginDesignerWP_Social_Login
                                 </td>
                             </tr>
                             <tr>
-                                <th scope="row"><?php esc_html_e('Setup Mode', 'logindesignerwp'); ?></th>
+                                <th scope="row"><?php esc_html_e('Client ID', 'logindesignerwp'); ?></th>
                                 <td>
-                                    <fieldset>
-                                        <label style="display: block; margin-bottom: 8px;">
-                                            <input type="radio" name="logindesignerwp_settings[google_auth_mode]" value="proxy"
-                                                <?php checked($this->settings['google_auth_mode'], 'proxy'); ?>>
-                                            <strong><?php esc_html_e('Quick Setup', 'logindesignerwp'); ?></strong>
-                                            <span style="color: #666;"> —
-                                                <?php esc_html_e('No credentials needed. Uses LoginDesigner proxy.', 'logindesignerwp'); ?></span>
-                                        </label>
-                                        <label style="display: block;">
-                                            <input type="radio" name="logindesignerwp_settings[google_auth_mode]" value="custom"
-                                                <?php checked($this->settings['google_auth_mode'], 'custom'); ?>>
-                                            <strong><?php esc_html_e('Use My Own Credentials', 'logindesignerwp'); ?></strong>
-                                            <span style="color: #666;"> —
-                                                <?php esc_html_e('For advanced users with their own OAuth app.', 'logindesignerwp'); ?></span>
-                                        </label>
-                                    </fieldset>
+                                    <input type="text" class="regular-text" name="logindesignerwp_settings[google_client_id]"
+                                        value="<?php echo esc_attr($this->settings['google_client_id']); ?>">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><?php esc_html_e('Client Secret', 'logindesignerwp'); ?></th>
+                                <td>
+                                    <input type="password" class="regular-text"
+                                        name="logindesignerwp_settings[google_client_secret]"
+                                        value="<?php echo esc_attr($this->settings['google_client_secret']); ?>">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><?php esc_html_e('Redirect URI', 'logindesignerwp'); ?></th>
+                                <td>
+                                    <code><?php echo esc_url(site_url('wp-login.php') . '?action=ldwp_social_callback&provider=google'); ?></code>
+                                    <p class="description">
+                                        <?php esc_html_e('Add this URL to your OAuth Consent Screen settings in Google Cloud Console.', 'logindesignerwp'); ?>
+                                    </p>
                                 </td>
                             </tr>
                         </table>
-
-                        <!-- Quick Setup Success Message -->
-                        <div class="ldwp-google-proxy-mode" <?php echo $this->settings['google_auth_mode'] !== 'proxy' ? 'style="display:none;"' : ''; ?>>
-                            <div
-                                style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; padding: 12px 16px; margin: 16px 0; display: flex; align-items: center; gap: 10px;">
-                                <span class="dashicons dashicons-yes-alt" style="color: #28a745; font-size: 24px;"></span>
-                                <div>
-                                    <strong
-                                        style="color: #155724;"><?php esc_html_e('Google Login is ready!', 'logindesignerwp'); ?></strong>
-                                    <p style="margin: 4px 0 0; color: #155724; font-size: 13px;">
-                                        <?php esc_html_e('No configuration needed. Just enable and save.', 'logindesignerwp'); ?>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Custom Credentials Fields -->
-                        <div class="ldwp-google-custom-mode" <?php echo $this->settings['google_auth_mode'] !== 'custom' ? 'style="display:none;"' : ''; ?>>
-                            <table class="form-table">
-                                <tr>
-                                    <th scope="row"><?php esc_html_e('Client ID', 'logindesignerwp'); ?></th>
-                                    <td>
-                                        <input type="text" class="regular-text"
-                                            name="logindesignerwp_settings[google_client_id]"
-                                            value="<?php echo esc_attr($this->settings['google_client_id']); ?>">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row"><?php esc_html_e('Client Secret', 'logindesignerwp'); ?></th>
-                                    <td>
-                                        <input type="password" class="regular-text"
-                                            name="logindesignerwp_settings[google_client_secret]"
-                                            value="<?php echo esc_attr($this->settings['google_client_secret']); ?>">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row"><?php esc_html_e('Redirect URI', 'logindesignerwp'); ?></th>
-                                    <td>
-                                        <code><?php echo esc_url(site_url('wp-login.php') . '?action=ldwp_social_callback&provider=google'); ?></code>
-                                        <p class="description">
-                                            <?php esc_html_e('Add this URL to your OAuth Consent Screen settings in Google Cloud Console.', 'logindesignerwp'); ?>
-                                        </p>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-
-                        <script>
-                            (function () {
-                                document.querySelectorAll('input[name="logindesignerwp_settings[google_auth_mode]"]').forEach(function (radio) {
-                                    radio.addEventListener('change', function () {
-                                        var proxyDiv = document.querySelector('.ldwp-google-proxy-mode');
-                                        var customDiv = document.querySelector('.ldwp-google-custom-mode');
-                                        if (this.value === 'proxy') {
-                                            proxyDiv.style.display = 'block';
-                                            customDiv.style.display = 'none';
-                                        } else {
-                                            proxyDiv.style.display = 'none';
-                                            customDiv.style.display = 'block';
-                                        }
-                                    });
-                                });
-                            })();
-                        </script>
                     </div>
                 </div>
 

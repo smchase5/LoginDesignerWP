@@ -53,17 +53,14 @@ function logindesignerwp_get_defaults()
 
         // Social Login settings.
         'google_login_enable' => 0,
-        'google_auth_mode' => 'proxy', // 'proxy' or 'custom'
         'google_client_id' => '',
         'google_client_secret' => '',
         'github_login_enable' => 0,
-        'github_auth_mode' => 'proxy', // 'proxy' or 'custom'
         'github_client_id' => '',
         'github_client_secret' => '',
         'social_login_layout' => 'column', // column, row
         'social_login_shape' => 'rounded', // rounded, pill, square
         'social_login_style' => 'branding', // branding, custom
-        'social_proxy_url' => 'https://auth.logindesigner.com', // Configurable proxy URL
 
         // Label and input settings - WP defaults
         'label_text_color' => '#1e1e1e',  // Dark text on white
@@ -161,12 +158,10 @@ function logindesignerwp_sanitize_settings($input)
     $sanitized['google_login_enable'] = !empty($input['google_login_enable']) ? 1 : 0;
     $sanitized['google_client_id'] = sanitize_text_field($input['google_client_id'] ?? '');
     $sanitized['google_client_secret'] = sanitize_text_field($input['google_client_secret'] ?? '');
-    $sanitized['google_auth_mode'] = in_array($input['google_auth_mode'] ?? '', array('proxy', 'custom'), true) ? $input['google_auth_mode'] : $defaults['google_auth_mode'];
 
     $sanitized['github_login_enable'] = !empty($input['github_login_enable']) ? 1 : 0;
     $sanitized['github_client_id'] = sanitize_text_field($input['github_client_id'] ?? '');
     $sanitized['github_client_secret'] = sanitize_text_field($input['github_client_secret'] ?? '');
-    $sanitized['github_auth_mode'] = in_array($input['github_auth_mode'] ?? '', array('proxy', 'custom'), true) ? $input['github_auth_mode'] : $defaults['github_auth_mode'];
 
     // Social Login Design.
     $sanitized['social_login_layout'] = in_array($input['social_login_layout'] ?? '', array('column', 'row'), true) ? $input['social_login_layout'] : $defaults['social_login_layout'];
