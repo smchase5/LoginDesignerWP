@@ -4,10 +4,21 @@
  * Light styling for the settings page.
  */
 
+/* Loading state - prevents content shift by hiding until JS runs */
+.logindesignerwp-wrap {
+    opacity: 1;
+    transition: opacity 0.15s ease-out;
+}
+
+.logindesignerwp-wrap.is-loading {
+    opacity: 0;
+}
+
 /* Wrap container - full width, no max-width constraint */
 .logindesignerwp-wrap .description {
     margin-bottom: 20px;
 }
+
 
 .logindesignerwp-wrap>.description {
     margin-bottom: 24px;

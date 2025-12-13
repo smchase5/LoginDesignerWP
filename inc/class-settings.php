@@ -228,11 +228,18 @@ class LoginDesignerWP_Settings
     {
         $settings = logindesignerwp_get_settings();
 
+        // Determine active tab from cookie (set by JS) for server-side rendering
+        $valid_tabs = array('design', 'settings', 'social');
+        $active_tab = 'design'; // default
+        if (isset($_COOKIE['ldwp_active_tab']) && in_array($_COOKIE['ldwp_active_tab'], $valid_tabs, true)) {
+            $active_tab = sanitize_text_field($_COOKIE['ldwp_active_tab']);
+        }
+
         // Get image URLs for preview.
         $bg_image_url = $settings['background_image_id'] ? wp_get_attachment_image_url($settings['background_image_id'], 'full') : '';
         $logo_url = $settings['logo_id'] ? wp_get_attachment_image_url($settings['logo_id'], 'medium') : '';
         ?>
-        <div class="wrap logindesignerwp-wrap">
+        <div class="wrap logindesignerwp-wrap is-loading">
             <div class="logindesignerwp-header-row"
                 style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
                 <div>
@@ -609,22 +616,26 @@ class LoginDesignerWP_Settings
 
                     <!-- Tab Navigation -->
                     <nav class="logindesignerwp-tabs">
-                        <a href="#" class="logindesignerwp-tab active" data-tab="design">
+                        <a href="#" class="logindesignerwp-tab<?php echo $active_tab === 'design' ? ' active' : ''; ?>"
+                            data-tab="design">
                             <span class="dashicons dashicons-art"></span>
                             <?php esc_html_e('Design', 'logindesignerwp'); ?>
                         </a>
-                        <a href="#" class="logindesignerwp-tab" data-tab="settings">
+                        <a href="#" class="logindesignerwp-tab<?php echo $active_tab === 'settings' ? ' active' : ''; ?>"
+                            data-tab="settings">
                             <span class="dashicons dashicons-admin-generic"></span>
                             <?php esc_html_e('Settings', 'logindesignerwp'); ?>
                         </a>
-                        <a href="#" class="logindesignerwp-tab" data-tab="social">
+                        <a href="#" class="logindesignerwp-tab<?php echo $active_tab === 'social' ? ' active' : ''; ?>"
+                            data-tab="social">
                             <span class="dashicons dashicons-share"></span>
                             <?php esc_html_e('Social', 'logindesignerwp'); ?>
                         </a>
                     </nav>
 
                     <!-- Design Tab -->
-                    <div class="logindesignerwp-tab-content active" id="tab-design">
+                    <div class="logindesignerwp-tab-content<?php echo $active_tab === 'design' ? ' active' : ''; ?>"
+                        id="tab-design" <?php echo $active_tab !== 'design' ? ' style="display:none"' : ''; ?>>
                         <div class="logindesignerwp-design-layout">
                             <!-- Settings Column -->
                             <div class="logindesignerwp-design-settings">
@@ -801,7 +812,8 @@ class LoginDesignerWP_Settings
                     </div>
 
                     <!-- Settings Tab -->
-                    <div class="logindesignerwp-tab-content" id="tab-settings">
+                    <div class="logindesignerwp-tab-content<?php echo $active_tab === 'settings' ? ' active' : ''; ?>"
+                        id="tab-settings" <?php echo $active_tab !== 'settings' ? ' style="display:none"' : ''; ?>>
                         <?php
                         // Allow Pro to render license field.
                         do_action('logindesignerwp_render_settings_tab');
@@ -858,7 +870,8 @@ class LoginDesignerWP_Settings
                     <!-- End Settings Tab -->
 
                     <!-- Social Tab -->
-                    <div class="logindesignerwp-tab-content" id="tab-social">
+                    <div class="logindesignerwp-tab-content<?php echo $active_tab === 'social' ? ' active' : ''; ?>"
+                        id="tab-social" <?php echo $active_tab !== 'social' ? ' style="display:none"' : ''; ?>>
                         <form method="post" action="options.php" id="logindesignerwp-social-settings-form">
                             <?php
                             // Render Social Settings

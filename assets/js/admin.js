@@ -1646,18 +1646,20 @@
     function initTabs() {
         var $tabs = $('.logindesignerwp-tab');
         var $contents = $('.logindesignerwp-tab-content');
+        var $wrap = $('.logindesignerwp-wrap');
 
-        // Restore last active tab
+        // Remove loading state to reveal content with fade
+        // Use requestAnimationFrame to ensure CSS transition works
+        requestAnimationFrame(function () {
+            $wrap.removeClass('is-loading');
+        });
+
+        // Sync localStorage with cookie if they differ (cookie is source of truth for PHP)
         var lastTab = localStorage.getItem('ldwp_active_tab');
-        if (lastTab) {
-            $tabs.removeClass('active');
-            $contents.removeClass('active').hide(); // Force hide all first
-            $('.logindesignerwp-tab[data-tab="' + lastTab + '"]').addClass('active');
-            $('#tab-' + lastTab).addClass('active').show(); // Force show target
-        } else {
-            // Default to first tab (Design) if no storage
-            $contents.hide();
-            $('#tab-design').show();
+        var cookieTab = getCookie('ldwp_active_tab');
+        if (lastTab && lastTab !== cookieTab) {
+            // Update cookie to match localStorage
+            setCookie('ldwp_active_tab', lastTab, 365);
         }
 
         // Handle tab clicks
@@ -1673,10 +1675,39 @@
             $tab.addClass('active');
             $('#tab-' + tabId).addClass('active').show(); // Force show
 
-            // Save to localStorage
+            // Save to localStorage AND cookie (for PHP server-side rendering)
             localStorage.setItem('ldwp_active_tab', tabId);
+            setCookie('ldwp_active_tab', tabId, 365);
         });
     }
+
+    /**
+     * Set a cookie.
+     */
+    function setCookie(name, value, days) {
+        var expires = '';
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = '; expires=' + date.toUTCString();
+        }
+        document.cookie = name + '=' + (value || '') + expires + '; path=/';
+    }
+
+    /**
+     * Get a cookie value.
+     */
+    function getCookie(name) {
+        var nameEQ = name + '=';
+        var ca = document.cookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+
 
     /**
      * Initialize collapsible settings sections.
