@@ -214,18 +214,20 @@
         // Logo upload
         $(document).on('click', '.ldwp-wizard-logo-upload-btn', uploadLogo);
 
-        // Slider inputs for border radius
-        $(document).on('input', '.ldwp-wizard-slider', function () {
-            var $slider = $(this);
-            var value = $slider.val();
-            var setting = $slider.data('setting');
+        // Corner selector clicks
+        $(document).on('click', '.ldwp-corner-option', function () {
+            var $option = $(this);
+            var $selector = $option.closest('.ldwp-corner-selector');
+            var setting = $selector.data('setting');
+            var value = parseInt($option.data('value'), 10);
 
-            // Update display value
-            $slider.siblings('.ldwp-wizard-slider-value').text(value + 'px');
+            // Update active state
+            $selector.find('.ldwp-corner-option').removeClass('is-active');
+            $option.addClass('is-active');
 
             // Update wizard state
             if (setting && wizard.settings.hasOwnProperty(setting)) {
-                wizard.settings[setting] = parseInt(value, 10);
+                wizard.settings[setting] = value;
             }
         });
 
@@ -452,6 +454,16 @@
             'border': '1px solid ' + (s.form_border_color || '#c3c4c7'),
             'padding': '24px'
         });
+
+        // Update logo - show uploaded logo or default WP icon (logo is now outside the form box)
+        var $logoContainer = $container.find('.preview-logo');
+        $logoContainer.css('text-align', 'center'); // Ensure container is centered
+        if (s.logo_url) {
+            $logoContainer.html('<img src="' + s.logo_url + '" style="max-width: 84px; max-height: 84px; display: inline-block;">');
+        } else {
+            // Default WordPress-style icon
+            $logoContainer.html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.52 122.523" width="84" height="84" style="display: inline-block;"><circle fill="#2271b1" cx="61.26" cy="61.26" r="61.26"/><path fill="#fff" d="M61.262 8.805c28.939 0 52.455 23.516 52.455 52.455s-23.516 52.455-52.455 52.455S8.807 90.199 8.807 61.26 32.323 8.805 61.262 8.805z"/><path fill="#2271b1" d="M61.262 14.805c25.663 0 46.455 20.792 46.455 46.455s-20.792 46.455-46.455 46.455S14.807 86.923 14.807 61.26s20.792-46.455 46.455-46.455z"/></svg>');
+        }
 
         // Style labels
         $preview.find('.preview-label').css('color', s.label_text_color);

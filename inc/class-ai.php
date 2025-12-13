@@ -630,8 +630,7 @@ Return ONLY valid JSON with these exact keys (no markdown, no explanation, just 
                 <span class="logindesignerwp-card-title-wrapper">
                     <span class="dashicons dashicons-superhero"></span>
                     <?php esc_html_e('AI Configuration', 'logindesignerwp'); ?>
-                    <span
-                        style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 2px 8px; border-radius: 100px; font-size: 10px; margin-left: 10px; vertical-align: middle; text-transform: uppercase;"><?php esc_html_e('Pro', 'logindesignerwp'); ?></span>
+                    <span class="logindesignerwp-pro-badge"><?php esc_html_e('Pro', 'logindesignerwp'); ?></span>
                     <?php if (!empty($settings['openai_key'])): ?>
                         <span
                             style="background: #22c55e; color: white; padding: 2px 8px; border-radius: 100px; font-size: 10px; margin-left: 5px; vertical-align: middle; text-transform: uppercase;"><?php esc_html_e('Active', 'logindesignerwp'); ?></span>

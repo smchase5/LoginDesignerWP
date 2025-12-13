@@ -41,6 +41,9 @@ class LoginDesignerWP_Pro_Features
         // Pro CSS generation.
         add_action('logindesignerwp_login_styles', array($this, 'output_pro_css'));
 
+        // Custom message on login page.
+        add_action('login_footer', array($this, 'render_custom_message'));
+
         // Redirect handlers.
         add_filter('login_redirect', array($this, 'handle_login_redirect'), 10, 3);
         add_action('wp_logout', array($this, 'handle_logout_redirect'));
@@ -167,6 +170,20 @@ class LoginDesignerWP_Pro_Features
         if (!empty($settings['redirect_logout'])) {
             wp_redirect($settings['redirect_logout']);
             exit;
+        }
+    }
+
+    /**
+     * Render custom message on login page.
+     */
+    public function render_custom_message()
+    {
+        $settings = logindesignerwp_get_settings();
+        if (!empty($settings['custom_message'])) {
+            $link_color = !empty($settings['below_form_link_color']) ? $settings['below_form_link_color'] : '#50575e';
+            echo '<div id="logindesignerwp-custom-message" style="color: ' . esc_attr($link_color) . '; text-align: center; margin-top: 16px; font-size: 13px;">';
+            echo wp_kses_post(nl2br($settings['custom_message']));
+            echo '</div>';
         }
     }
 

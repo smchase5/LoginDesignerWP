@@ -569,3 +569,51 @@
         text-align: center;
     }
 }
+
+/* Corner Selector Component */
+.ldwp-corner-selector {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.ldwp-corner-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: #fff;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 70px;
+}
+
+.ldwp-corner-option:hover {
+    border-color: #9ca3af;
+    background: #f9fafb;
+}
+
+.ldwp-corner-option.is-active {
+    border-color: #2271b1;
+    background: #f0f7ff;
+}
+
+.ldwp-corner-preview {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #2271b1 0%, #135e96 100%);
+    transition: border-radius 0.2s ease;
+}
+
+.ldwp-corner-option span {
+    font-size: 12px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.ldwp-corner-option.is-active span {
+    color: #2271b1;
+}

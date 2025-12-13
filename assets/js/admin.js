@@ -21,6 +21,125 @@
         $previewContainer;
 
     /**
+     * Preview Status Indicator Module
+     * Manages "Live" / "Updating..." state with debounced burst detection
+     * Also tracks "Saved" / "Unsaved" state
+     */
+    var PreviewStatus = (function () {
+        var $badge = null;
+        var $container = null;
+        var $statusText = null;
+        var $saveStatus = null;
+        var isUpdating = false;
+        var isSaved = true;
+        var isInitializing = true; // Flag to skip markUnsaved during initial load
+        var fallbackTimer = null;
+        var doneDebounceTimer = null;
+
+        var config = {
+            fallbackMs: 700,
+            pulseClass: 'is-pulsing',
+            updatingClass: 'is-updating',
+            unsavedClass: 'is-unsaved',
+            liveText: 'Preview',
+            updatingText: 'Syncing…',
+            savedText: 'Saved',
+            unsavedText: 'Unsaved'
+        };
+
+        function init() {
+            $badge = $('#ldwp-preview-status');
+            $container = $('.logindesignerwp-preview-container');
+            $statusText = $badge.find('.ldwp-status-text');
+            $saveStatus = $badge.find('.ldwp-save-status');
+        }
+
+        function startUpdate() {
+            if (!$badge || !$badge.length) return;
+
+            if (!isUpdating) {
+                isUpdating = true;
+                $badge.addClass(config.updatingClass);
+                $statusText.text(config.updatingText);
+                triggerPulse();
+            }
+
+            // Mark as unsaved when changes are made (but not during initial load)
+            if (!isInitializing) {
+                markUnsaved();
+            }
+
+            // Clear existing timers
+            clearTimeout(doneDebounceTimer);
+            clearTimeout(fallbackTimer);
+
+            // Set fallback to auto-complete after idle period
+            fallbackTimer = setTimeout(function () {
+                doneUpdate();
+            }, config.fallbackMs);
+        }
+
+        function doneUpdate() {
+            if (!$badge || !$badge.length) return;
+
+            clearTimeout(doneDebounceTimer);
+            clearTimeout(fallbackTimer);
+
+            // Small debounce to prevent flicker
+            doneDebounceTimer = setTimeout(function () {
+                isUpdating = false;
+                $badge.removeClass(config.updatingClass);
+                $statusText.text(config.liveText);
+            }, 50);
+        }
+
+        function triggerPulse() {
+            if (!$container || !$container.length) return;
+
+            // Remove class to reset animation
+            $container.removeClass(config.pulseClass);
+            // Force reflow to restart animation
+            void $container[0].offsetWidth;
+            // Re-add to trigger animation
+            $container.addClass(config.pulseClass);
+
+            // Remove after animation completes
+            setTimeout(function () {
+                $container.removeClass(config.pulseClass);
+            }, 250);
+        }
+
+        function markUnsaved() {
+            if (!$badge || !$badge.length) return;
+            if (isSaved) {
+                isSaved = false;
+                $badge.addClass(config.unsavedClass);
+                $saveStatus.text(config.unsavedText);
+            }
+        }
+
+        function markSaved() {
+            if (!$badge || !$badge.length) return;
+            isSaved = true;
+            $badge.removeClass(config.unsavedClass);
+            $saveStatus.text(config.savedText);
+        }
+
+        function finishInitializing() {
+            isInitializing = false;
+        }
+
+        return {
+            init: init,
+            start: startUpdate,
+            done: doneUpdate,
+            markUnsaved: markUnsaved,
+            markSaved: markSaved,
+            finishInitializing: finishInitializing
+        };
+    })();
+
+    /**
      * Initialize preview element cache.
      */
     function initPreviewCache() {
@@ -361,6 +480,44 @@
         $('input[name="logindesignerwp_settings[logo_width]"]').on('input change', function () {
             updatePreview('logo_width', $(this).val());
         });
+
+        // Custom message preview update
+        $('textarea[name="logindesignerwp_settings[custom_message]"]').on('input change', function () {
+            var value = $(this).val();
+            var $customMsg = $('#ldwp-preview-custom-message');
+            if (value.trim()) {
+                $customMsg.text(value).show();
+            } else {
+                $customMsg.hide();
+            }
+            PreviewStatus.startUpdate();
+            setTimeout(function () { PreviewStatus.endUpdate(); }, 100);
+        });
+    }
+
+    /**
+     * Initialize corner selector click handlers.
+     */
+    function initCornerSelectors() {
+        // Click handler for corner options
+        $(document).on('click', '.ldwp-corner-option', function () {
+            var $option = $(this);
+            var $selector = $option.closest('.ldwp-corner-selector');
+            var settingName = $selector.data('setting');
+            var value = $option.data('value');
+
+            // Update active state
+            $selector.find('.ldwp-corner-option').removeClass('is-active');
+            $option.addClass('is-active');
+
+            // Update hidden input value
+            $selector.siblings('.ldwp-corner-value').val(value);
+
+            // Update live preview
+            if (settingName && typeof updatePreview === 'function') {
+                updatePreview(settingName, value);
+            }
+        });
     }
 
     /**
@@ -417,12 +574,40 @@
         $('#logindesignerwp-social-style').on('change', function () {
             updatePreview('social_login_style', $(this).val());
         });
+
+        // Toggle Buttons visibility
+        function updateSocialContainerVisibility() {
+            var google = $('.ldwp-preview-google').is(':visible');
+            var github = $('.ldwp-preview-github').is(':visible');
+            // Check specific settings value as well to be sure on init
+            // But here we rely on the DOM visibility which is set by the toggle
+            if (google || github) {
+                $('#ldwp-preview-social').show();
+            } else {
+                $('#ldwp-preview-social').hide();
+            }
+        }
+
+        $('input[name="logindesignerwp_settings[google_login_enable]"]').on('change', function () {
+            var checked = $(this).is(':checked');
+            $('.ldwp-preview-google').toggle(checked);
+            updateSocialContainerVisibility();
+        });
+
+        $('input[name="logindesignerwp_settings[github_login_enable]"]').on('change', function () {
+            var checked = $(this).is(':checked');
+            $('.ldwp-preview-github').toggle(checked);
+            updateSocialContainerVisibility();
+        });
     }
 
     /**
      * Update preview based on setting change.
      */
     function updatePreview(setting, value) {
+        // Trigger status indicator update
+        PreviewStatus.start();
+
         switch (setting) {
             // Background settings
             case 'background_mode':
@@ -493,6 +678,8 @@
 
             case 'below_form_link_color':
                 $previewLinks.css('color', value);
+                $('#ldwp-preview-backtoblog a').css('color', value);
+                $('#ldwp-preview-custom-message').css('color', value);
                 break;
 
             case 'input_bg_color':
@@ -749,6 +936,9 @@
 
         // Apply background
         applyBackgroundPreview();
+
+        // Mark initialization complete so future changes trigger unsaved state
+        PreviewStatus.finishInitializing();
     }
 
     /**
@@ -1457,17 +1647,17 @@
         var $tabs = $('.logindesignerwp-tab');
         var $contents = $('.logindesignerwp-tab-content');
 
-        if ($tabs.length === 0) {
-            return;
-        }
-
-        // Restore active tab from localStorage
-        var savedTab = localStorage.getItem('ldwp_active_tab');
-        if (savedTab) {
+        // Restore last active tab
+        var lastTab = localStorage.getItem('ldwp_active_tab');
+        if (lastTab) {
             $tabs.removeClass('active');
-            $contents.removeClass('active');
-            $tabs.filter('[data-tab="' + savedTab + '"]').addClass('active');
-            $('#tab-' + savedTab).addClass('active');
+            $contents.removeClass('active').hide(); // Force hide all first
+            $('.logindesignerwp-tab[data-tab="' + lastTab + '"]').addClass('active');
+            $('#tab-' + lastTab).addClass('active').show(); // Force show target
+        } else {
+            // Default to first tab (Design) if no storage
+            $contents.hide();
+            $('#tab-design').show();
         }
 
         // Handle tab clicks
@@ -1478,9 +1668,10 @@
 
             // Update active states
             $tabs.removeClass('active');
-            $contents.removeClass('active');
+            $contents.removeClass('active').hide(); // Force hide
+
             $tab.addClass('active');
-            $('#tab-' + tabId).addClass('active');
+            $('#tab-' + tabId).addClass('active').show(); // Force show
 
             // Save to localStorage
             localStorage.setItem('ldwp_active_tab', tabId);
@@ -1637,7 +1828,7 @@
      */
     function initSortableSections() {
         var $form = $('#logindesignerwp-settings-form');
-        var $actionsDiv = $('.logindesignerwp-actions');
+        var $actionsDiv = $form.find('.logindesignerwp-actions');
 
         if ($form.length === 0) {
             return;
@@ -1720,7 +1911,7 @@
      * Initialize AJAX save for settings form.
      */
     function initAjaxSave() {
-        var $form = $('.logindesignerwp-settings-column form').not('#logindesignerwp-ai-settings-form');
+        var $form = $('.logindesignerwp-settings-column form').not('#logindesignerwp-ai-settings-form, #logindesignerwp-social-settings-form');
         var $submitBtn = $form.find('#submit');
 
         if ($form.length === 0) {
@@ -1745,6 +1936,9 @@
                 $submitBtn.prop('disabled', false);
 
                 if (response.success) {
+                    // Mark as saved
+                    PreviewStatus.markSaved();
+
                     // Show success toast
                     var $notice = $('<div class="notice notice-success is-dismissible" style="position: fixed; top: 40px; right: 20px; z-index: 9999; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"><p>' + (response.data.message || 'Settings saved') + '</p></div>');
                     $('body').append($notice);
@@ -1815,6 +2009,48 @@
     }
 
     /**
+     * Initialize Social Settings AJAX save.
+     */
+    function initSocialSettingsSave() {
+        var $form = $('#logindesignerwp-social-settings-form');
+        var $submitBtn = $form.find('#submit');
+
+        if ($form.length === 0) {
+            return;
+        }
+
+        $form.on('submit', function (e) {
+            e.preventDefault();
+
+            var $spinner = $('<span class="spinner is-active" style="float:none; margin-left: 5px;"></span>');
+            $submitBtn.prop('disabled', true).after($spinner);
+
+            var serializedData = $form.serialize();
+            serializedData += '&action=logindesignerwp_save_social_settings';
+            // serializedData += '&nonce=' + (window.logindesignerwp_ajax ? window.logindesignerwp_ajax.nonce : '');
+
+            $.post(ajaxurl, serializedData, function (response) {
+                $spinner.remove();
+                $submitBtn.prop('disabled', false);
+
+                if (response.success) {
+                    var $notice = $('<div class="notice notice-success is-dismissible" style="position: fixed; top: 40px; right: 20px; z-index: 9999; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"><p>' + (response.data.message || 'Settings saved') + '</p></div>');
+                    $('body').append($notice);
+                    setTimeout(function () {
+                        $notice.fadeOut(function () { $(this).remove(); });
+                    }, 3000);
+                } else {
+                    alert(response.data || 'Error saving settings.');
+                }
+            }).fail(function () {
+                $spinner.remove();
+                $submitBtn.prop('disabled', false);
+                alert('Ajax error. Please try again.');
+            });
+        });
+    }
+
+    /**
      * Document ready.
      */
     $(document).ready(function () {
@@ -1824,10 +2060,12 @@
         }
 
         initPreviewCache();
+        PreviewStatus.init();
         initColorPickers();
         initMediaUploaders();
         initBackgroundToggle();
         initNumberInputs();
+        initCornerSelectors();
         initCheckboxes();
         initButtonHover();
         initStickyPreview();
@@ -1842,6 +2080,7 @@
         initTextToTheme();
         initSmartTheme();
         initAISettingsSave();
+        initSocialSettingsSave();
         initResetDefaults();
 
         // Apply initial preview after a short delay to ensure color pickers are ready

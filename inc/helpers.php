@@ -158,14 +158,15 @@ function logindesignerwp_sanitize_settings($input)
     $sanitized['background_image_id'] = absint($input['background_image_id'] ?? 0);
 
     // Social Login.
-    $sanitized['google_login_enable'] = isset($input['google_login_enable']) ? 1 : 0;
+    $sanitized['google_login_enable'] = !empty($input['google_login_enable']) ? 1 : 0;
     $sanitized['google_client_id'] = sanitize_text_field($input['google_client_id'] ?? '');
     $sanitized['google_client_secret'] = sanitize_text_field($input['google_client_secret'] ?? '');
-    $sanitized['github_login_enable'] = isset($input['github_login_enable']) ? 1 : 0;
-    $sanitized['github_client_id'] = sanitize_text_field($input['github_client_id'] ?? '');
-    $sanitized['github_login_enable'] = isset($input['github_login_enable']) ? 1 : 0;
+    $sanitized['google_auth_mode'] = in_array($input['google_auth_mode'] ?? '', array('proxy', 'custom'), true) ? $input['google_auth_mode'] : $defaults['google_auth_mode'];
+
+    $sanitized['github_login_enable'] = !empty($input['github_login_enable']) ? 1 : 0;
     $sanitized['github_client_id'] = sanitize_text_field($input['github_client_id'] ?? '');
     $sanitized['github_client_secret'] = sanitize_text_field($input['github_client_secret'] ?? '');
+    $sanitized['github_auth_mode'] = in_array($input['github_auth_mode'] ?? '', array('proxy', 'custom'), true) ? $input['github_auth_mode'] : $defaults['github_auth_mode'];
 
     // Social Login Design.
     $sanitized['social_login_layout'] = in_array($input['social_login_layout'] ?? '', array('column', 'row'), true) ? $input['social_login_layout'] : $defaults['social_login_layout'];

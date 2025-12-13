@@ -41,6 +41,11 @@ class LoginDesignerWP_Social_Login
      */
     public function render_social_buttons()
     {
+        // Social login is a Pro feature - don't render if Pro is not active.
+        if (!logindesignerwp_is_pro_active()) {
+            return;
+        }
+
         // Check if any provider is enabled.
         if (empty($this->settings['google_login_enable']) && empty($this->settings['github_login_enable'])) {
             return;
@@ -182,7 +187,7 @@ class LoginDesignerWP_Social_Login
             /* Move social buttons to correct position via JS on load */
         </style>
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 var socialContainer = document.querySelector('.logindesignerwp-social-login');
                 var loginNav = document.querySelector('#login #nav');
                 if (socialContainer && loginNav) {
@@ -565,7 +570,7 @@ class LoginDesignerWP_Social_Login
             <?php
             $this->settings = logindesignerwp_get_settings();
             ?>
-            <div class="logindesignerwp-design-settings">
+            <div class="logindesignerwp-social-settings-content">
                 <div class="logindesignerwp-card" data-section-id="google_login">
                     <h2>
                         <span class="logindesignerwp-card-title-wrapper">
@@ -723,10 +728,16 @@ class LoginDesignerWP_Social_Login
                     </div>
                 </div>
 
-                <div class="logindesignerwp-actions">
-                    <?php submit_button(__('Save Changes', 'logindesignerwp'), 'primary', 'submit', false); ?>
-                </div>
+
             </div>
-            <?php
+
+            <!-- Social Tab Actions -->
+            <?php wp_nonce_field('logindesignerwp_save_nonce', 'nonce', false); ?>
+            <div class="logindesignerwp-actions" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
+                <?php submit_button(__('Save Changes', 'logindesignerwp'), 'primary', 'submit', false); ?>
+            </div>
+
+        </div>
+        <?php
     }
 }

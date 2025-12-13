@@ -4,9 +4,9 @@
  * Light styling for the settings page.
  */
 
-/* Wrap container */
-.logindesignerwp-wrap {
-    /* Full width - no max-width constraint */
+/* Wrap container - full width, no max-width constraint */
+.logindesignerwp-wrap .description {
+    margin-bottom: 20px;
 }
 
 .logindesignerwp-wrap>.description {
@@ -93,7 +93,8 @@
     align-items: flex-start;
 }
 
-.logindesignerwp-design-settings {
+.logindesignerwp-design-settings,
+.logindesignerwp-social-settings-content {
     flex: 1;
     min-width: 0;
 }
@@ -107,7 +108,7 @@
     align-self: flex-start;
 }
 
-/* Live Preview badge */
+/* Live Preview Status Badge */
 .logindesignerwp-preview-badge {
     position: absolute;
     top: 12px;
@@ -122,6 +123,74 @@
     border-radius: 4px;
     z-index: 10;
     backdrop-filter: blur(4px);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background-color 0.2s ease;
+}
+
+/* Status dot indicator */
+.logindesignerwp-preview-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease;
+}
+
+/* Updating state */
+.logindesignerwp-preview-badge.is-updating::before {
+    background: #f59e0b;
+}
+
+/* Subtle pulse animation for preview container */
+@keyframes ldwp-preview-pulse {
+    0% {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    50% {
+        box-shadow: 0 2px 12px rgba(34, 113, 177, 0.3);
+    }
+
+    100% {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+}
+
+.logindesignerwp-preview-container.is-pulsing {
+    animation: ldwp-preview-pulse 0.25s ease-out;
+}
+
+/* Accessibility: disable animations for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .logindesignerwp-preview-container.is-pulsing {
+        animation: none;
+    }
+
+    .logindesignerwp-preview-badge::before,
+    .logindesignerwp-preview-badge {
+        transition: none;
+    }
+}
+
+/* Status separator and save status */
+.ldwp-status-separator {
+    opacity: 0.5;
+    margin: 0 2px;
+}
+
+.ldwp-save-status {
+    opacity: 0.7;
+    transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+/* Unsaved state - slight highlight */
+.logindesignerwp-preview-badge.is-unsaved .ldwp-save-status {
+    opacity: 1;
+    color: #fbbf24;
 }
 
 /* Preview action buttons */
@@ -480,6 +549,35 @@
 
 .logindesignerwp-preview-links a:hover {
     opacity: 1;
+}
+
+/* Back to Site link */
+.logindesignerwp-preview-backtoblog {
+    text-align: left;
+    margin-top: 20px;
+    padding: 0 8px;
+}
+
+.logindesignerwp-preview-backtoblog a {
+    font-size: 13px;
+    text-decoration: none;
+    opacity: 0.8;
+    transition: color 0.3s ease;
+}
+
+.logindesignerwp-preview-backtoblog a:hover {
+    opacity: 1;
+}
+
+/* Custom Message preview */
+.logindesignerwp-preview-custom-message {
+    text-align: left;
+    margin-top: 16px;
+    padding: 0 8px;
+    font-size: 13px;
+    opacity: 0.85;
+    white-space: pre-line;
+    transition: color 0.3s ease;
 }
 
 /* Responsive adjustments */
@@ -846,4 +944,55 @@
     background: #24292e;
     color: #fff;
     border-color: #24292e;
+}
+
+/* Corner Selector Component */
+.ldwp-corner-selector {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.ldwp-corner-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #fff;
+    min-width: 70px;
+}
+
+.ldwp-corner-option:hover {
+    border-color: #2271b1;
+    background: #f6f7f7;
+}
+
+.ldwp-corner-option.is-active {
+    border-color: #2271b1;
+    background: #f0f6fc;
+}
+
+.ldwp-corner-preview {
+    width: 36px;
+    height: 28px;
+    background: #2271b1;
+    transition: border-radius 0.2s ease;
+}
+
+.ldwp-corner-option span {
+    font-size: 11px;
+    color: #50575e;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.ldwp-corner-option.is-active span {
+    color: #2271b1;
+    font-weight: 600;
 }
