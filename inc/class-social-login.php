@@ -551,114 +551,460 @@ class LoginDesignerWP_Social_Login
         <div class="logindesignerwp-settings-container">
             <?php
             $this->settings = logindesignerwp_get_settings();
+            $google_active = !empty($this->settings['google_login_enable']) && !empty($this->settings['google_client_id']);
+            $github_active = !empty($this->settings['github_login_enable']) && !empty($this->settings['github_client_id']);
             ?>
-            <div class="logindesignerwp-social-settings-content">
-                <div class="logindesignerwp-card" data-section-id="google_login">
-                    <h2>
-                        <span class="logindesignerwp-card-title-wrapper">
-                            <span class="dashicons dashicons-google"></span>
+
+            <!-- Google Login Card -->
+            <form id="logindesignerwp-google-settings-form" class="logindesignerwp-social-provider-form">
+                <?php wp_nonce_field('logindesignerwp_save_nonce', 'nonce', false); ?>
+                <input type="hidden" name="provider" value="google">
+
+                <div class="logindesignerwp-card ldwp-social-card" data-section-id="google_login">
+                    <!-- Card Header -->
+                    <div class="ldwp-social-card-header">
+                        <div class="ldwp-social-card-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" style="margin-right: 8px;">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                            </svg>
                             <?php esc_html_e('Google Login', 'logindesignerwp'); ?>
-                        </span>
-                    </h2>
-                    <div class="logindesignerwp-card-content">
-                        <table class="form-table">
-                            <tr>
-                                <th scope="row"><?php esc_html_e('Enable Google Login', 'logindesignerwp'); ?></th>
-                                <td>
-                                    <label class="logindesignerwp-switch">
-                                        <input type="checkbox" name="logindesignerwp_settings[google_login_enable]" value="1"
-                                            <?php checked(1, $this->settings['google_login_enable']); ?>>
-                                        <span class="logindesignerwp-slider round"></span>
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><?php esc_html_e('Client ID', 'logindesignerwp'); ?></th>
-                                <td>
-                                    <input type="text" class="regular-text" name="logindesignerwp_settings[google_client_id]"
-                                        value="<?php echo esc_attr($this->settings['google_client_id']); ?>">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><?php esc_html_e('Client Secret', 'logindesignerwp'); ?></th>
-                                <td>
-                                    <input type="password" class="regular-text"
-                                        name="logindesignerwp_settings[google_client_secret]"
-                                        value="<?php echo esc_attr($this->settings['google_client_secret']); ?>">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><?php esc_html_e('Redirect URI', 'logindesignerwp'); ?></th>
-                                <td>
-                                    <code><?php echo esc_url(site_url('wp-login.php') . '?action=ldwp_social_callback&provider=google'); ?></code>
-                                    <p class="description">
-                                        <?php esc_html_e('Add this URL to your OAuth Consent Screen settings in Google Cloud Console.', 'logindesignerwp'); ?>
-                                    </p>
-                                </td>
-                            </tr>
-                        </table>
+                        </div>
+                        <div class="ldwp-social-card-badges">
+                            <span class="ldwp-badge ldwp-badge-pro">Pro</span>
+                            <label class="ldwp-status-toggle">
+                                <input type="checkbox" name="logindesignerwp_settings[google_login_enable]" value="1"
+                                    <?php checked(1, $this->settings['google_login_enable']); ?>>
+                                <span class="ldwp-status-pill <?php echo $google_active ? 'active' : 'inactive'; ?>">
+                                    <?php echo $google_active ? esc_html__('Active', 'logindesignerwp') : esc_html__('Inactive', 'logindesignerwp'); ?>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <p class="ldwp-social-card-description">
+                        <?php esc_html_e('Allow users to log in with their Google account. Requires a Google Cloud project with OAuth credentials.', 'logindesignerwp'); ?>
+                        <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener"><?php esc_html_e('Get credentials', 'logindesignerwp'); ?></a>
+                    </p>
+
+                    <!-- Configuration Section -->
+                    <div class="ldwp-social-config">
+                        <h4><?php esc_html_e('Configuration', 'logindesignerwp'); ?></h4>
+
+                        <div class="ldwp-field-row">
+                            <label><?php esc_html_e('Client ID', 'logindesignerwp'); ?></label>
+                            <input type="text" class="regular-text" name="logindesignerwp_settings[google_client_id]"
+                                value="<?php echo esc_attr($this->settings['google_client_id']); ?>"
+                                placeholder="your-client-id.apps.googleusercontent.com">
+                            <p class="description"><?php esc_html_e('Found in your Google Cloud Console under OAuth 2.0 Client IDs.', 'logindesignerwp'); ?></p>
+                        </div>
+
+                        <div class="ldwp-field-row">
+                            <label><?php esc_html_e('Client Secret', 'logindesignerwp'); ?></label>
+                            <input type="password" class="regular-text" name="logindesignerwp_settings[google_client_secret]"
+                                value="<?php echo esc_attr($this->settings['google_client_secret']); ?>">
+                        </div>
+
+                        <div class="ldwp-field-row">
+                            <label><?php esc_html_e('Redirect URI', 'logindesignerwp'); ?></label>
+                            <div class="ldwp-copy-field">
+                                <code id="google-redirect-uri"><?php echo esc_url(site_url('wp-login.php') . '?action=ldwp_social_callback&provider=google'); ?></code>
+                                <button type="button" class="button ldwp-copy-btn" data-target="google-redirect-uri">
+                                    <span class="dashicons dashicons-admin-page"></span>
+                                </button>
+                            </div>
+                            <p class="description"><?php esc_html_e('Add this URL as an Authorized Redirect URI in your Google Cloud Console.', 'logindesignerwp'); ?></p>
+                        </div>
+                    </div>
+
+                    <!-- Setup Instructions -->
+                    <details class="ldwp-setup-instructions">
+                        <summary><?php esc_html_e('Setup Instructions', 'logindesignerwp'); ?></summary>
+                        <ol>
+                            <li><?php printf(
+                                /* translators: %s: link to Google Cloud Console */
+                                esc_html__('Go to the %s and create a new project (or select an existing one).', 'logindesignerwp'),
+                                '<a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud Console</a>'
+                            ); ?></li>
+                            <li><?php esc_html_e('Navigate to APIs & Services → Credentials.', 'logindesignerwp'); ?></li>
+                            <li><?php esc_html_e('Click "Create Credentials" → "OAuth client ID".', 'logindesignerwp'); ?></li>
+                            <li><?php esc_html_e('Select "Web application" as the application type.', 'logindesignerwp'); ?></li>
+                            <li><?php esc_html_e('Add the Redirect URI shown above to "Authorized redirect URIs".', 'logindesignerwp'); ?></li>
+                            <li><?php esc_html_e('Copy the Client ID and Client Secret and paste them above.', 'logindesignerwp'); ?></li>
+                            <li><?php esc_html_e('Configure your OAuth Consent Screen if you haven\'t already.', 'logindesignerwp'); ?></li>
+                        </ol>
+                    </details>
+
+                    <!-- Save Button -->
+                    <div class="ldwp-social-card-footer">
+                        <button type="submit" class="button button-primary">
+                            <?php esc_html_e('Save Google Settings', 'logindesignerwp'); ?>
+                        </button>
                     </div>
                 </div>
+            </form>
 
-                <div class="logindesignerwp-card" data-section-id="github_login">
-                    <h2>
-                        <span class="logindesignerwp-card-title-wrapper">
-                            <span class="dashicons dashicons-github"></span>
-                            <!-- Utilizing generic icon if specific github one isn't available, but dashicons usually doesn't have brand icons except wordpress/google/facebook/twitter. Typically plugins use SVG or fontawesome. Let's use generic or look for a match. Dashicons has 'admin-network' which looks kinda like a git graph or 'editor-code'. Let's stick to standard dashicons for now, maybe finding a better SVG later. Actually, for settings UI, let's use 'admin-site' or similar if github specific is missing. Wait, there is no dashicons-github. I'll use 'admin-site' or just no icon. -->
-                            <!-- Actually Google dashicon exists? 'dashicons-google'. Let's check generic. Using 'admin-links' for now if unsure. -->
+            <!-- GitHub Login Card -->
+            <form id="logindesignerwp-github-settings-form" class="logindesignerwp-social-provider-form">
+                <?php wp_nonce_field('logindesignerwp_save_nonce', 'nonce', false); ?>
+                <input type="hidden" name="provider" value="github">
+
+                <div class="logindesignerwp-card ldwp-social-card" data-section-id="github_login" style="margin-top: 20px;">
+                    <!-- Card Header -->
+                    <div class="ldwp-social-card-header">
+                        <div class="ldwp-social-card-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" style="margin-right: 8px;">
+                                <path fill="#24292e" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                            </svg>
                             <?php esc_html_e('GitHub Login', 'logindesignerwp'); ?>
-                        </span>
-                    </h2>
-                    <div class="logindesignerwp-card-content">
-                        <table class="form-table">
-                            <tr>
-                                <th scope="row"><?php esc_html_e('Enable GitHub Login', 'logindesignerwp'); ?></th>
-                                <td>
-                                    <label class="logindesignerwp-switch">
-                                        <input type="checkbox" name="logindesignerwp_settings[github_login_enable]" value="1"
-                                            <?php checked(1, $this->settings['github_login_enable']); ?>>
-                                        <span class="logindesignerwp-slider round"></span>
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><?php esc_html_e('Client ID', 'logindesignerwp'); ?></th>
-                                <td>
-                                    <input type="text" class="regular-text" name="logindesignerwp_settings[github_client_id]"
-                                        value="<?php echo esc_attr($this->settings['github_client_id']); ?>">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><?php esc_html_e('Client Secret', 'logindesignerwp'); ?></th>
-                                <td>
-                                    <input type="password" class="regular-text"
-                                        name="logindesignerwp_settings[github_client_secret]"
-                                        value="<?php echo esc_attr($this->settings['github_client_secret']); ?>">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><?php esc_html_e('Callback URL', 'logindesignerwp'); ?></th>
-                                <td>
-                                    <code><?php echo esc_url(site_url('wp-login.php') . '?action=ldwp_social_login&provider=github'); ?></code>
-                                    <p class="description">
-                                        <?php esc_html_e('Add this as the Authorization Callback URL in your GitHub OAuth App settings.', 'logindesignerwp'); ?>
-                                    </p>
-                                </td>
-                            </tr>
-                        </table>
+                        </div>
+                        <div class="ldwp-social-card-badges">
+                            <span class="ldwp-badge ldwp-badge-pro">Pro</span>
+                            <label class="ldwp-status-toggle">
+                                <input type="checkbox" name="logindesignerwp_settings[github_login_enable]" value="1"
+                                    <?php checked(1, $this->settings['github_login_enable']); ?>>
+                                <span class="ldwp-status-pill <?php echo $github_active ? 'active' : 'inactive'; ?>">
+                                    <?php echo $github_active ? esc_html__('Active', 'logindesignerwp') : esc_html__('Inactive', 'logindesignerwp'); ?>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <p class="ldwp-social-card-description">
+                        <?php esc_html_e('Allow users to log in with their GitHub account. Great for developer-focused sites.', 'logindesignerwp'); ?>
+                        <a href="https://github.com/settings/developers" target="_blank" rel="noopener"><?php esc_html_e('Get credentials', 'logindesignerwp'); ?></a>
+                    </p>
+
+                    <!-- Configuration Section -->
+                    <div class="ldwp-social-config">
+                        <h4><?php esc_html_e('Configuration', 'logindesignerwp'); ?></h4>
+
+                        <div class="ldwp-field-row">
+                            <label><?php esc_html_e('Client ID', 'logindesignerwp'); ?></label>
+                            <input type="text" class="regular-text" name="logindesignerwp_settings[github_client_id]"
+                                value="<?php echo esc_attr($this->settings['github_client_id']); ?>">
+                            <p class="description"><?php esc_html_e('Found in your GitHub OAuth App settings.', 'logindesignerwp'); ?></p>
+                        </div>
+
+                        <div class="ldwp-field-row">
+                            <label><?php esc_html_e('Client Secret', 'logindesignerwp'); ?></label>
+                            <input type="password" class="regular-text" name="logindesignerwp_settings[github_client_secret]"
+                                value="<?php echo esc_attr($this->settings['github_client_secret']); ?>">
+                        </div>
+
+                        <div class="ldwp-field-row">
+                            <label><?php esc_html_e('Callback URL', 'logindesignerwp'); ?></label>
+                            <div class="ldwp-copy-field">
+                                <code id="github-callback-url"><?php echo esc_url(site_url('wp-login.php') . '?action=ldwp_social_callback&provider=github'); ?></code>
+                                <button type="button" class="button ldwp-copy-btn" data-target="github-callback-url">
+                                    <span class="dashicons dashicons-admin-page"></span>
+                                </button>
+                            </div>
+                            <p class="description"><?php esc_html_e('Add this as the Authorization Callback URL in your GitHub OAuth App.', 'logindesignerwp'); ?></p>
+                        </div>
+                    </div>
+
+                    <!-- Setup Instructions -->
+                    <details class="ldwp-setup-instructions">
+                        <summary><?php esc_html_e('Setup Instructions', 'logindesignerwp'); ?></summary>
+                        <ol>
+                            <li><?php printf(
+                                /* translators: %s: link to GitHub Developer Settings */
+                                esc_html__('Go to %s.', 'logindesignerwp'),
+                                '<a href="https://github.com/settings/developers" target="_blank" rel="noopener">GitHub Developer Settings</a>'
+                            ); ?></li>
+                            <li><?php esc_html_e('Click "New OAuth App" (or select an existing one).', 'logindesignerwp'); ?></li>
+                            <li><?php printf(
+                                /* translators: %s: site URL */
+                                esc_html__('Set the Homepage URL to: %s', 'logindesignerwp'),
+                                '<code>' . esc_url(home_url()) . '</code>'
+                            ); ?></li>
+                            <li><?php esc_html_e('Add the Callback URL shown above.', 'logindesignerwp'); ?></li>
+                            <li><?php esc_html_e('Copy the Client ID and generate a new Client Secret.', 'logindesignerwp'); ?></li>
+                            <li><?php esc_html_e('Paste both values above and save.', 'logindesignerwp'); ?></li>
+                        </ol>
+                    </details>
+
+                    <!-- Save Button -->
+                    <div class="ldwp-social-card-footer">
+                        <button type="submit" class="button button-primary">
+                            <?php esc_html_e('Save GitHub Settings', 'logindesignerwp'); ?>
+                        </button>
                     </div>
                 </div>
-
-
-            </div>
-
-            <!-- Social Tab Actions -->
-            <?php wp_nonce_field('logindesignerwp_save_nonce', 'nonce', false); ?>
-            <div class="logindesignerwp-actions" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
-                <?php submit_button(__('Save Changes', 'logindesignerwp'), 'primary', 'submit', false); ?>
-            </div>
+            </form>
 
         </div>
+
+        <style>
+        /* Social Card Styles */
+        .ldwp-social-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 0;
+        }
+
+        .ldwp-social-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid #eee;
+            background: #fafafa;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .ldwp-social-card-title {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e1e1e;
+        }
+
+        .ldwp-social-card-badges {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ldwp-badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .ldwp-badge-pro {
+            background: #1e1e1e;
+            color: #fff;
+        }
+
+        .ldwp-status-toggle input[type="checkbox"] {
+            display: none;
+        }
+
+        .ldwp-status-pill {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .ldwp-status-pill.active {
+            background: #46b450;
+            color: #fff;
+        }
+
+        .ldwp-status-pill.inactive {
+            background: #ddd;
+            color: #666;
+        }
+
+        .ldwp-status-toggle:hover .ldwp-status-pill {
+            opacity: 0.8;
+        }
+
+        .ldwp-social-card-description {
+            padding: 16px 20px 0;
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .ldwp-social-card-description a {
+            color: #2271b1;
+            text-decoration: none;
+        }
+
+        .ldwp-social-card-description a:hover {
+            text-decoration: underline;
+        }
+
+        .ldwp-social-config {
+            padding: 20px;
+        }
+
+        .ldwp-social-config h4 {
+            margin: 0 0 16px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e1e1e;
+        }
+
+        .ldwp-field-row {
+            margin-bottom: 16px;
+        }
+
+        .ldwp-field-row label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #1e1e1e;
+        }
+
+        .ldwp-field-row input.regular-text {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .ldwp-field-row .description {
+            margin-top: 4px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .ldwp-copy-field {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ldwp-copy-field code {
+            flex: 1;
+            max-width: 400px;
+            padding: 8px 12px;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            word-break: break-all;
+        }
+
+        .ldwp-copy-btn {
+            padding: 4px 8px !important;
+            min-height: auto !important;
+        }
+
+        .ldwp-copy-btn .dashicons {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+        }
+
+        .ldwp-setup-instructions {
+            margin: 0 20px 20px;
+            padding: 16px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            border: 1px solid #eee;
+        }
+
+        .ldwp-setup-instructions summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: #2271b1;
+            font-size: 14px;
+        }
+
+        .ldwp-setup-instructions summary:hover {
+            color: #135e96;
+        }
+
+        .ldwp-setup-instructions ol {
+            margin: 16px 0 0 20px;
+            padding: 0;
+            color: #444;
+            line-height: 1.8;
+        }
+
+        .ldwp-setup-instructions ol li {
+            margin-bottom: 8px;
+        }
+
+        .ldwp-setup-instructions code {
+            background: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .ldwp-social-card-footer {
+            padding: 16px 20px;
+            border-top: 1px solid #eee;
+            background: #fafafa;
+            border-radius: 0 0 8px 8px;
+        }
+        </style>
+
+        <script>
+        (function($) {
+            // Toggle status pill text and class
+            $('.ldwp-status-toggle input[type="checkbox"]').on('change', function() {
+                var $pill = $(this).siblings('.ldwp-status-pill');
+                if (this.checked) {
+                    $pill.removeClass('inactive').addClass('active').text('<?php echo esc_js(__('Active', 'logindesignerwp')); ?>');
+                } else {
+                    $pill.removeClass('active').addClass('inactive').text('<?php echo esc_js(__('Inactive', 'logindesignerwp')); ?>');
+                }
+            });
+
+            // Copy button functionality
+            $('.ldwp-copy-btn').on('click', function() {
+                var targetId = $(this).data('target');
+                var $code = $('#' + targetId);
+                var text = $code.text();
+
+                navigator.clipboard.writeText(text).then(function() {
+                    var $btn = $(this);
+                    $btn.find('.dashicons').removeClass('dashicons-admin-page').addClass('dashicons-yes');
+                    setTimeout(function() {
+                        $btn.find('.dashicons').removeClass('dashicons-yes').addClass('dashicons-admin-page');
+                    }, 2000);
+                }.bind(this));
+            });
+
+            // Individual form submission via AJAX
+            $('.logindesignerwp-social-provider-form').on('submit', function(e) {
+                e.preventDefault();
+
+                var $form = $(this);
+                var $submitBtn = $form.find('button[type="submit"]');
+                var originalText = $submitBtn.text();
+                var provider = $form.find('input[name="provider"]').val();
+
+                $submitBtn.prop('disabled', true).text('<?php echo esc_js(__('Saving...', 'logindesignerwp')); ?>');
+
+                var formData = $form.serialize();
+                formData += '&action=logindesignerwp_save_social_settings';
+
+                $.post(ajaxurl, formData, function(response) {
+                    $submitBtn.prop('disabled', false).text(originalText);
+
+                    if (response.success) {
+                        // Update status pill if credentials are now complete
+                        var $card = $form.find('.ldwp-social-card');
+                        var $pill = $card.find('.ldwp-status-pill');
+                        var $checkbox = $card.find('.ldwp-status-toggle input[type="checkbox"]');
+
+                        // Show success notice
+                        var $notice = $('<div class="notice notice-success is-dismissible" style="position: fixed; top: 40px; right: 20px; z-index: 9999; padding: 10px 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"><p>' + (response.data.message || 'Settings saved!') + '</p></div>');
+                        $('body').append($notice);
+                        setTimeout(function() {
+                            $notice.fadeOut(function() { $(this).remove(); });
+                        }, 3000);
+                    } else {
+                        alert(response.data || 'Error saving settings.');
+                    }
+                }).fail(function() {
+                    $submitBtn.prop('disabled', false).text(originalText);
+                    alert('Ajax error. Please try again.');
+                });
+            });
+        })(jQuery);
+        </script>
         <?php
     }
 }
+
