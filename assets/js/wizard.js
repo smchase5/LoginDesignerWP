@@ -171,6 +171,103 @@
                 button_text_color: '#ffffff',
                 button_border_radius: 999
             }
+        },
+        'ocean': {
+            name: 'Ocean',
+            pro: true,
+            settings: {
+                background_mode: 'gradient',
+                background_gradient_1: '#0891b2',
+                background_gradient_2: '#164e63',
+                form_bg_color: '#ffffff',
+                form_border_radius: 16,
+                form_border_color: '#a5f3fc',
+                label_text_color: '#164e63',
+                input_bg_color: '#ecfeff',
+                input_text_color: '#164e63',
+                input_border_color: '#67e8f9',
+                button_bg: '#0891b2',
+                button_bg_hover: '#0e7490',
+                button_text_color: '#ffffff',
+                button_border_radius: 8
+            }
+        },
+        'sunset': {
+            name: 'Sunset',
+            pro: true,
+            settings: {
+                background_mode: 'gradient',
+                background_gradient_1: '#f59e0b',
+                background_gradient_2: '#dc2626',
+                form_bg_color: '#fffbeb',
+                form_border_radius: 20,
+                form_border_color: '#fde68a',
+                label_text_color: '#92400e',
+                input_bg_color: '#ffffff',
+                input_text_color: '#78350f',
+                input_border_color: '#fcd34d',
+                button_bg: '#f59e0b',
+                button_bg_hover: '#d97706',
+                button_text_color: '#000000',
+                button_border_radius: 12
+            }
+        },
+        'forest': {
+            name: 'Forest',
+            pro: true,
+            settings: {
+                background_mode: 'solid',
+                background_color: '#14532d',
+                form_bg_color: '#f0fdf4',
+                form_border_radius: 12,
+                form_border_color: '#86efac',
+                label_text_color: '#14532d',
+                input_bg_color: '#ffffff',
+                input_text_color: '#166534',
+                input_border_color: '#4ade80',
+                button_bg: '#16a34a',
+                button_bg_hover: '#15803d',
+                button_text_color: '#ffffff',
+                button_border_radius: 8
+            }
+        },
+        'elegant': {
+            name: 'Elegant',
+            pro: true,
+            settings: {
+                background_mode: 'solid',
+                background_color: '#1c1917',
+                form_bg_color: '#fafaf9',
+                form_border_radius: 8,
+                form_border_color: '#d6d3d1',
+                label_text_color: '#44403c',
+                input_bg_color: '#ffffff',
+                input_text_color: '#1c1917',
+                input_border_color: '#a8a29e',
+                button_bg: '#78716c',
+                button_bg_hover: '#57534e',
+                button_text_color: '#ffffff',
+                button_border_radius: 4
+            }
+        },
+        'tech': {
+            name: 'Tech',
+            pro: true,
+            settings: {
+                background_mode: 'solid',
+                background_color: '#18181b',
+                form_bg_color: '#27272a',
+                form_border_radius: 16,
+                form_border_color: '#3f3f46',
+                label_text_color: '#a1a1aa',
+                input_bg_color: '#18181b',
+                input_text_color: '#fafafa',
+                input_border_color: '#52525b',
+                button_bg: '#a855f7',
+                button_bg_hover: '#9333ea',
+                button_text_color: '#ffffff',
+                button_border_radius: 8
+            }
         }
     };
 
@@ -244,7 +341,6 @@
         wizard.currentStep = 1;
         updateStepDisplay();
         $('.ldwp-wizard-overlay').addClass('is-open');
-        $('body').css('overflow', 'hidden');
 
         // Initialize color pickers if not already done
         initColorPickers();
@@ -271,7 +367,6 @@
     // Close wizard modal
     function closeWizard() {
         $('.ldwp-wizard-overlay').removeClass('is-open');
-        $('body').css('overflow', '');
     }
 
     // Go to next step

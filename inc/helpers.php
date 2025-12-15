@@ -44,6 +44,7 @@ function logindesignerwp_get_defaults()
         'background_image_pos' => 'center',
         'background_image_repeat' => 'no-repeat',
         'background_blur' => 0,
+        'preset_background_url' => '',
 
         // Form container settings - WP default is white with shadow
         'form_bg_color' => '#ffffff',
@@ -87,6 +88,9 @@ function logindesignerwp_get_defaults()
         'logo_background_color' => '',
         'logo_url' => '',
         'logo_title' => '',
+
+        // Active preset tracking.
+        'active_preset' => '',
     );
 
     // Allow Pro to extend defaults.
@@ -116,12 +120,6 @@ function logindesignerwp_sanitize_settings($input)
 {
     $defaults = logindesignerwp_get_defaults();
     $sanitized = array();
-
-    error_log('LoginDesignerWP Sanitization Start');
-    error_log('Raw Input Keys: ' . implode(', ', array_keys($input)));
-    if (isset($input['background_color'])) {
-        error_log('Input Background Color: ' . $input['background_color']);
-    }
 
     // Background mode.
     $sanitized['background_mode'] = in_array($input['background_mode'] ?? '', array('solid', 'gradient', 'image'), true)

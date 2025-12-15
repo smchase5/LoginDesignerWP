@@ -54,6 +54,17 @@ class LoginDesignerWP_Login_Style
         if ('image' === $s['background_mode'] && $s['background_image_id']) {
             $bg_image_url = wp_get_attachment_image_url($s['background_image_id'], 'full');
         }
+        // Fallback to preset bundled background URL if no media library image
+        if ('image' === $s['background_mode'] && empty($bg_image_url)) {
+            // Check if preset_background_url is set
+            if (!empty($s['preset_background_url'])) {
+                $bg_image_url = $s['preset_background_url'];
+            }
+            // Special case: glassmorphism preset - use bundled image
+            elseif (isset($s['active_preset']) && $s['active_preset'] === 'glassmorphism') {
+                $bg_image_url = LOGINDESIGNERWP_URL . 'assets/images/glassmorphism-bg.png';
+            }
+        }
 
         // Get custom logo URL if applicable.
         $logo_url = '';
@@ -120,6 +131,9 @@ class LoginDesignerWP_Login_Style
                 $css .= "    background-repeat: " . esc_attr($s['background_image_repeat']) . " !important;\n";
                 $css .= "    background-attachment: fixed !important;\n";
             }
+        } elseif ('image' === $s['background_mode']) {
+            // Image mode but no image found - fallback to background color
+            $css .= "    background: " . esc_attr($s['background_color']) . " !important;\n";
         }
         $css .= "}\n";
 

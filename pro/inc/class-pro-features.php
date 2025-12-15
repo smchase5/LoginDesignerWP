@@ -98,15 +98,28 @@ class LoginDesignerWP_Pro_Features
         }
 
         // Layout Options
-        // Position
-        if ($settings['layout_position'] === 'left' || $settings['layout_position'] === 'right') {
-            $align = $settings['layout_position'] === 'left' ? 'flex-start' : 'flex-end';
+        // 9-Position Grid
+        $pos_x = isset($settings['layout_position_x']) ? $settings['layout_position_x'] : 'center';
+        $pos_y = isset($settings['layout_position_y']) ? $settings['layout_position_y'] : 'center';
+
+        // Map positions to flexbox values
+        $justify_map = array('left' => 'flex-start', 'center' => 'center', 'right' => 'flex-end');
+        $align_map = array('top' => 'flex-start', 'center' => 'center', 'bottom' => 'flex-end');
+
+        $justify = isset($justify_map[$pos_x]) ? $justify_map[$pos_x] : 'center';
+        $align = isset($align_map[$pos_y]) ? $align_map[$pos_y] : 'center';
+
+        // Only apply custom positioning if not default center-center
+        if ($pos_x !== 'center' || $pos_y !== 'center') {
             $css .= "/* Layout Position */\n";
             $css .= "body.login {\n";
             $css .= "    display: flex !important;\n";
-            $css .= "    align-items: center !important;\n";
+            $css .= "    flex-direction: column !important;\n";
+            $css .= "    align-items: {$justify} !important;\n";
             $css .= "    justify-content: {$align} !important;\n";
-            $css .= "    padding: 0 10% !important;\n";
+            $css .= "    min-height: 100vh !important;\n";
+            $css .= "    padding: 5% 10% !important;\n";
+            $css .= "    box-sizing: border-box !important;\n";
             $css .= "}\n";
             $css .= "body.login div#login {\n";
             $css .= "    position: relative !important;\n";
@@ -115,18 +128,21 @@ class LoginDesignerWP_Pro_Features
             $css .= "    width: 100% !important;\n";
             $css .= "    max-width: 400px !important;\n";
             $css .= "}\n";
-            // Disable default padding on body
-            $css .= "html, body { height: 100% !important; }\n";
+            $css .= "html, body { height: 100% !important; margin: 0 !important; }\n";
         }
 
-        // Compact/Spacious
+        // Layout Style - Compact/Standard/Spacious with balanced spacing
         if ($settings['layout_style'] === 'compact') {
             $css .= "/* Compact Layout */\n";
-            $css .= "#loginform, #registerform, #lostpasswordform { padding: 20px !important; }\n";
-            $css .= "#login h1 { margin-bottom: 10px !important; }\n";
+            $css .= "#loginform, #registerform, #lostpasswordform { padding: 16px 20px !important; }\n";
+            $css .= "#login h1 { margin-bottom: 12px !important; }\n";
+            $css .= "#loginform p, #registerform p { margin-bottom: 12px !important; }\n";
         } elseif ($settings['layout_style'] === 'spacious') {
             $css .= "/* Spacious Layout */\n";
-            $css .= "#loginform, #registerform, #lostpasswordform { padding: 40px !important; }\n";
+            $css .= "#loginform, #registerform, #lostpasswordform { padding: 32px 36px !important; }\n";
+            $css .= "#login h1 { margin-bottom: 32px !important; }\n";
+            $css .= "#loginform p, #registerform p { margin-bottom: 20px !important; }\n";
+            $css .= "#loginform .input, #registerform .input { padding: 8px 12px !important; font-size: 15px !important; }\n";
         }
 
         // Hide Footer Links
@@ -232,6 +248,13 @@ class LoginDesignerWP_Pro_Features
         }
 
         $file = $_FILES['import_file'];
+
+        // Validate file type.
+        $file_type = wp_check_filetype($file['name']);
+        if ($file_type['ext'] !== 'json') {
+            wp_send_json_error(__('Invalid file type. Please upload a JSON file.', 'logindesignerwp-pro'));
+        }
+
         $content = file_get_contents($file['tmp_name']);
         $data = json_decode($content, true);
 
@@ -239,15 +262,26 @@ class LoginDesignerWP_Pro_Features
             wp_send_json_error('Invalid JSON file.');
         }
 
-        // Update settings.
-        update_option('logindesignerwp_settings', $data['settings']);
+        // Sanitize settings through the standard sanitizer.
+        $sanitized_settings = logindesignerwp_sanitize_settings($data['settings']);
+        update_option('logindesignerwp_settings', $sanitized_settings);
 
-        // Update custom presets if present.
-        if (isset($data['custom_presets'])) {
-            update_option('logindesignerwp_custom_presets', $data['custom_presets']);
+        // Update custom presets if present, with sanitization.
+        if (isset($data['custom_presets']) && is_array($data['custom_presets'])) {
+            $sanitized_presets = array();
+            foreach ($data['custom_presets'] as $key => $preset) {
+                if (!is_array($preset)) {
+                    continue;
+                }
+                $sanitized_presets[sanitize_key($key)] = array(
+                    'name' => sanitize_text_field($preset['name'] ?? ''),
+                    'settings' => logindesignerwp_sanitize_settings($preset['settings'] ?? array()),
+                );
+            }
+            update_option('logindesignerwp_custom_presets', $sanitized_presets);
         }
 
-        wp_send_json_success('Settings imported successfully.');
+        wp_send_json_success(__('Settings imported successfully.', 'logindesignerwp-pro'));
     }
 
     /**
@@ -291,7 +325,8 @@ class LoginDesignerWP_Pro_Features
             'glass_border' => true,
 
             // Layout settings.
-            'layout_position' => 'center',
+            'layout_position_x' => 'center',
+            'layout_position_y' => 'center',
             'layout_style' => 'standard',
             'hide_footer_links' => false,
 
@@ -347,11 +382,17 @@ class LoginDesignerWP_Pro_Features
         }
 
         // Sanitize layout settings.
-        if (isset($input['layout_position'])) {
-            $settings['layout_position'] = sanitize_text_field($input['layout_position']);
+        if (isset($input['layout_position_x'])) {
+            $allowed_x = array('left', 'center', 'right');
+            $settings['layout_position_x'] = in_array($input['layout_position_x'], $allowed_x, true) ? $input['layout_position_x'] : 'center';
+        }
+        if (isset($input['layout_position_y'])) {
+            $allowed_y = array('top', 'center', 'bottom');
+            $settings['layout_position_y'] = in_array($input['layout_position_y'], $allowed_y, true) ? $input['layout_position_y'] : 'center';
         }
         if (isset($input['layout_style'])) {
-            $settings['layout_style'] = sanitize_text_field($input['layout_style']);
+            $allowed_styles = array('compact', 'standard', 'spacious');
+            $settings['layout_style'] = in_array($input['layout_style'], $allowed_styles, true) ? $input['layout_style'] : 'standard';
         }
         if (isset($input['hide_footer_links'])) {
             $settings['hide_footer_links'] = (bool) $input['hide_footer_links'];
@@ -458,39 +499,89 @@ class LoginDesignerWP_Pro_Features
                 </span>
             </h2>
             <div class="logindesignerwp-card-content">
-                <table class="form-table">
-                    <tr>
-                        <th scope="row"><?php esc_html_e('Form Position', 'logindesignerwp-pro'); ?></th>
-                        <td>
-                            <select name="logindesignerwp_settings[layout_position]">
-                                <option value="center" <?php selected($settings['layout_position'], 'center'); ?>>
-                                    <?php esc_html_e('Center', 'logindesignerwp-pro'); ?>
-                                </option>
-                                <option value="left" <?php selected($settings['layout_position'], 'left'); ?>>
-                                    <?php esc_html_e('Left', 'logindesignerwp-pro'); ?>
-                                </option>
-                                <option value="right" <?php selected($settings['layout_position'], 'right'); ?>>
-                                    <?php esc_html_e('Right', 'logindesignerwp-pro'); ?>
-                                </option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><?php esc_html_e('Layout Style', 'logindesignerwp-pro'); ?></th>
-                        <td>
-                            <select name="logindesignerwp_settings[layout_style]">
-                                <option value="standard" <?php selected($settings['layout_style'], 'standard'); ?>>
-                                    <?php esc_html_e('Standard', 'logindesignerwp-pro'); ?>
-                                </option>
-                                <option value="compact" <?php selected($settings['layout_style'], 'compact'); ?>>
-                                    <?php esc_html_e('Compact', 'logindesignerwp-pro'); ?>
-                                </option>
-                                <option value="spacious" <?php selected($settings['layout_style'], 'spacious'); ?>>
-                                    <?php esc_html_e('Spacious', 'logindesignerwp-pro'); ?>
-                                </option>
-                            </select>
-                        </td>
-                    </tr>
+                <!-- Form Position: 9-position grid -->
+                <h3><?php esc_html_e('Form Position', 'logindesignerwp-pro'); ?></h3>
+                <p class="description" style="margin-bottom: 12px;">
+                    <?php esc_html_e('Choose where the login form appears on the page.', 'logindesignerwp-pro'); ?>
+                </p>
+
+                <input type="hidden" name="logindesignerwp_settings[layout_position_x]" id="ldwp-position-x"
+                    value="<?php echo esc_attr($settings['layout_position_x']); ?>">
+                <input type="hidden" name="logindesignerwp_settings[layout_position_y]" id="ldwp-position-y"
+                    value="<?php echo esc_attr($settings['layout_position_y']); ?>">
+
+                <div class="ldwp-position-grid">
+                    <?php
+                    $positions = array(
+                        'top-left' => array('x' => 'left', 'y' => 'top'),
+                        'top-center' => array('x' => 'center', 'y' => 'top'),
+                        'top-right' => array('x' => 'right', 'y' => 'top'),
+                        'center-left' => array('x' => 'left', 'y' => 'center'),
+                        'center-center' => array('x' => 'center', 'y' => 'center'),
+                        'center-right' => array('x' => 'right', 'y' => 'center'),
+                        'bottom-left' => array('x' => 'left', 'y' => 'bottom'),
+                        'bottom-center' => array('x' => 'center', 'y' => 'bottom'),
+                        'bottom-right' => array('x' => 'right', 'y' => 'bottom'),
+                    );
+                    foreach ($positions as $key => $pos):
+                        $is_active = ($settings['layout_position_x'] === $pos['x'] && $settings['layout_position_y'] === $pos['y']);
+                        ?>
+                        <div class="ldwp-position-cell<?php echo $is_active ? ' is-active' : ''; ?>"
+                            data-x="<?php echo esc_attr($pos['x']); ?>" data-y="<?php echo esc_attr($pos['y']); ?>">
+                            <div class="ldwp-position-preview ldwp-pos-<?php echo esc_attr($key); ?>">
+                                <div class="ldwp-mini-form"></div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- Layout Style: Visual cards -->
+                <h3 style="margin-top: 28px;"><?php esc_html_e('Layout Style', 'logindesignerwp-pro'); ?></h3>
+                <p class="description" style="margin-bottom: 12px;">
+                    <?php esc_html_e('Adjust the form spacing and padding.', 'logindesignerwp-pro'); ?>
+                </p>
+
+                <input type="hidden" name="logindesignerwp_settings[layout_style]" id="ldwp-layout-style"
+                    value="<?php echo esc_attr($settings['layout_style']); ?>">
+
+                <div class="ldwp-style-cards">
+                    <div class="ldwp-style-card<?php echo $settings['layout_style'] === 'compact' ? ' is-active' : ''; ?>"
+                        data-style="compact">
+                        <div class="ldwp-style-preview ldwp-style-compact">
+                            <div class="ldwp-style-form">
+                                <div class="ldwp-style-field"></div>
+                                <div class="ldwp-style-field"></div>
+                                <div class="ldwp-style-btn"></div>
+                            </div>
+                        </div>
+                        <span class="ldwp-style-label"><?php esc_html_e('Compact', 'logindesignerwp-pro'); ?></span>
+                    </div>
+                    <div class="ldwp-style-card<?php echo $settings['layout_style'] === 'standard' ? ' is-active' : ''; ?>"
+                        data-style="standard">
+                        <div class="ldwp-style-preview ldwp-style-standard">
+                            <div class="ldwp-style-form">
+                                <div class="ldwp-style-field"></div>
+                                <div class="ldwp-style-field"></div>
+                                <div class="ldwp-style-btn"></div>
+                            </div>
+                        </div>
+                        <span class="ldwp-style-label"><?php esc_html_e('Standard', 'logindesignerwp-pro'); ?></span>
+                    </div>
+                    <div class="ldwp-style-card<?php echo $settings['layout_style'] === 'spacious' ? ' is-active' : ''; ?>"
+                        data-style="spacious">
+                        <div class="ldwp-style-preview ldwp-style-spacious">
+                            <div class="ldwp-style-form">
+                                <div class="ldwp-style-field"></div>
+                                <div class="ldwp-style-field"></div>
+                                <div class="ldwp-style-btn"></div>
+                            </div>
+                        </div>
+                        <span class="ldwp-style-label"><?php esc_html_e('Spacious', 'logindesignerwp-pro'); ?></span>
+                    </div>
+                </div>
+
+                <!-- Hide Footer Links -->
+                <table class="form-table" style="margin-top: 16px;">
                     <tr>
                         <th scope="row"><?php esc_html_e('Hide Footer Links', 'logindesignerwp-pro'); ?></th>
                         <td>

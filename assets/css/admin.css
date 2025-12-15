@@ -1007,3 +1007,218 @@
     color: #2271b1;
     font-weight: 600;
 }
+
+/* ========================================
+   Position Grid (9-position selector)
+   ======================================== */
+.ldwp-position-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    max-width: 280px;
+}
+
+.ldwp-position-cell {
+    aspect-ratio: 16 / 10;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    overflow: hidden;
+}
+
+.ldwp-position-cell:hover {
+    border-color: #2271b1;
+    background: #f0f6fc;
+}
+
+.ldwp-position-cell.is-active {
+    border-color: #2271b1;
+    background: #e8f4fc;
+    box-shadow: 0 0 0 1px #2271b1;
+}
+
+.ldwp-position-preview {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    padding: 6px;
+    box-sizing: border-box;
+}
+
+/* Mini form inside each cell */
+.ldwp-mini-form {
+    width: 24px;
+    height: 18px;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Position-based alignment */
+.ldwp-pos-top-left {
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.ldwp-pos-top-center {
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.ldwp-pos-top-right {
+    align-items: flex-start;
+    justify-content: flex-end;
+}
+
+.ldwp-pos-center-left {
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.ldwp-pos-center-center {
+    align-items: center;
+    justify-content: center;
+}
+
+.ldwp-pos-center-right {
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.ldwp-pos-bottom-left {
+    align-items: flex-end;
+    justify-content: flex-start;
+}
+
+.ldwp-pos-bottom-center {
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.ldwp-pos-bottom-right {
+    align-items: flex-end;
+    justify-content: flex-end;
+}
+
+/* ========================================
+   Style Cards (Compact/Standard/Spacious)
+   ======================================== */
+.ldwp-style-cards {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.ldwp-style-card {
+    flex: 1;
+    min-width: 100px;
+    max-width: 140px;
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    overflow: hidden;
+    text-align: center;
+}
+
+.ldwp-style-card:hover {
+    border-color: #2271b1;
+    background: #f8fafc;
+}
+
+.ldwp-style-card.is-active {
+    border-color: #2271b1;
+    background: #f0f6fc;
+    box-shadow: 0 0 0 1px #2271b1;
+}
+
+.ldwp-style-preview {
+    background: #e5e7eb;
+    padding: 16px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ldwp-style-form {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 3px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Compact style - tight padding */
+.ldwp-style-compact .ldwp-style-form {
+    padding: 6px;
+}
+
+.ldwp-style-compact .ldwp-style-field {
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 2px;
+}
+
+.ldwp-style-compact .ldwp-style-btn {
+    height: 8px;
+    background: #2271b1;
+    border-radius: 2px;
+    margin-top: 2px;
+}
+
+/* Standard style - default padding */
+.ldwp-style-standard .ldwp-style-form {
+    padding: 10px;
+}
+
+.ldwp-style-standard .ldwp-style-field {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 2px;
+}
+
+.ldwp-style-standard .ldwp-style-btn {
+    height: 10px;
+    background: #2271b1;
+    border-radius: 2px;
+    margin-top: 4px;
+}
+
+/* Spacious style - generous padding */
+.ldwp-style-spacious .ldwp-style-form {
+    padding: 14px;
+}
+
+.ldwp-style-spacious .ldwp-style-field {
+    height: 10px;
+    background: #e5e7eb;
+    border-radius: 2px;
+}
+
+.ldwp-style-spacious .ldwp-style-btn {
+    height: 12px;
+    background: #2271b1;
+    border-radius: 2px;
+    margin-top: 6px;
+}
+
+.ldwp-style-label {
+    display: block;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #50575e;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.ldwp-style-card.is-active .ldwp-style-label {
+    color: #2271b1;
+}

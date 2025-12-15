@@ -521,6 +521,53 @@
     }
 
     /**
+     * Initialize 9-position grid click handlers.
+     */
+    function initPositionGrid() {
+        $(document).on('click', '.ldwp-position-cell', function () {
+            var $cell = $(this);
+            var posX = $cell.data('x');
+            var posY = $cell.data('y');
+
+            // Update active state
+            $('.ldwp-position-cell').removeClass('is-active');
+            $cell.addClass('is-active');
+
+            // Update hidden inputs
+            $('#ldwp-position-x').val(posX);
+            $('#ldwp-position-y').val(posY);
+
+            // Update live preview - position the form
+            if (typeof updatePreview === 'function') {
+                updatePreview('layout_position_x', posX);
+                updatePreview('layout_position_y', posY);
+            }
+        });
+    }
+
+    /**
+     * Initialize layout style cards click handlers.
+     */
+    function initStyleCards() {
+        $(document).on('click', '.ldwp-style-card', function () {
+            var $card = $(this);
+            var style = $card.data('style');
+
+            // Update active state
+            $('.ldwp-style-card').removeClass('is-active');
+            $card.addClass('is-active');
+
+            // Update hidden input
+            $('#ldwp-layout-style').val(style);
+
+            // Update live preview
+            if (typeof updatePreview === 'function') {
+                updatePreview('layout_style', style);
+            }
+        });
+    }
+
+    /**
      * Initialize Logo Controls.
      */
     function initLogoControls() {
@@ -799,6 +846,35 @@
                 if ($previewSocial.length) {
                     $previewSocial.attr('data-style', value);
                 }
+                break;
+
+            // Layout Position (9-grid)
+            case 'layout_position_x':
+            case 'layout_position_y':
+                // Get current X and Y values
+                var posX = $('#ldwp-position-x').val() || 'center';
+                var posY = $('#ldwp-position-y').val() || 'center';
+
+                // Map to flexbox values
+                var justifyMap = { 'left': 'flex-start', 'center': 'center', 'right': 'flex-end' };
+                var alignMap = { 'top': 'flex-start', 'center': 'center', 'bottom': 'flex-end' };
+
+                $previewBg.css({
+                    'display': 'flex',
+                    'flex-direction': 'column',
+                    'justify-content': alignMap[posY] || 'center',
+                    'align-items': justifyMap[posX] || 'center'
+                });
+                break;
+
+            // Layout Style (compact/standard/spacious)
+            case 'layout_style':
+                // Adjust form padding based on style
+                var paddingMap = { 'compact': '12px 16px', 'standard': '20px', 'spacious': '28px 32px' };
+                var marginMap = { 'compact': '12px', 'standard': '25px', 'spacious': '35px' };
+
+                $previewForm.css('padding', paddingMap[value] || '20px');
+                $previewLogo.css('margin-bottom', marginMap[value] || '25px');
                 break;
         }
     }
@@ -2013,7 +2089,7 @@
                 $submitBtn.prop('disabled', false);
 
                 if (response.success) {
-                    // Update badge
+                    // Update badge on Settings tab
                     var $badge = $('.logindesignerwp-ai-active-badge');
                     if (response.data.active) {
                         if ($badge.length === 0) {
@@ -2021,6 +2097,30 @@
                         }
                     } else {
                         $badge.remove();
+                    }
+
+                    // Update AI Tools card on Design tab dynamically
+                    var $aiCard = $('[data-section-id="ai_tools"]');
+                    if ($aiCard.length) {
+                        var $warningBox = $aiCard.find('[style*="fff8e5"]'); // Yellow warning box
+                        var $activeBadge = $aiCard.find('h2 span[style*="22c55e"]'); // Green "Active" badge
+                        var $aiButtons = $aiCard.find('.logindesignerwp-ai-generate-bg, .logindesignerwp-ai-smart-theme, .logindesignerwp-ai-text-to-theme');
+
+                        if (response.data.active) {
+                            // Hide warning, show badge, enable buttons
+                            $warningBox.slideUp(200);
+                            if ($activeBadge.length === 0) {
+                                $aiCard.find('.logindesignerwp-pro-badge').after(
+                                    '<span style="background:#22c55e;color:white;padding:2px 8px;border-radius:100px;font-size:10px;margin-left:5px;vertical-align:middle;text-transform:uppercase;">Active</span>'
+                                );
+                            }
+                            $aiButtons.prop('disabled', false);
+                        } else {
+                            // Show warning, remove badge, disable buttons
+                            $warningBox.slideDown(200);
+                            $activeBadge.remove();
+                            $aiButtons.prop('disabled', true);
+                        }
                     }
 
                     var $notice = $('<div class="notice notice-success is-dismissible" style="position: fixed; top: 40px; right: 20px; z-index: 9999; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"><p>' + (response.data.message || 'Settings saved') + '</p></div>');
@@ -2082,6 +2182,452 @@
     }
 
     /**
+     * Initialize Inline Design Wizard.
+     * Handles step navigation, preset selection, and live preview updates.
+     */
+    function initInlineWizard() {
+        var $wizard = $('.ldwp-wizard-inline');
+        var $cards = $('.ldwp-settings-cards');
+        var $startBtn = $('.ldwp-start-wizard-btn');
+        var $exitBtn = $('.ldwp-wizard-exit-btn');
+        var $nextBtn = $('.ldwp-wizard-next');
+        var $prevBtn = $('.ldwp-wizard-prev');
+        var $applyBtn = $('.ldwp-wizard-apply');
+        var $cancelModal = $('.ldwp-wizard-cancel-modal');
+
+        var currentStep = 1;
+        var totalSteps = 4;
+        var originalSettings = {};
+        var hasChanges = false;
+
+        // Store original settings when wizard opens
+        function captureOriginalSettings() {
+            originalSettings = {
+                background_color: $('input[name$="[background_color]"]').val(),
+                form_bg_color: $('input[name$="[form_bg_color]"]').val(),
+                button_bg: $('input[name$="[button_bg]"]').val(),
+                button_text_color: $('input[name$="[button_text_color]"]').val(),
+                logo_id: $('input[name$="[logo_id]"]').val()
+            };
+            hasChanges = false;
+        }
+
+        // Open wizard
+        $startBtn.on('click', function () {
+            captureOriginalSettings();
+            $wizard.addClass('is-visible').show();
+            $cards.hide();
+            goToStep(1);
+        });
+
+        // Exit wizard
+        $exitBtn.on('click', function () {
+            if (hasChanges) {
+                $cancelModal.show();
+            } else {
+                closeWizard(false);
+            }
+        });
+
+        // Cancel modal - Keep Editing
+        $('.ldwp-wizard-cancel-stay').on('click', function () {
+            $cancelModal.hide();
+        });
+
+        // Cancel modal - Exit (revert changes)
+        $('.ldwp-wizard-cancel-confirm').on('click', function () {
+            $cancelModal.hide();
+            if (originalSettings.background_color) {
+                updatePreview('background_color', originalSettings.background_color);
+            }
+            if (originalSettings.form_bg_color) {
+                updatePreview('form_bg_color', originalSettings.form_bg_color);
+            }
+            if (originalSettings.button_bg) {
+                updatePreview('button_bg', originalSettings.button_bg);
+            }
+            closeWizard(false);
+        });
+
+        // Next button
+        $nextBtn.on('click', function () {
+            if (currentStep < totalSteps) {
+                goToStep(currentStep + 1);
+            }
+        });
+
+        // Previous button
+        $prevBtn.on('click', function () {
+            if (currentStep > 1) {
+                goToStep(currentStep - 1);
+            }
+        });
+
+        // Apply button - save and close
+        $applyBtn.on('click', function () {
+            closeWizard(true);
+            $('#logindesignerwp-settings-form').submit();
+        });
+
+        // Step navigation
+        function goToStep(step) {
+            currentStep = step;
+            $('.ldwp-wizard-step').removeClass('is-active');
+            $('.ldwp-wizard-step[data-step="' + step + '"]').addClass('is-active');
+
+            $('.ldwp-wizard-dot').removeClass('is-active is-complete');
+            $('.ldwp-wizard-dot').each(function () {
+                var dotStep = $(this).data('step');
+                if (dotStep < step) $(this).addClass('is-complete');
+                else if (dotStep === step) $(this).addClass('is-active');
+            });
+
+            $('.ldwp-wizard-progress-bar').css('width', (step / totalSteps * 100) + '%');
+            $('.ldwp-step-current').text(step);
+
+            $prevBtn.css('visibility', step === 1 ? 'hidden' : 'visible');
+            if (step === totalSteps) {
+                $nextBtn.hide();
+                $applyBtn.show();
+            } else {
+                $nextBtn.show();
+                $applyBtn.hide();
+            }
+        }
+
+        function closeWizard(applied) {
+            $wizard.removeClass('is-visible').hide();
+            $cards.show();
+            currentStep = 1;
+            if (applied) hasChanges = false;
+        }
+
+        // Preset selection - update live preview
+        $('.ldwp-wizard-preset').not('.is-locked').on('click', function () {
+            var presetName = $(this).data('preset');
+            $('.ldwp-wizard-preset').removeClass('is-selected');
+            $(this).addClass('is-selected');
+            hasChanges = true;
+
+            var presets = {
+                // Free presets
+                'modern-light': {
+                    background_mode: 'solid',
+                    background_color: '#f8fafc',
+                    form_bg_color: '#ffffff',
+                    button_bg: '#3b82f6',
+                    button_text_color: '#ffffff',
+                    below_form_link_color: '#64748b',
+                    label_text_color: '#374151'
+                },
+                'modern-dark': {
+                    background_mode: 'solid',
+                    background_color: '#0f172a',
+                    form_bg_color: '#1e293b',
+                    button_bg: '#3b82f6',
+                    button_text_color: '#ffffff',
+                    below_form_link_color: '#94a3b8',
+                    label_text_color: '#e2e8f0'
+                },
+                'minimal': {
+                    background_mode: 'solid',
+                    background_color: '#ffffff',
+                    form_bg_color: '#ffffff',
+                    button_bg: '#111827',
+                    button_text_color: '#ffffff',
+                    below_form_link_color: '#6b7280',
+                    label_text_color: '#374151'
+                },
+                // Pro presets
+                'glassmorphism': {
+                    background_mode: 'gradient',
+                    background_gradient_1: '#667eea',
+                    background_gradient_2: '#764ba2',
+                    form_bg_color: 'rgba(255,255,255,0.15)',
+                    button_bg: '#ffffff',
+                    button_text_color: '#667eea',
+                    below_form_link_color: '#e0e7ff',
+                    label_text_color: '#ffffff'
+                },
+                'neon-glow': {
+                    background_mode: 'solid',
+                    background_color: '#0a0a0a',
+                    form_bg_color: '#141414',
+                    button_bg: '#22d3ee',
+                    button_text_color: '#0a0a0a',
+                    below_form_link_color: '#67e8f9',
+                    label_text_color: '#22d3ee'
+                },
+                'corporate': {
+                    background_mode: 'gradient',
+                    background_gradient_1: '#1e40af',
+                    background_gradient_2: '#3b82f6',
+                    form_bg_color: '#ffffff',
+                    button_bg: '#1e40af',
+                    button_text_color: '#ffffff',
+                    below_form_link_color: '#ffffff',
+                    label_text_color: '#374151'
+                },
+                'creative': {
+                    background_mode: 'gradient',
+                    background_gradient_1: '#f97316',
+                    background_gradient_2: '#ec4899',
+                    form_bg_color: '#ffffff',
+                    button_bg: '#ec4899',
+                    button_text_color: '#ffffff',
+                    below_form_link_color: '#ffffff',
+                    label_text_color: '#831843'
+                },
+                'ocean': {
+                    background_mode: 'gradient',
+                    background_gradient_1: '#0891b2',
+                    background_gradient_2: '#164e63',
+                    form_bg_color: '#ffffff',
+                    button_bg: '#0891b2',
+                    button_text_color: '#ffffff',
+                    below_form_link_color: '#ffffff',
+                    label_text_color: '#164e63'
+                },
+                'sunset': {
+                    background_mode: 'gradient',
+                    background_gradient_1: '#f97316',
+                    background_gradient_2: '#ec4899',
+                    form_bg_color: '#ffffff',
+                    button_bg: '#ea580c',
+                    button_text_color: '#ffffff',
+                    below_form_link_color: '#ffffff',
+                    label_text_color: '#1f2937'
+                },
+                'forest': {
+                    background_mode: 'gradient',
+                    background_gradient_1: '#14532d',
+                    background_gradient_2: '#166534',
+                    form_bg_color: '#f0fdf4',
+                    button_bg: '#16a34a',
+                    button_text_color: '#ffffff',
+                    below_form_link_color: '#bbf7d0',
+                    label_text_color: '#14532d'
+                },
+                'elegant': {
+                    background_mode: 'solid',
+                    background_color: '#1c1917',
+                    form_bg_color: '#fafaf9',
+                    button_bg: '#78716c',
+                    button_text_color: '#ffffff',
+                    below_form_link_color: '#a8a29e',
+                    label_text_color: '#44403c'
+                },
+                'tech': {
+                    background_mode: 'solid',
+                    background_color: '#18181b',
+                    form_bg_color: '#27272a',
+                    button_bg: '#a855f7',
+                    button_text_color: '#ffffff',
+                    below_form_link_color: '#c4b5fd',
+                    label_text_color: '#a1a1aa'
+                }
+            };
+
+            if (presets[presetName]) {
+                var p = presets[presetName];
+
+                // Update background mode
+                var bgMode = p.background_mode || 'solid';
+                $('input[name="logindesignerwp_settings[background_mode]"][value="' + bgMode + '"]').prop('checked', true);
+
+                // Update background based on mode
+                if (bgMode === 'gradient' && p.background_gradient_1 && p.background_gradient_2) {
+                    $previewContainer.data('gradient-1', p.background_gradient_1);
+                    $previewContainer.data('gradient-2', p.background_gradient_2);
+                    $('input[name="logindesignerwp_settings[background_gradient_1]"]').val(p.background_gradient_1);
+                    $('input[name="logindesignerwp_settings[background_gradient_2]"]').val(p.background_gradient_2);
+                } else if (p.background_color) {
+                    $previewContainer.data('bg-color', p.background_color);
+                    $('input[name$="[background_color]"]').val(p.background_color);
+                }
+
+                // Apply background preview
+                applyBackgroundPreview();
+
+                // Update form and button colors
+                updatePreview('form_bg_color', p.form_bg_color);
+                updatePreview('button_bg', p.button_bg);
+                updatePreview('button_text_color', p.button_text_color);
+
+                // Update below form link color
+                if (p.below_form_link_color) {
+                    updatePreview('below_form_link_color', p.below_form_link_color);
+                    $('input[name$="[below_form_link_color]"]').val(p.below_form_link_color);
+                }
+
+                // Update label color
+                if (p.label_text_color) {
+                    updatePreview('label_text_color', p.label_text_color);
+                    $('input[name$="[label_text_color]"]').val(p.label_text_color);
+                }
+
+                // Update wizard color inputs
+                if (p.background_color) {
+                    $('.ldwp-wizard-color[data-setting="background_color"]').val(p.background_color);
+                }
+                $('.ldwp-wizard-color[data-setting="form_bg_color"]').val(p.form_bg_color);
+                $('.ldwp-wizard-color[data-setting="button_bg"]').val(p.button_bg);
+                $('.ldwp-wizard-color[data-setting="button_text_color"]').val(p.button_text_color);
+
+                // Update form fields
+                $('input[name$="[form_bg_color]"]').val(p.form_bg_color);
+                $('input[name$="[button_bg]"]').val(p.button_bg);
+                $('input[name$="[button_text_color]"]').val(p.button_text_color);
+            }
+        });
+
+        // Wizard color inputs
+        $('.ldwp-wizard-color').on('input change', function () {
+            var setting = $(this).data('setting');
+            var value = $(this).val();
+            hasChanges = true;
+            updatePreview(setting, value);
+            $('input[name$="[' + setting + ']"]').val(value);
+        });
+
+        // Logo upload
+        $('.ldwp-wizard-logo-btn, .ldwp-wizard-logo-upload-area').on('click', function (e) {
+            e.preventDefault();
+            var frame = wp.media({ title: 'Select Logo', multiple: false, library: { type: 'image' } });
+            frame.on('select', function () {
+                var attachment = frame.state().get('selection').first().toJSON();
+                hasChanges = true;
+                $('.ldwp-wizard-logo-upload-area').hide();
+                $('.ldwp-wizard-logo-preview-area').show();
+                $('.ldwp-wizard-logo-img').attr('src', attachment.url);
+                $('input[name$="[logo_id]"]').val(attachment.id);
+                if ($previewLogoImg && $previewLogoImg.length) {
+                    $previewLogoImg.attr('src', attachment.url);
+                }
+            });
+            frame.open();
+        });
+
+        $('.ldwp-wizard-logo-remove').on('click', function () {
+            $('.ldwp-wizard-logo-upload-area').show();
+            $('.ldwp-wizard-logo-preview-area').hide();
+            $('input[name$="[logo_id]"]').val('');
+            hasChanges = true;
+        });
+
+        // Dot navigation
+        $('.ldwp-wizard-dot').on('click', function () {
+            goToStep($(this).data('step'));
+        });
+
+        // Background type toggle (Solid / Gradient / Image)
+        $('.ldwp-wizard-bg-type').on('click', function () {
+            var type = $(this).data('type');
+            $('.ldwp-wizard-bg-type').removeClass('is-active');
+            $(this).addClass('is-active');
+
+            $('.ldwp-wizard-bg-panel').removeClass('is-active');
+            $('.ldwp-wizard-bg-panel[data-panel="' + type + '"]').addClass('is-active');
+            hasChanges = true;
+
+            // Apply the type change to preview
+            if (type === 'solid') {
+                var solidColor = $('.ldwp-wizard-color[data-setting="background_color"]').val();
+                $previewBg.css('background', solidColor);
+            } else if (type === 'gradient') {
+                applyGradientPreview();
+            }
+            // Image handled separately
+        });
+
+        // Gradient color updates
+        $('.ldwp-wizard-color[data-setting="gradient_start"], .ldwp-wizard-color[data-setting="gradient_end"]').on('input change', function () {
+            hasChanges = true;
+            applyGradientPreview();
+        });
+
+        $('.ldwp-wizard-select[data-setting="gradient_direction"]').on('change', function () {
+            hasChanges = true;
+            applyGradientPreview();
+        });
+
+        function applyGradientPreview() {
+            var start = $('.ldwp-wizard-color[data-setting="gradient_start"]').val() || '#667eea';
+            var end = $('.ldwp-wizard-color[data-setting="gradient_end"]').val() || '#764ba2';
+            var dir = $('.ldwp-wizard-select[data-setting="gradient_direction"]').val() || '135deg';
+            var gradient = 'linear-gradient(' + dir + ', ' + start + ', ' + end + ')';
+            if ($previewBg && $previewBg.length) {
+                $previewBg.css('background', gradient);
+            }
+        }
+
+        // Background image upload
+        $('.ldwp-wizard-image-btn').on('click', function (e) {
+            e.preventDefault();
+            var frame = wp.media({ title: 'Select Background', multiple: false, library: { type: 'image' } });
+            frame.on('select', function () {
+                var attachment = frame.state().get('selection').first().toJSON();
+                hasChanges = true;
+                $('.ldwp-wizard-image-preview').show().find('img').attr('src', attachment.url);
+                $('input[name$="[background_image]"]').val(attachment.id);
+                if ($previewBg && $previewBg.length) {
+                    $previewBg.css({
+                        'background': 'url(' + attachment.url + ') center/cover no-repeat'
+                    });
+                }
+            });
+            frame.open();
+        });
+
+        $('.ldwp-wizard-image-remove').on('click', function () {
+            $('.ldwp-wizard-image-preview').hide().find('img').attr('src', '');
+            $('input[name$="[background_image]"]').val('');
+            var solidColor = $('.ldwp-wizard-color[data-setting="background_color"]').val() || '#f0f0f1';
+            if ($previewBg && $previewBg.length) {
+                $previewBg.css('background', solidColor);
+            }
+            hasChanges = true;
+        });
+
+        // Range sliders (logo spacing, roundness)
+        $('.ldwp-wizard-range').on('input', function () {
+            var $slider = $(this);
+            var setting = $slider.data('setting');
+            var value = $slider.val();
+            hasChanges = true;
+
+            // Update value display
+            $slider.siblings('.ldwp-wizard-range-value').text(value);
+
+            // Apply to preview
+            if (setting === 'logo_padding') {
+                if ($previewLogo && $previewLogo.length) {
+                    $previewLogo.css('padding', value + 'px');
+                }
+                $('input[name$="[logo_padding]"]').val(value);
+            } else if (setting === 'logo_border_radius') {
+                if ($previewLogo && $previewLogo.length) {
+                    $previewLogo.css('border-radius', value + 'px');
+                }
+                $('input[name$="[logo_border_radius]"]').val(value);
+            }
+        });
+
+        // Logo background color
+        $('.ldwp-wizard-color[data-setting="logo_bg_color"]').on('input change', function () {
+            var value = $(this).val();
+            hasChanges = true;
+            if ($previewLogo && $previewLogo.length) {
+                $previewLogo.css('background-color', value || 'transparent');
+            }
+            $('input[name$="[logo_bg_color]"]').val(value);
+        });
+
+        // Update total steps to 3
+        totalSteps = 3;
+    }
+
+    /**
      * Document ready.
      */
     $(document).ready(function () {
@@ -2097,6 +2643,8 @@
         initBackgroundToggle();
         initNumberInputs();
         initCornerSelectors();
+        initPositionGrid();
+        initStyleCards();
         initCheckboxes();
         initButtonHover();
         initStickyPreview();
@@ -2113,6 +2661,11 @@
         initAISettingsSave();
         initSocialSettingsSave();
         initResetDefaults();
+        initInlineWizard();
+
+        // Expose functions globally for preset AJAX updates
+        window.ldwpApplyPreview = applyInitialPreview;
+        window.ldwpUpdatePreview = updatePreview;
 
         // Apply initial preview after a short delay to ensure color pickers are ready
         setTimeout(applyInitialPreview, 100);
