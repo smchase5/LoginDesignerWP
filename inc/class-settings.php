@@ -338,7 +338,7 @@ class LoginDesignerWP_Settings
                             <!-- Preview Column -->
                             <div class="logindesignerwp-design-preview">
                                 <div class="logindesignerwp-preview-sticky">
-                                    <div class="logindesignerwp-preview-container"
+                                    <div class="logindesignerwp-preview-container is-preview-loading"
                                         data-bg-image="<?php echo esc_url($bg_image_url); ?>"
                                         data-logo-url="<?php echo esc_url($logo_url); ?>">
                                         <span class="logindesignerwp-preview-badge" id="ldwp-preview-status">

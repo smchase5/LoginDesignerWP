@@ -1015,6 +1015,9 @@
 
         // Mark initialization complete so future changes trigger unsaved state
         PreviewStatus.finishInitializing();
+
+        // Remove loading state from preview
+        $('.logindesignerwp-preview-container').removeClass('is-preview-loading');
     }
 
     /**
