@@ -1009,6 +1009,94 @@
 }
 
 /* ========================================
+   Background Type Selector Component
+   ======================================== */
+.ldwp-bg-type-selector {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.ldwp-bg-type-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #fff;
+    min-width: 80px;
+}
+
+.ldwp-bg-type-option:hover {
+    border-color: #2271b1;
+    background: #f6f7f7;
+}
+
+.ldwp-bg-type-option.is-active {
+    border-color: #2271b1;
+    background: #f0f6fc;
+}
+
+.ldwp-bg-type-preview {
+    width: 48px;
+    height: 32px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    overflow: hidden;
+}
+
+/* Solid preview - single color fill */
+.ldwp-bg-type-solid {
+    background: #2271b1;
+}
+
+/* Gradient preview - diagonal gradient */
+.ldwp-bg-type-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Image preview - landscape icon */
+.ldwp-bg-type-image {
+    background: #f0f0f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.ldwp-bg-type-image::before {
+    content: '';
+    width: 24px;
+    height: 20px;
+    background: #718096;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z'/%3E%3C/svg%3E");
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z'/%3E%3C/svg%3E");
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+}
+
+.ldwp-bg-type-option span {
+    font-size: 11px;
+    color: #50575e;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.ldwp-bg-type-option.is-active span {
+    color: #2271b1;
+    font-weight: 600;
+}
+
+/* ========================================
    Position Grid (9-position selector)
    ======================================== */
 .ldwp-position-grid {

@@ -235,20 +235,20 @@ $is_pro = function_exists('logindesignerwp_is_pro_active') && logindesignerwp_is
                 <p><?php esc_html_e('Choose your background style and customize it.', 'logindesignerwp'); ?></p>
             </div>
             <div class="ldwp-wizard-step-content">
-                <!-- Background Type Selector -->
-                <div class="ldwp-wizard-bg-types">
-                    <button type="button" class="ldwp-wizard-bg-type is-active" data-type="solid">
-                        <span class="dashicons dashicons-admin-appearance"></span>
-                        <?php esc_html_e('Solid Color', 'logindesignerwp'); ?>
-                    </button>
-                    <button type="button" class="ldwp-wizard-bg-type" data-type="gradient">
-                        <span class="dashicons dashicons-art"></span>
-                        <?php esc_html_e('Gradient', 'logindesignerwp'); ?>
-                    </button>
-                    <button type="button" class="ldwp-wizard-bg-type" data-type="image">
-                        <span class="dashicons dashicons-format-image"></span>
-                        <?php esc_html_e('Image', 'logindesignerwp'); ?>
-                    </button>
+                <!-- Background Type Selector - Visual Style -->
+                <div class="ldwp-wizard-bg-type-selector" data-setting="background_mode">
+                    <label class="ldwp-wizard-bg-type-option is-active" data-value="solid">
+                        <div class="ldwp-wizard-bg-type-preview ldwp-wizard-bg-type-solid"></div>
+                        <span><?php esc_html_e('Solid', 'logindesignerwp'); ?></span>
+                    </label>
+                    <label class="ldwp-wizard-bg-type-option" data-value="gradient">
+                        <div class="ldwp-wizard-bg-type-preview ldwp-wizard-bg-type-gradient"></div>
+                        <span><?php esc_html_e('Gradient', 'logindesignerwp'); ?></span>
+                    </label>
+                    <label class="ldwp-wizard-bg-type-option" data-value="image">
+                        <div class="ldwp-wizard-bg-type-preview ldwp-wizard-bg-type-image"></div>
+                        <span><?php esc_html_e('Image', 'logindesignerwp'); ?></span>
+                    </label>
                 </div>
 
                 <!-- Solid Color Options -->
@@ -262,43 +262,123 @@ $is_pro = function_exists('logindesignerwp_is_pro_active') && logindesignerwp_is
                 <!-- Gradient Options -->
                 <div class="ldwp-wizard-bg-panel" data-panel="gradient">
                     <div class="ldwp-wizard-control-row">
+                        <label><?php esc_html_e('Gradient Type', 'logindesignerwp'); ?></label>
+                        <div class="ldwp-wizard-control-group">
+                            <select class="ldwp-wizard-select" data-setting="gradient_type">
+                                <option value="linear"><?php esc_html_e('Linear', 'logindesignerwp'); ?></option>
+                                <option value="radial"><?php esc_html_e('Radial', 'logindesignerwp'); ?></option>
+                            </select>
+                            <button type="button" class="ldwp-wizard-randomize-btn"
+                                title="<?php esc_attr_e('Randomize Colors', 'logindesignerwp'); ?>">
+                                <span class="dashicons dashicons-randomize"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Linear Angle -->
+                    <div class="ldwp-wizard-control-row ldwp-wizard-gradient-linear-opt">
+                        <label><?php esc_html_e('Angle', 'logindesignerwp'); ?></label>
+                        <div class="ldwp-wizard-range-wrapper">
+                            <input type="range" class="ldwp-wizard-range" data-setting="gradient_angle" min="0"
+                                max="360" value="135">
+                            <span class="ldwp-wizard-range-value">135°</span>
+                        </div>
+                    </div>
+
+                    <!-- Radial Position -->
+                    <div class="ldwp-wizard-control-row ldwp-wizard-gradient-radial-opt" style="display:none;">
+                        <label><?php esc_html_e('Position', 'logindesignerwp'); ?></label>
+                        <select class="ldwp-wizard-select" data-setting="gradient_position">
+                            <option value="center center"><?php esc_html_e('Center', 'logindesignerwp'); ?></option>
+                            <option value="top left"><?php esc_html_e('Top Left', 'logindesignerwp'); ?></option>
+                            <option value="top center"><?php esc_html_e('Top Center', 'logindesignerwp'); ?></option>
+                            <option value="top right"><?php esc_html_e('Top Right', 'logindesignerwp'); ?></option>
+                            <option value="center left"><?php esc_html_e('Center Left', 'logindesignerwp'); ?></option>
+                            <option value="center right"><?php esc_html_e('Center Right', 'logindesignerwp'); ?>
+                            </option>
+                            <option value="bottom left"><?php esc_html_e('Bottom Left', 'logindesignerwp'); ?></option>
+                            <option value="bottom center"><?php esc_html_e('Bottom Center', 'logindesignerwp'); ?>
+                            </option>
+                            <option value="bottom right"><?php esc_html_e('Bottom Right', 'logindesignerwp'); ?>
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="ldwp-wizard-control-row">
                         <label><?php esc_html_e('Start Color', 'logindesignerwp'); ?></label>
-                        <input type="text" class="ldwp-wizard-color" data-setting="gradient_start" value="#667eea">
+                        <input type="text" class="ldwp-wizard-color" data-setting="background_gradient_1"
+                            value="#667eea">
                     </div>
                     <div class="ldwp-wizard-control-row">
                         <label><?php esc_html_e('End Color', 'logindesignerwp'); ?></label>
-                        <input type="text" class="ldwp-wizard-color" data-setting="gradient_end" value="#764ba2">
-                    </div>
-                    <div class="ldwp-wizard-control-row">
-                        <label><?php esc_html_e('Direction', 'logindesignerwp'); ?></label>
-                        <select class="ldwp-wizard-select" data-setting="gradient_direction">
-                            <option value="135deg"><?php esc_html_e('Diagonal ↘', 'logindesignerwp'); ?></option>
-                            <option value="to right"><?php esc_html_e('Horizontal →', 'logindesignerwp'); ?></option>
-                            <option value="to bottom"><?php esc_html_e('Vertical ↓', 'logindesignerwp'); ?></option>
-                            <option value="45deg"><?php esc_html_e('Diagonal ↗', 'logindesignerwp'); ?></option>
-                        </select>
+                        <input type="text" class="ldwp-wizard-color" data-setting="background_gradient_2"
+                            value="#764ba2">
                     </div>
                 </div>
 
                 <!-- Image Options -->
                 <div class="ldwp-wizard-bg-panel" data-panel="image">
+                    <!-- Image Upload Area -->
                     <div class="ldwp-wizard-image-upload">
                         <div class="ldwp-wizard-image-preview" style="display: none;">
                             <img src="" alt="Background preview">
                             <button type="button" class="ldwp-wizard-image-remove">&times;</button>
                         </div>
-                        <button type="button" class="ldwp-wizard-image-btn button">
-                            <span class="dashicons dashicons-upload"></span>
-                            <?php esc_html_e('Select Background Image', 'logindesignerwp'); ?>
-                        </button>
+                        <div class="ldwp-wizard-upload-buttons">
+                            <button type="button" class="ldwp-wizard-image-btn button">
+                                <span class="dashicons dashicons-upload"></span>
+                                <?php esc_html_e('Select Image', 'logindesignerwp'); ?>
+                            </button>
+                            <?php if ($is_pro): ?>
+                                <button type="button" class="button ldwp-wizard-ai-generate-btn">
+                                    <span class="dashicons dashicons-superhero"></span>
+                                    <?php esc_html_e('AI Generate', 'logindesignerwp'); ?>
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <!-- Image Settings -->
+                    <div class="ldwp-wizard-image-settings">
+                        <div class="ldwp-wizard-control-row">
+                            <label><?php esc_html_e('Size', 'logindesignerwp'); ?></label>
+                            <select class="ldwp-wizard-select" data-setting="background_image_size">
+                                <option value="cover"><?php esc_html_e('Cover', 'logindesignerwp'); ?></option>
+                                <option value="contain"><?php esc_html_e('Contain', 'logindesignerwp'); ?></option>
+                                <option value="auto"><?php esc_html_e('Auto', 'logindesignerwp'); ?></option>
+                            </select>
+                        </div>
+                        <div class="ldwp-wizard-control-row">
+                            <label><?php esc_html_e('Position', 'logindesignerwp'); ?></label>
+                            <select class="ldwp-wizard-select" data-setting="background_image_pos">
+                                <option value="center"><?php esc_html_e('Center', 'logindesignerwp'); ?></option>
+                                <option value="top"><?php esc_html_e('Top', 'logindesignerwp'); ?></option>
+                                <option value="bottom"><?php esc_html_e('Bottom', 'logindesignerwp'); ?></option>
+                            </select>
+                        </div>
+                        <div class="ldwp-wizard-control-row">
+                            <label><?php esc_html_e('Repeat', 'logindesignerwp'); ?></label>
+                            <select class="ldwp-wizard-select" data-setting="background_image_repeat">
+                                <option value="no-repeat"><?php esc_html_e('No Repeat', 'logindesignerwp'); ?></option>
+                                <option value="repeat"><?php esc_html_e('Repeat', 'logindesignerwp'); ?></option>
+                            </select>
+                        </div>
+                        <div class="ldwp-wizard-control-row">
+                            <label><?php esc_html_e('Blur', 'logindesignerwp'); ?></label>
+                            <div class="ldwp-wizard-range-wrapper">
+                                <input type="range" class="ldwp-wizard-range" data-setting="background_blur" min="0"
+                                    max="20" value="0">
+                                <span class="ldwp-wizard-range-value">0px</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Pro Feature: AI Background -->
+                <!-- Pro Feature: AI Background Teaser (Free users only) -->
                 <?php if (!$is_pro): ?>
                     <div class="ldwp-wizard-pro-teaser">
                         <div class="ldwp-wizard-pro-teaser-icon">
-                            <span class="dashicons dashicons-admin-site-alt3"></span>
+                            <span class="dashicons dashicons-superhero"></span>
                         </div>
                         <div class="ldwp-wizard-pro-teaser-content">
                             <h5><?php esc_html_e('AI Background Generator', 'logindesignerwp'); ?></h5>
@@ -311,6 +391,7 @@ $is_pro = function_exists('logindesignerwp_is_pro_active') && logindesignerwp_is
             </div>
         </div>
 
+
         <!-- Step 3: Logo Setup -->
         <div class="ldwp-wizard-step" data-step="3">
             <div class="ldwp-wizard-step-header">
@@ -322,7 +403,7 @@ $is_pro = function_exists('logindesignerwp_is_pro_active') && logindesignerwp_is
                 <div class="ldwp-wizard-logo-section">
                     <div class="ldwp-wizard-logo-upload-area">
                         <span class="dashicons dashicons-format-image"></span>
-                        <p><?php esc_html_e('Drop your logo here or click to upload', 'logindesignerwp'); ?></p>
+                        <p><?php esc_html_e('Click to upload your logo', 'logindesignerwp'); ?></p>
                         <button type="button"
                             class="button ldwp-wizard-logo-btn"><?php esc_html_e('Select Logo', 'logindesignerwp'); ?></button>
                     </div>
@@ -335,25 +416,52 @@ $is_pro = function_exists('logindesignerwp_is_pro_active') && logindesignerwp_is
 
                 <!-- Logo Options -->
                 <div class="ldwp-wizard-logo-options">
+                    <!-- Logo Size -->
                     <div class="ldwp-wizard-control-row">
-                        <label><?php esc_html_e('Logo Background', 'logindesignerwp'); ?></label>
-                        <input type="text" class="ldwp-wizard-color" data-setting="logo_bg_color" value="">
-                        <span
-                            class="ldwp-wizard-hint"><?php esc_html_e('Leave empty for transparent', 'logindesignerwp'); ?></span>
+                        <label><?php esc_html_e('Width (px)', 'logindesignerwp'); ?></label>
+                        <input type="number" class="ldwp-wizard-number" data-setting="logo_width" value="84" min="20" max="500">
                     </div>
                     <div class="ldwp-wizard-control-row">
-                        <label><?php esc_html_e('Spacing (px)', 'logindesignerwp'); ?></label>
-                        <input type="range" class="ldwp-wizard-range" data-setting="logo_padding" min="0" max="50"
-                            value="20">
-                        <span class="ldwp-wizard-range-value">20</span>
+                        <label><?php esc_html_e('Height (px)', 'logindesignerwp'); ?></label>
+                        <input type="number" class="ldwp-wizard-number" data-setting="logo_height" value="84" min="20" max="500">
                     </div>
+                    
+                    <!-- Logo Corners - Visual Selector -->
+                    <div class="ldwp-wizard-control-row ldwp-wizard-control-row-block">
+                        <label><?php esc_html_e('Logo Corners', 'logindesignerwp'); ?></label>
+                        <div class="ldwp-wizard-corner-selector" data-setting="logo_border_radius">
+                            <label class="ldwp-wizard-corner-option is-active" data-value="0">
+                                <div class="ldwp-wizard-corner-preview" style="border-radius: 0;"></div>
+                                <span><?php esc_html_e('Square', 'logindesignerwp'); ?></span>
+                            </label>
+                            <label class="ldwp-wizard-corner-option" data-value="8">
+                                <div class="ldwp-wizard-corner-preview" style="border-radius: 8px;"></div>
+                                <span><?php esc_html_e('Rounded', 'logindesignerwp'); ?></span>
+                            </label>
+                            <label class="ldwp-wizard-corner-option" data-value="50">
+                                <div class="ldwp-wizard-corner-preview" style="border-radius: 50%;"></div>
+                                <span><?php esc_html_e('Circle', 'logindesignerwp'); ?></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Bottom Margin -->
                     <div class="ldwp-wizard-control-row">
-                        <label><?php esc_html_e('Roundness (px)', 'logindesignerwp'); ?></label>
-                        <input type="range" class="ldwp-wizard-range" data-setting="logo_border_radius" min="0" max="50"
-                            value="0">
-                        <span class="ldwp-wizard-range-value">0</span>
+                        <label><?php esc_html_e('Bottom Margin', 'logindesignerwp'); ?></label>
+                        <div class="ldwp-wizard-range-wrapper">
+                            <input type="range" class="ldwp-wizard-range" data-setting="logo_bottom_margin" min="0" max="50" value="0">
+                            <span class="ldwp-wizard-range-value">0px</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Background Color -->
+                    <div class="ldwp-wizard-control-row">
+                        <label><?php esc_html_e('Background Color', 'logindesignerwp'); ?></label>
+                        <input type="text" class="ldwp-wizard-color" data-setting="logo_background_color" value="">
+                        <span class="ldwp-wizard-hint"><?php esc_html_e('Optional', 'logindesignerwp'); ?></span>
                     </div>
                 </div>
+
 
                 <!-- Pro Features Teaser -->
                 <?php if (!$is_pro): ?>

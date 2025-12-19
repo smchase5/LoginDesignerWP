@@ -562,23 +562,28 @@ class LoginDesignerWP_Settings
                         <tr>
                             <th scope="row"><?php esc_html_e('Background Type', 'logindesignerwp'); ?></th>
                             <td>
-                                <fieldset>
-                                    <label>
-                                        <input type="radio" name="<?php echo esc_attr($this->option_name); ?>[background_mode]"
-                                            value="solid" <?php checked($settings['background_mode'], 'solid'); ?>>
-                                        <?php esc_html_e('Solid Color', 'logindesignerwp'); ?>
-                                    </label><br>
-                                    <label>
-                                        <input type="radio" name="<?php echo esc_attr($this->option_name); ?>[background_mode]"
-                                            value="gradient" <?php checked($settings['background_mode'], 'gradient'); ?>>
-                                        <?php esc_html_e('Gradient', 'logindesignerwp'); ?>
-                                    </label><br>
-                                    <label>
-                                        <input type="radio" name="<?php echo esc_attr($this->option_name); ?>[background_mode]"
-                                            value="image" <?php checked($settings['background_mode'], 'image'); ?>>
-                                        <?php esc_html_e('Image', 'logindesignerwp'); ?>
+                                <input type="hidden" name="<?php echo esc_attr($this->option_name); ?>[background_mode]"
+                                    value="<?php echo esc_attr($settings['background_mode']); ?>" class="ldwp-bg-mode-value">
+                                <div class="ldwp-bg-type-selector" data-setting="background_mode">
+                                    <label
+                                        class="ldwp-bg-type-option<?php echo ($settings['background_mode'] === 'solid') ? ' is-active' : ''; ?>"
+                                        data-value="solid">
+                                        <div class="ldwp-bg-type-preview ldwp-bg-type-solid"></div>
+                                        <span><?php esc_html_e('Solid', 'logindesignerwp'); ?></span>
                                     </label>
-                                </fieldset>
+                                    <label
+                                        class="ldwp-bg-type-option<?php echo ($settings['background_mode'] === 'gradient') ? ' is-active' : ''; ?>"
+                                        data-value="gradient">
+                                        <div class="ldwp-bg-type-preview ldwp-bg-type-gradient"></div>
+                                        <span><?php esc_html_e('Gradient', 'logindesignerwp'); ?></span>
+                                    </label>
+                                    <label
+                                        class="ldwp-bg-type-option<?php echo ($settings['background_mode'] === 'image') ? ' is-active' : ''; ?>"
+                                        data-value="image">
+                                        <div class="ldwp-bg-type-preview ldwp-bg-type-image"></div>
+                                        <span><?php esc_html_e('Image', 'logindesignerwp'); ?></span>
+                                    </label>
+                                </div>
                             </td>
                         </tr>
                     </table>

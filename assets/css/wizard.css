@@ -765,3 +765,284 @@
     color: #047857;
     font-size: 13px;
 }
+
+/* ========================================
+   Visual Background Type Selector (New)
+   ======================================== */
+.ldwp-wizard-bg-type-selector {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.ldwp-wizard-bg-type-option {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ldwp-wizard-bg-type-option:hover {
+    border-color: #2271b1;
+    background: #f8fbfd;
+}
+
+.ldwp-wizard-bg-type-option.is-active {
+    border-color: #2271b1;
+    background: #e8f4fc;
+    box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.15);
+}
+
+.ldwp-wizard-bg-type-option span {
+    font-size: 12px;
+    font-weight: 500;
+    color: #555;
+}
+
+.ldwp-wizard-bg-type-option.is-active span {
+    color: #2271b1;
+}
+
+.ldwp-wizard-bg-type-preview {
+    width: 48px;
+    height: 32px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.ldwp-wizard-bg-type-solid {
+    background: #f0f0f1;
+}
+
+.ldwp-wizard-bg-type-gradient {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.ldwp-wizard-bg-type-image {
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23999" d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>') center/60% no-repeat #f0f0f1;
+}
+
+/* ========================================
+   Logo Corner Selector (Visual)
+   ======================================== */
+.ldwp-wizard-corner-selector {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.ldwp-wizard-corner-option {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 8px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ldwp-wizard-corner-option:hover {
+    border-color: #2271b1;
+    background: #f8fbfd;
+}
+
+.ldwp-wizard-corner-option.is-active {
+    border-color: #2271b1;
+    background: #e8f4fc;
+}
+
+.ldwp-wizard-corner-preview {
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, #2271b1, #135e96);
+}
+
+.ldwp-wizard-corner-option span {
+    font-size: 11px;
+    color: #666;
+}
+
+.ldwp-wizard-corner-option.is-active span {
+    color: #2271b1;
+    font-weight: 500;
+}
+
+/* ========================================
+   Range Wrapper with Value Display
+   ======================================== */
+.ldwp-wizard-range-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ldwp-wizard-range-wrapper .ldwp-wizard-range {
+    flex: 1;
+    max-width: 120px;
+}
+
+.ldwp-wizard-range-wrapper .ldwp-wizard-range-value {
+    min-width: 40px;
+    text-align: right;
+    font-size: 13px;
+    color: #2271b1;
+    font-weight: 600;
+}
+
+/* ========================================
+   Number Inputs
+   ======================================== */
+.ldwp-wizard-number {
+    width: 80px;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+    text-align: center;
+}
+
+.ldwp-wizard-number:focus {
+    border-color: #2271b1;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.15);
+}
+
+/* ========================================
+   Control Group (for inline elements)
+   ======================================== */
+.ldwp-wizard-control-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ldwp-wizard-control-row-block {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.ldwp-wizard-control-row-block label {
+    margin-bottom: 8px;
+}
+
+.ldwp-wizard-control-row-block .ldwp-wizard-corner-selector {
+    width: 100%;
+}
+
+/* ========================================
+   Randomize Button
+   ======================================== */
+.ldwp-wizard-randomize-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ldwp-wizard-randomize-btn:hover {
+    border-color: #2271b1;
+    background: #f8fbfd;
+}
+
+.ldwp-wizard-randomize-btn .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: #666;
+}
+
+.ldwp-wizard-randomize-btn:hover .dashicons {
+    color: #2271b1;
+}
+
+/* ========================================
+   Upload Buttons (Image + AI)
+   ======================================== */
+.ldwp-wizard-upload-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.ldwp-wizard-ai-generate-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ldwp-wizard-ai-generate-btn:hover {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    transform: translateY(-1px);
+}
+
+.ldwp-wizard-ai-generate-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.ldwp-wizard-ai-generate-btn .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* ========================================
+   Image Settings Panel
+   ======================================== */
+.ldwp-wizard-image-settings {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+}
+
+/* ========================================
+   Responsive Adjustments
+   ======================================== */
+@media (max-width: 600px) {
+    .ldwp-wizard-bg-type-selector {
+        flex-direction: column;
+    }
+
+    .ldwp-wizard-corner-selector {
+        flex-wrap: wrap;
+    }
+
+    .ldwp-wizard-upload-buttons {
+        flex-direction: column;
+    }
+
+    .ldwp-wizard-upload-buttons .button,
+    .ldwp-wizard-ai-generate-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

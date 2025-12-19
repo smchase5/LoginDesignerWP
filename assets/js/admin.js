@@ -20,6 +20,19 @@
         $previewSocialBtns,
         $previewContainer;
 
+    // Simple object to cache preview values (more reliable than jQuery .data())
+    var previewCache = {
+        bgMode: '',
+        bgColor: '',
+        gradient1: '',
+        gradient2: '',
+        gradient3: '',
+        gradientType: 'linear',
+        gradientAngle: 135,
+        gradientPosition: 'center center',
+        bgImage: ''
+    };
+
     /**
      * Preview Status Indicator Module
      * Manages "Live" / "Updating..." state with debounced burst detection
@@ -352,13 +365,14 @@
     }
 
     /**
-     * Initialize background mode toggling.
+     * Initialize background mode toggling (visual selector).
      */
     function initBackgroundToggle() {
-        var $modeInputs = $('input[name="logindesignerwp_settings[background_mode]"]');
+        var $modeInput = $('input.ldwp-bg-mode-value');
+        var $selector = $('.ldwp-bg-type-selector');
 
         function toggleBackgroundOptions() {
-            var mode = $modeInputs.filter(':checked').val();
+            var mode = $modeInput.val();
 
             // Hide all options.
             $('.logindesignerwp-bg-options').hide();
@@ -373,8 +387,21 @@
         // Initial state.
         toggleBackgroundOptions();
 
-        // On change.
-        $modeInputs.on('change', toggleBackgroundOptions);
+        // Click handler for visual selector cards
+        $selector.on('click', '.ldwp-bg-type-option', function () {
+            var $option = $(this);
+            var value = $option.data('value');
+
+            // Update active state
+            $selector.find('.ldwp-bg-type-option').removeClass('is-active');
+            $option.addClass('is-active');
+
+            // Update hidden input value
+            $modeInput.val(value);
+
+            // Toggle options and update preview
+            toggleBackgroundOptions();
+        });
 
         initGradientControls();
         initRandomizer();
@@ -658,37 +685,56 @@
         switch (setting) {
             // Background settings
             case 'background_mode':
+                // Cache the mode value and update hidden input
+                previewCache.bgMode = value;
+                $('input.ldwp-bg-mode-value').val(value);
                 applyBackgroundPreview();
                 break;
 
             case 'background_color':
-                $previewContainer.data('bg-color', value);
+                previewCache.bgColor = value;
                 applyBackgroundPreview();
                 break;
 
             case 'background_gradient_1':
-                $previewContainer.data('gradient-1', value);
+                previewCache.gradient1 = value;
+                $('input[name="logindesignerwp_settings[background_gradient_1]"]').val(value);
                 applyBackgroundPreview();
                 break;
 
             case 'background_gradient_2':
-                $previewContainer.data('gradient-2', value);
+                previewCache.gradient2 = value;
+                $('input[name="logindesignerwp_settings[background_gradient_2]"]').val(value);
                 applyBackgroundPreview();
                 break;
 
             case 'background_gradient_3':
-                $previewContainer.data('gradient-3', value);
+                previewCache.gradient3 = value;
+                $('input[name="logindesignerwp_settings[background_gradient_3]"]').val(value);
                 applyBackgroundPreview();
                 break;
 
             case 'gradient_type':
+                previewCache.gradientType = value;
+                $('select[name="logindesignerwp_settings[gradient_type]"]').val(value);
+                applyBackgroundPreview();
+                break;
+
             case 'gradient_angle':
+                previewCache.gradientAngle = value;
+                $('input[name="logindesignerwp_settings[gradient_angle]"]').val(value);
+                applyBackgroundPreview();
+                break;
+
             case 'gradient_position':
+                previewCache.gradientPosition = value;
+                $('select[name="logindesignerwp_settings[gradient_position]"]').val(value);
                 applyBackgroundPreview();
                 break;
 
             case 'background_image':
-                $previewContainer.data('bg-image', value);
+                previewCache.bgImage = value;
+                $('input[name="logindesignerwp_settings[background_image]"]').val(value);
                 applyBackgroundPreview();
                 break;
 
@@ -710,8 +756,15 @@
                 break;
 
             case 'form_shadow_enable':
-                if (value) {
-                    $previewForm.css('box-shadow', '0 4px 24px rgba(0,0,0,0.25)');
+            case 'form_shadow_color':
+                var enableShadow = setting === 'form_shadow_enable' ? value : $('input[name="logindesignerwp_settings[form_shadow_enable]"]').is(':checked');
+                // Check if value is boolean true, string "1", "on", or "true"
+                var isEnabled = enableShadow === true || enableShadow === '1' || enableShadow === 1 || enableShadow === 'true' || enableShadow === 'on';
+
+                if (isEnabled) {
+                    var shadowColor = setting === 'form_shadow_color' ? value : $('input[name="logindesignerwp_settings[form_shadow_color]"]').val();
+                    if (!shadowColor) shadowColor = 'rgba(0,0,0,0.25)';
+                    $previewForm.css('box-shadow', '0 4px 24px ' + shadowColor);
                 } else {
                     $previewForm.css('box-shadow', 'none');
                 }
@@ -883,26 +936,26 @@
      * Apply background preview based on current mode.
      */
     function applyBackgroundPreview() {
-        var mode = $('input[name="logindesignerwp_settings[background_mode]"]:checked').val();
+        // Use previewCache (reliable) first, then fall back to DOM inputs
+        var mode = previewCache.bgMode || $('input.ldwp-bg-mode-value').val() || $('input[name="logindesignerwp_settings[background_mode]"]').val();
 
-        // Use cached data for live updates to avoid timing issues with color picker
-        var bgColor = $previewContainer.data('bg-color') || $('input[name="logindesignerwp_settings[background_color]"]').val();
-        var gradient1 = $previewContainer.data('gradient-1') || $('input[name="logindesignerwp_settings[background_gradient_1]"]').val();
-        var gradient2 = $previewContainer.data('gradient-2') || $('input[name="logindesignerwp_settings[background_gradient_2]"]').val();
+        var bgColor = previewCache.bgColor || $('input[name="logindesignerwp_settings[background_color]"]').val();
+        var gradient1 = previewCache.gradient1 || $('input[name="logindesignerwp_settings[background_gradient_1]"]').val();
+        var gradient2 = previewCache.gradient2 || $('input[name="logindesignerwp_settings[background_gradient_2]"]').val();
 
-        var bgImage = $previewContainer.data('bg-image') || '';
+        var bgImage = previewCache.bgImage || '';
 
-        // Advanced Gradient Settings
-        var gradType = $('select[name="logindesignerwp_settings[gradient_type]"]').val() || 'linear';
-        var gradAngle = $('input[name="logindesignerwp_settings[gradient_angle]"]').val() || '135';
-        var gradPos = $('select[name="logindesignerwp_settings[gradient_position]"]').val() || 'center center';
+        // Advanced Gradient Settings - use cache first, then DOM, then defaults
+        var gradType = previewCache.gradientType || $('select[name="logindesignerwp_settings[gradient_type]"]').val() || 'linear';
+        var gradAngle = previewCache.gradientAngle || $('input[name="logindesignerwp_settings[gradient_angle]"]').val() || '135';
+        var gradPos = previewCache.gradientPosition || $('select[name="logindesignerwp_settings[gradient_position]"]').val() || 'center center';
 
         // Reset background - ALWAYS remove blur class and clear CSS vars for non-image modes
         $previewBg.removeClass('has-blur');
         $previewBg.css({
-            'background': '',
+            'background': '', // Clears shorthand
+            'background-image': 'none', // Explicitly remove image (gradient)
             'background-color': '',
-            'background-image': '',
             'background-size': '',
             'background-position': '',
             'background-repeat': '',
@@ -914,6 +967,7 @@
         switch (mode) {
             case 'solid':
                 $previewBg.css('background-color', bgColor);
+                $previewBg.css('background-image', 'none'); // Double ensure
                 break;
 
             case 'gradient':
@@ -1214,7 +1268,7 @@
                             $('input[name="logindesignerwp_settings[background_mode]"][value="image"]').prop('checked', true).trigger('change');
 
                             // Update live preview
-                            $previewContainer.data('bg-image', data.url);
+                            previewCache.bgImage = data.url;
                             updatePreview('background_image', data.url);
 
                             // Show success message
@@ -2307,181 +2361,24 @@
 
         // Preset selection - update live preview
         $('.ldwp-wizard-preset').not('.is-locked').on('click', function () {
+            // DEPRECATED: Handled by wizard.js
+            // Return early to prevent conflicts with wizard.js logic
+            return;
+
+            /* 
             var presetName = $(this).data('preset');
             $('.ldwp-wizard-preset').removeClass('is-selected');
             $(this).addClass('is-selected');
             hasChanges = true;
 
             var presets = {
-                // Free presets
-                'modern-light': {
-                    background_mode: 'solid',
-                    background_color: '#f8fafc',
-                    form_bg_color: '#ffffff',
-                    button_bg: '#3b82f6',
-                    button_text_color: '#ffffff',
-                    below_form_link_color: '#64748b',
-                    label_text_color: '#374151'
-                },
-                'modern-dark': {
-                    background_mode: 'solid',
-                    background_color: '#0f172a',
-                    form_bg_color: '#1e293b',
-                    button_bg: '#3b82f6',
-                    button_text_color: '#ffffff',
-                    below_form_link_color: '#94a3b8',
-                    label_text_color: '#e2e8f0'
-                },
-                'minimal': {
-                    background_mode: 'solid',
-                    background_color: '#ffffff',
-                    form_bg_color: '#ffffff',
-                    button_bg: '#111827',
-                    button_text_color: '#ffffff',
-                    below_form_link_color: '#6b7280',
-                    label_text_color: '#374151'
-                },
-                // Pro presets
-                'glassmorphism': {
-                    background_mode: 'gradient',
-                    background_gradient_1: '#667eea',
-                    background_gradient_2: '#764ba2',
-                    form_bg_color: 'rgba(255,255,255,0.15)',
-                    button_bg: '#ffffff',
-                    button_text_color: '#667eea',
-                    below_form_link_color: '#e0e7ff',
-                    label_text_color: '#ffffff'
-                },
-                'neon-glow': {
-                    background_mode: 'solid',
-                    background_color: '#0a0a0a',
-                    form_bg_color: '#141414',
-                    button_bg: '#22d3ee',
-                    button_text_color: '#0a0a0a',
-                    below_form_link_color: '#67e8f9',
-                    label_text_color: '#22d3ee'
-                },
-                'corporate': {
-                    background_mode: 'gradient',
-                    background_gradient_1: '#1e40af',
-                    background_gradient_2: '#3b82f6',
-                    form_bg_color: '#ffffff',
-                    button_bg: '#1e40af',
-                    button_text_color: '#ffffff',
-                    below_form_link_color: '#ffffff',
-                    label_text_color: '#374151'
-                },
-                'creative': {
-                    background_mode: 'gradient',
-                    background_gradient_1: '#f97316',
-                    background_gradient_2: '#ec4899',
-                    form_bg_color: '#ffffff',
-                    button_bg: '#ec4899',
-                    button_text_color: '#ffffff',
-                    below_form_link_color: '#ffffff',
-                    label_text_color: '#831843'
-                },
-                'ocean': {
-                    background_mode: 'gradient',
-                    background_gradient_1: '#0891b2',
-                    background_gradient_2: '#164e63',
-                    form_bg_color: '#ffffff',
-                    button_bg: '#0891b2',
-                    button_text_color: '#ffffff',
-                    below_form_link_color: '#ffffff',
-                    label_text_color: '#164e63'
-                },
-                'sunset': {
-                    background_mode: 'gradient',
-                    background_gradient_1: '#f97316',
-                    background_gradient_2: '#ec4899',
-                    form_bg_color: '#ffffff',
-                    button_bg: '#ea580c',
-                    button_text_color: '#ffffff',
-                    below_form_link_color: '#ffffff',
-                    label_text_color: '#1f2937'
-                },
-                'forest': {
-                    background_mode: 'gradient',
-                    background_gradient_1: '#14532d',
-                    background_gradient_2: '#166534',
-                    form_bg_color: '#f0fdf4',
-                    button_bg: '#16a34a',
-                    button_text_color: '#ffffff',
-                    below_form_link_color: '#bbf7d0',
-                    label_text_color: '#14532d'
-                },
-                'elegant': {
-                    background_mode: 'solid',
-                    background_color: '#1c1917',
-                    form_bg_color: '#fafaf9',
-                    button_bg: '#78716c',
-                    button_text_color: '#ffffff',
-                    below_form_link_color: '#a8a29e',
-                    label_text_color: '#44403c'
-                },
-                'tech': {
-                    background_mode: 'solid',
-                    background_color: '#18181b',
-                    form_bg_color: '#27272a',
-                    button_bg: '#a855f7',
-                    button_text_color: '#ffffff',
-                    below_form_link_color: '#c4b5fd',
-                    label_text_color: '#a1a1aa'
-                }
+                // ... (presets definitions would be here)
             };
 
             if (presets[presetName]) {
-                var p = presets[presetName];
-
-                // Update background mode
-                var bgMode = p.background_mode || 'solid';
-                $('input[name="logindesignerwp_settings[background_mode]"][value="' + bgMode + '"]').prop('checked', true);
-
-                // Update background based on mode
-                if (bgMode === 'gradient' && p.background_gradient_1 && p.background_gradient_2) {
-                    $previewContainer.data('gradient-1', p.background_gradient_1);
-                    $previewContainer.data('gradient-2', p.background_gradient_2);
-                    $('input[name="logindesignerwp_settings[background_gradient_1]"]').val(p.background_gradient_1);
-                    $('input[name="logindesignerwp_settings[background_gradient_2]"]').val(p.background_gradient_2);
-                } else if (p.background_color) {
-                    $previewContainer.data('bg-color', p.background_color);
-                    $('input[name$="[background_color]"]').val(p.background_color);
-                }
-
-                // Apply background preview
-                applyBackgroundPreview();
-
-                // Update form and button colors
-                updatePreview('form_bg_color', p.form_bg_color);
-                updatePreview('button_bg', p.button_bg);
-                updatePreview('button_text_color', p.button_text_color);
-
-                // Update below form link color
-                if (p.below_form_link_color) {
-                    updatePreview('below_form_link_color', p.below_form_link_color);
-                    $('input[name$="[below_form_link_color]"]').val(p.below_form_link_color);
-                }
-
-                // Update label color
-                if (p.label_text_color) {
-                    updatePreview('label_text_color', p.label_text_color);
-                    $('input[name$="[label_text_color]"]').val(p.label_text_color);
-                }
-
-                // Update wizard color inputs
-                if (p.background_color) {
-                    $('.ldwp-wizard-color[data-setting="background_color"]').val(p.background_color);
-                }
-                $('.ldwp-wizard-color[data-setting="form_bg_color"]').val(p.form_bg_color);
-                $('.ldwp-wizard-color[data-setting="button_bg"]').val(p.button_bg);
-                $('.ldwp-wizard-color[data-setting="button_text_color"]').val(p.button_text_color);
-
-                // Update form fields
-                $('input[name$="[form_bg_color]"]').val(p.form_bg_color);
-                $('input[name$="[button_bg]"]').val(p.button_bg);
-                $('input[name$="[button_text_color]"]').val(p.button_text_color);
+                // ... (logic would be here)
             }
+            */
         });
 
         // Wizard color inputs
