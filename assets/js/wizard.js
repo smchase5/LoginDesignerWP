@@ -73,51 +73,34 @@
     function syncAllSettingsToPreview() {
         var s = wizard.settings;
 
-        // IMPORTANT: Set gradient colors and background_color FIRST, 
-        // before background_mode, so they're cached when applyBackgroundPreview runs
-        updateLivePreview('background_color', s.background_color);
-        updateLivePreview('background_gradient_1', s.background_gradient_1);
-        updateLivePreview('background_gradient_2', s.background_gradient_2);
+        // Create batch object compatible with admin.js updatePreview
+        var batch = $.extend({}, s);
 
-        // Also sync gradient type and angle settings
-        updateLivePreview('gradient_type', s.gradient_type || 'linear');
-        updateLivePreview('gradient_angle', s.gradient_angle || 135);
-        updateLivePreview('gradient_position', s.gradient_position || 'center center');
-
-        // Now set the mode - this will use the cached gradient colors
-        updateLivePreview('background_mode', s.background_mode);
-
-        // Sync background image
+        // Remap keys where wizard settings differ from preview setting names
         if (s.background_mode === 'image') {
-            updateLivePreview('background_image', s.background_image_url || '');
+            batch.background_image = s.background_image_url || '';
+        } else {
+            batch.background_image = ''; // Ensure it's cleared if not image mode
         }
 
-        // Form colors
-        updateLivePreview('form_bg_color', s.form_bg_color);
-        updateLivePreview('form_border_radius', s.form_border_radius);
-        updateLivePreview('form_border_color', s.form_border_color);
-        updateLivePreview('form_shadow_enable', s.form_shadow_enable);
-        updateLivePreview('form_shadow_color', s.form_shadow_color);
-        updateLivePreview('label_text_color', s.label_text_color);
-        updateLivePreview('input_bg_color', s.input_bg_color);
-        updateLivePreview('input_text_color', s.input_text_color);
-        updateLivePreview('input_border_color', s.input_border_color);
-
-        // Button
-        updateLivePreview('button_bg', s.button_bg);
-        updateLivePreview('button_bg_hover', s.button_bg_hover);
-        updateLivePreview('button_text_color', s.button_text_color);
-        updateLivePreview('button_border_radius', s.button_border_radius);
-
-        // Logo
         if (s.logo_url) {
-            updateLivePreview('logo_image', s.logo_url);
+            batch.logo_image = s.logo_url;
         }
-        updateLivePreview('logo_width', s.logo_width);
-        updateLivePreview('logo_height', s.logo_height);
-        updateLivePreview('logo_border_radius', s.logo_border_radius);
-        updateLivePreview('logo_bottom_margin', s.logo_bottom_margin);
-        updateLivePreview('logo_background_color', s.logo_background_color);
+
+        // Set defaults for gradients if missing (prevents glitches)
+        if (!batch.gradient_type) batch.gradient_type = 'linear';
+        if (!batch.gradient_angle) batch.gradient_angle = 135;
+        if (!batch.gradient_position) batch.gradient_position = 'center center';
+
+        // Use Atomic Batch Update if available (fixes race conditions)
+        if (typeof window.ldwpUpdatePreviewBatch === 'function') {
+            window.ldwpUpdatePreviewBatch(batch);
+        } else {
+            // Fallback for safety (though admin.js should be updated)
+            $.each(batch, function (key, value) {
+                updateLivePreview(key, value);
+            });
+        }
     }
 
     // Preset definitions
@@ -293,8 +276,8 @@
             pro: true,
             settings: {
                 background_mode: 'gradient',
-                background_gradient_1: '#f59e0b',
-                background_gradient_2: '#dc2626',
+                background_gradient_1: '#ff6b6b',
+                background_gradient_2: '#feca57',
                 gradient_type: 'linear',
                 gradient_angle: 135,
                 gradient_position: 'center center',

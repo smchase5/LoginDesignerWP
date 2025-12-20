@@ -1371,3 +1371,76 @@
         opacity: 1;
     }
 }
+
+/* Helper class to enforce background mode cleaning - FIX for solid colors */
+#ldwp-preview-bg.is-mode-solid {
+    background-image: none !important;
+}
+
+/* ========================================
+   Button Styling Enhancements
+   ======================================== */
+
+/* Beefier Preview Action Buttons */
+.logindesignerwp-preview-actions .button {
+    height: 44px;
+    line-height: 42px;
+    /* Vertically center text (accounting for border) */
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.logindesignerwp-preview-actions .button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.logindesignerwp-preview-actions .button.button-primary {
+    background: #2271b1;
+    border-color: #2271b1;
+}
+
+.logindesignerwp-preview-actions .button.button-primary:hover {
+    background: #135e96;
+    border-color: #135e96;
+}
+
+/* Premium "Start Wizard" Button */
+.ldwp-start-wizard-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #2271b1;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(34, 113, 177, 0.3), 0 2px 4px -1px rgba(34, 113, 177, 0.15);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+}
+
+.ldwp-start-wizard-btn:hover {
+    background: #135e96;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(34, 113, 177, 0.4), 0 4px 6px -2px rgba(34, 113, 177, 0.2);
+    color: #fff;
+}
+
+.ldwp-start-wizard-btn:focus {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+}
+
+.ldwp-start-wizard-btn .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+}
