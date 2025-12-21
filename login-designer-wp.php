@@ -29,6 +29,7 @@ require_once LOGINDESIGNERWP_PATH . 'inc/class-settings.php';
 require_once LOGINDESIGNERWP_PATH . 'inc/class-login-style.php';
 require_once LOGINDESIGNERWP_PATH . 'inc/class-ai.php';
 require_once LOGINDESIGNERWP_PATH . 'inc/class-social-login.php';
+require_once LOGINDESIGNERWP_PATH . 'inc/class-presets-core.php';
 
 // Load Pro module (Development Mode / Integrated).
 if (file_exists(LOGINDESIGNERWP_PATH . 'inc/pro/class-pro-manager.php')) {

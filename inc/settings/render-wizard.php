@@ -49,181 +49,41 @@ $is_pro = function_exists('logindesignerwp_is_pro_active') && logindesignerwp_is
                 </p>
             </div>
             <div class="ldwp-wizard-step-content">
+                <?php
+                // Fetch presets for the grid below
+                $presets = Login_Designer_WP_Presets_Core::get_presets();
+                ?>
+
                 <div class="ldwp-wizard-presets">
-                    <!-- Free Presets -->
-                    <div class="ldwp-wizard-preset" data-preset="modern-light">
-                        <div class="ldwp-wizard-preset-preview" style="background: #f8fafc;">
-                            <div class="mini-form" style="background: #fff; border: 1px solid #e2e8f0;">
-                                <div class="mini-input" style="background: #f1f5f9;"></div>
-                                <div class="mini-input" style="background: #f1f5f9;"></div>
-                                <div class="mini-button" style="background: #3b82f6;"></div>
-                            </div>
-                        </div>
-                        <div class="ldwp-wizard-preset-name"><?php esc_html_e('Modern Light', 'logindesignerwp'); ?>
-                        </div>
-                    </div>
-                    <div class="ldwp-wizard-preset" data-preset="modern-dark">
-                        <div class="ldwp-wizard-preset-preview" style="background: #0f172a;">
-                            <div class="mini-form" style="background: #1e293b; border: 1px solid #334155;">
-                                <div class="mini-input" style="background: #0f172a;"></div>
-                                <div class="mini-input" style="background: #0f172a;"></div>
-                                <div class="mini-button" style="background: #3b82f6;"></div>
-                            </div>
-                        </div>
-                        <div class="ldwp-wizard-preset-name"><?php esc_html_e('Modern Dark', 'logindesignerwp'); ?>
-                        </div>
-                    </div>
-                    <div class="ldwp-wizard-preset" data-preset="minimal">
-                        <div class="ldwp-wizard-preset-preview" style="background: #fff;">
-                            <div class="mini-form" style="background: #fff; border: 1px solid #e5e7eb;">
-                                <div class="mini-input" style="background: #f9fafb;"></div>
-                                <div class="mini-input" style="background: #f9fafb;"></div>
-                                <div class="mini-button" style="background: #111827;"></div>
-                            </div>
-                        </div>
-                        <div class="ldwp-wizard-preset-name"><?php esc_html_e('Minimal', 'logindesignerwp'); ?></div>
-                    </div>
+                    <?php foreach ($presets as $key => $preset):
+                        $is_locked = $preset['is_pro'] && !$is_pro;
+                        $preview = $preset['preview'];
+                        ?>
+                        <div class="ldwp-wizard-preset <?php echo $is_locked ? 'is-locked' : ''; ?>"
+                            data-preset="<?php echo esc_attr($key); ?>"
+                            data-category="<?php echo esc_attr($preset['category'] ?? 'other'); ?>"
+                            data-name="<?php echo esc_attr(strtolower($preset['name'])); ?>"
+                            data-settings="<?php echo esc_attr(json_encode($preset['settings'])); ?>">
 
-                    <!-- Pro Presets -->
-                    <div class="ldwp-wizard-preset <?php echo $is_pro ? '' : 'is-locked'; ?>"
-                        data-preset="glassmorphism">
-                        <?php if (!$is_pro): ?>
-                            <div class="ldwp-wizard-preset-lock"><span class="dashicons dashicons-lock"></span> Pro</div>
-                        <?php endif; ?>
-                        <div class="ldwp-wizard-preset-preview"
-                            style="background: linear-gradient(135deg, #667eea, #764ba2);">
-                            <div class="mini-form"
-                                style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);">
-                                <div class="mini-input" style="background: rgba(255,255,255,0.2);"></div>
-                                <div class="mini-input" style="background: rgba(255,255,255,0.2);"></div>
-                                <div class="mini-button" style="background: #fff;"></div>
-                            </div>
-                        </div>
-                        <div class="ldwp-wizard-preset-name"><?php esc_html_e('Glassmorphism', 'logindesignerwp'); ?>
-                        </div>
-                    </div>
-                    <div class="ldwp-wizard-preset <?php echo $is_pro ? '' : 'is-locked'; ?>" data-preset="neon-glow">
-                        <?php if (!$is_pro): ?>
-                            <div class="ldwp-wizard-preset-lock"><span class="dashicons dashicons-lock"></span> Pro</div>
-                        <?php endif; ?>
-                        <div class="ldwp-wizard-preset-preview" style="background: #0a0a0a;">
-                            <div class="mini-form"
-                                style="background: #1a1a2e; border: 1px solid #00d4ff; box-shadow: 0 0 10px rgba(0,212,255,0.3);">
-                                <div class="mini-input" style="background: #16213e;"></div>
-                                <div class="mini-input" style="background: #16213e;"></div>
-                                <div class="mini-button" style="background: linear-gradient(90deg, #00d4ff, #00ff88);">
+                            <?php if ($is_locked): ?>
+                                <div class="ldwp-wizard-preset-lock"><span class="dashicons dashicons-lock"></span> Pro</div>
+                            <?php endif; ?>
+
+                            <div class="ldwp-wizard-preset-preview"
+                                style="background: <?php echo esc_attr($preview['bg']); ?>;">
+                                <div class="mini-form"
+                                    style="background: <?php echo esc_attr($preview['form_bg']); ?>; border: <?php echo esc_attr($preview['form_border'] ?? 'none'); ?>;">
+                                    <div class="mini-input"
+                                        style="background: <?php echo esc_attr($preview['input_bg']); ?>;"></div>
+                                    <div class="mini-input"
+                                        style="background: <?php echo esc_attr($preview['input_bg']); ?>;"></div>
+                                    <div class="mini-button"
+                                        style="background: <?php echo esc_attr($preview['button_bg']); ?>;"></div>
                                 </div>
                             </div>
+                            <div class="ldwp-wizard-preset-name"><?php echo esc_html($preset['name']); ?></div>
                         </div>
-                        <div class="ldwp-wizard-preset-name"><?php esc_html_e('Neon Glow', 'logindesignerwp'); ?></div>
-                    </div>
-                    <div class="ldwp-wizard-preset <?php echo $is_pro ? '' : 'is-locked'; ?>" data-preset="sunset">
-                        <?php if (!$is_pro): ?>
-                            <div class="ldwp-wizard-preset-lock"><span class="dashicons dashicons-lock"></span> Pro</div>
-                        <?php endif; ?>
-                        <div class="ldwp-wizard-preset-preview"
-                            style="background: linear-gradient(135deg, #ff6b6b, #feca57, #ff9ff3);">
-                            <div class="mini-form" style="background: rgba(255,255,255,0.95); border-radius: 12px;">
-                                <div class="mini-input" style="background: #fff4f4;"></div>
-                                <div class="mini-input" style="background: #fff4f4;"></div>
-                                <div class="mini-button" style="background: linear-gradient(90deg, #ff6b6b, #feca57);">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="ldwp-wizard-preset-name"><?php esc_html_e('Sunset', 'logindesignerwp'); ?></div>
-                    </div>
-
-                    <!-- Corporate -->
-                    <div class="ldwp-wizard-preset <?php echo $is_pro ? '' : 'is-locked'; ?>" data-preset="corporate">
-                        <?php if (!$is_pro): ?>
-                            <div class="ldwp-wizard-preset-lock"><span class="dashicons dashicons-lock"></span> Pro</div>
-                        <?php endif; ?>
-                        <div class="ldwp-wizard-preset-preview" style="background: #1e3a5f;">
-                            <div class="mini-form" style="background: #fff; border: 1px solid #d1d5db;">
-                                <div class="mini-input" style="background: #f9fafb;"></div>
-                                <div class="mini-input" style="background: #f9fafb;"></div>
-                                <div class="mini-button" style="background: #1e3a5f;"></div>
-                            </div>
-                        </div>
-                        <div class="ldwp-wizard-preset-name"><?php esc_html_e('Corporate', 'logindesignerwp'); ?></div>
-                    </div>
-
-                    <!-- Creative -->
-                    <div class="ldwp-wizard-preset <?php echo $is_pro ? '' : 'is-locked'; ?>" data-preset="creative">
-                        <?php if (!$is_pro): ?>
-                            <div class="ldwp-wizard-preset-lock"><span class="dashicons dashicons-lock"></span> Pro</div>
-                        <?php endif; ?>
-                        <div class="ldwp-wizard-preset-preview"
-                            style="background: linear-gradient(135deg, #f97316, #ec4899);">
-                            <div class="mini-form" style="background: #fff; border-radius: 24px;">
-                                <div class="mini-input" style="background: #fff1f2;"></div>
-                                <div class="mini-input" style="background: #fff1f2;"></div>
-                                <div class="mini-button" style="background: #ec4899; border-radius: 999px;"></div>
-                            </div>
-                        </div>
-                        <div class="ldwp-wizard-preset-name"><?php esc_html_e('Creative', 'logindesignerwp'); ?></div>
-                    </div>
-
-                    <!-- Ocean -->
-                    <div class="ldwp-wizard-preset <?php echo $is_pro ? '' : 'is-locked'; ?>" data-preset="ocean">
-                        <?php if (!$is_pro): ?>
-                            <div class="ldwp-wizard-preset-lock"><span class="dashicons dashicons-lock"></span> Pro</div>
-                        <?php endif; ?>
-                        <div class="ldwp-wizard-preset-preview"
-                            style="background: linear-gradient(135deg, #0891b2, #164e63);">
-                            <div class="mini-form" style="background: #fff; border: 1px solid #a5f3fc;">
-                                <div class="mini-input" style="background: #ecfeff;"></div>
-                                <div class="mini-input" style="background: #ecfeff;"></div>
-                                <div class="mini-button" style="background: #0891b2;"></div>
-                            </div>
-                        </div>
-                        <div class="ldwp-wizard-preset-name"><?php esc_html_e('Ocean', 'logindesignerwp'); ?></div>
-                    </div>
-
-                    <!-- Forest -->
-                    <div class="ldwp-wizard-preset <?php echo $is_pro ? '' : 'is-locked'; ?>" data-preset="forest">
-                        <?php if (!$is_pro): ?>
-                            <div class="ldwp-wizard-preset-lock"><span class="dashicons dashicons-lock"></span> Pro</div>
-                        <?php endif; ?>
-                        <div class="ldwp-wizard-preset-preview" style="background: #14532d;">
-                            <div class="mini-form" style="background: #f0fdf4; border: 1px solid #86efac;">
-                                <div class="mini-input" style="background: #fff;"></div>
-                                <div class="mini-input" style="background: #fff;"></div>
-                                <div class="mini-button" style="background: #16a34a;"></div>
-                            </div>
-                        </div>
-                        <div class="ldwp-wizard-preset-name"><?php esc_html_e('Forest', 'logindesignerwp'); ?></div>
-                    </div>
-
-                    <!-- Elegant -->
-                    <div class="ldwp-wizard-preset <?php echo $is_pro ? '' : 'is-locked'; ?>" data-preset="elegant">
-                        <?php if (!$is_pro): ?>
-                            <div class="ldwp-wizard-preset-lock"><span class="dashicons dashicons-lock"></span> Pro</div>
-                        <?php endif; ?>
-                        <div class="ldwp-wizard-preset-preview" style="background: #1c1917;">
-                            <div class="mini-form" style="background: #fafaf9; border: 1px solid #d6d3d1;">
-                                <div class="mini-input" style="background: #fff;"></div>
-                                <div class="mini-input" style="background: #fff;"></div>
-                                <div class="mini-button" style="background: #78716c;"></div>
-                            </div>
-                        </div>
-                        <div class="ldwp-wizard-preset-name"><?php esc_html_e('Elegant', 'logindesignerwp'); ?></div>
-                    </div>
-
-                    <!-- Tech -->
-                    <div class="ldwp-wizard-preset <?php echo $is_pro ? '' : 'is-locked'; ?>" data-preset="tech">
-                        <?php if (!$is_pro): ?>
-                            <div class="ldwp-wizard-preset-lock"><span class="dashicons dashicons-lock"></span> Pro</div>
-                        <?php endif; ?>
-                        <div class="ldwp-wizard-preset-preview" style="background: #18181b;">
-                            <div class="mini-form" style="background: #27272a; border: 1px solid #3f3f46;">
-                                <div class="mini-input" style="background: #18181b;"></div>
-                                <div class="mini-input" style="background: #18181b;"></div>
-                                <div class="mini-button" style="background: #a855f7;"></div>
-                            </div>
-                        </div>
-                        <div class="ldwp-wizard-preset-name"><?php esc_html_e('Tech', 'logindesignerwp'); ?></div>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </div>

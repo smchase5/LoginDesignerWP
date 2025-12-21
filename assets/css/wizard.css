@@ -1470,3 +1470,40 @@ input:checked+.ldwp-wizard-slider:before {
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
+
+
+
+/* Presets Grid (Matching Pro UI) */
+.ldwp-wizard-presets {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 4px 2px;
+    margin-bottom: 20px;
+}
+
+/* Ensure Presets look good */
+.ldwp-wizard-preset {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-right: 0;
+    width: 100%;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+    padding: 10px;
+}
+
+.ldwp-wizard-preset.is-selected {
+    border-color: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.ldwp-wizard-preset:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}

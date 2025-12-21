@@ -46,284 +46,13 @@ class LoginDesignerWP_Pro_Presets
      */
     private function init_presets()
     {
-        $this->built_in_presets = array(
-            'dark_mode' => array(
-                'name' => __('Dark Mode', 'logindesignerwp-pro'),
-                'settings' => array(
-                    'background_mode' => 'solid',
-                    'background_color' => '#0f172a',
-                    'form_bg_color' => '#1e293b',
-                    'form_border_radius' => 12,
-                    'form_border_color' => '#334155',
-                    'form_shadow_enable' => true,
-                    'label_text_color' => '#e2e8f0',
-                    'input_bg_color' => '#0f172a',
-                    'input_text_color' => '#f8fafc',
-                    'input_border_color' => '#475569',
-                    'input_border_focus' => '#3b82f6',
-                    'button_bg' => '#3b82f6',
-                    'button_bg_hover' => '#2563eb',
-                    'button_text_color' => '#ffffff',
-                    'button_border_radius' => 8,
-                    'below_form_link_color' => '#94a3b8',
-                    'logo_bottom_margin' => 25,
-                ),
-            ),
-            'corporate_blue' => array(
-                'name' => __('Corporate Blue', 'logindesignerwp-pro'),
-                'settings' => array(
-                    'background_mode' => 'gradient',
-                    'background_gradient_1' => '#1e40af',
-                    'background_gradient_2' => '#3b82f6',
-                    'form_bg_color' => '#ffffff',
-                    'form_border_radius' => 8,
-                    'form_border_color' => '#e5e7eb',
-                    'form_shadow_enable' => true,
-                    'label_text_color' => '#374151',
-                    'input_bg_color' => '#f9fafb',
-                    'input_text_color' => '#111827',
-                    'input_border_color' => '#d1d5db',
-                    'input_border_focus' => '#2563eb',
-                    'button_bg' => '#1e40af',
-                    'button_bg_hover' => '#1e3a8a',
-                    'button_text_color' => '#ffffff',
-                    'button_border_radius' => 6,
-                    'below_form_link_color' => '#ffffff',
-                    'logo_bottom_margin' => 25,
-                ),
-            ),
-            'minimal_light' => array(
-                'name' => __('Minimal Light', 'logindesignerwp-pro'),
-                'settings' => array(
-                    'background_mode' => 'solid',
-                    'background_color' => '#f8fafc',
-                    'form_bg_color' => '#ffffff',
-                    'form_border_radius' => 4,
-                    'form_border_color' => '#e2e8f0',
-                    'form_shadow_enable' => false,
-                    'label_text_color' => '#475569',
-                    'input_bg_color' => '#ffffff',
-                    'input_text_color' => '#1e293b',
-                    'input_border_color' => '#cbd5e1',
-                    'input_border_focus' => '#0ea5e9',
-                    'button_bg' => '#0f172a',
-                    'button_bg_hover' => '#1e293b',
-                    'button_text_color' => '#ffffff',
-                    'button_border_radius' => 4,
-                    'below_form_link_color' => '#64748b',
-                    'logo_bottom_margin' => 25,
-                ),
-            ),
-            'sunset_gradient' => array(
-                'name' => __('Sunset Gradient', 'logindesignerwp-pro'),
-                'settings' => array(
-                    'background_mode' => 'gradient',
-                    'background_gradient_1' => '#f97316',
-                    'background_gradient_2' => '#ec4899',
-                    'form_bg_color' => '#ffffff',
-                    'form_border_radius' => 16,
-                    'form_border_color' => '#fecaca',
-                    'form_shadow_enable' => true,
-                    'label_text_color' => '#1f2937',
-                    'input_bg_color' => '#fff7ed',
-                    'input_text_color' => '#1f2937',
-                    'input_border_color' => '#fed7aa',
-                    'input_border_focus' => '#f97316',
-                    'button_bg' => '#ea580c',
-                    'button_bg_hover' => '#c2410c',
-                    'button_text_color' => '#ffffff',
-                    'button_border_radius' => 999,
-                    'below_form_link_color' => '#ffffff',
-                    'logo_bottom_margin' => 25,
-                ),
-            ),
-            'forest' => array(
-                'name' => __('Forest', 'logindesignerwp-pro'),
-                'settings' => array(
-                    'background_mode' => 'gradient',
-                    'background_gradient_1' => '#14532d',
-                    'background_gradient_2' => '#166534',
-                    'form_bg_color' => '#f0fdf4',
-                    'form_border_radius' => 12,
-                    'form_border_color' => '#86efac',
-                    'form_shadow_enable' => true,
-                    'label_text_color' => '#14532d',
-                    'input_bg_color' => '#ffffff',
-                    'input_text_color' => '#166534',
-                    'input_border_color' => '#bbf7d0',
-                    'input_border_focus' => '#22c55e',
-                    'button_bg' => '#16a34a',
-                    'button_bg_hover' => '#15803d',
-                    'button_text_color' => '#ffffff',
-                    'button_border_radius' => 8,
-                    'below_form_link_color' => '#bbf7d0',
-                    'logo_bottom_margin' => 25,
-                ),
-            ),
-            'midnight' => array(
-                'name' => __('Midnight', 'logindesignerwp-pro'),
-                'settings' => array(
-                    'background_mode' => 'gradient',
-                    'background_gradient_1' => '#1e1b4b',
-                    'background_gradient_2' => '#312e81',
-                    'form_bg_color' => '#0f0a1e',
-                    'form_border_radius' => 16,
-                    'form_border_color' => '#4c1d95',
-                    'form_shadow_enable' => true,
-                    'label_text_color' => '#c4b5fd',
-                    'input_bg_color' => '#1e1b4b',
-                    'input_text_color' => '#f5f3ff',
-                    'input_border_color' => '#6d28d9',
-                    'input_border_focus' => '#a78bfa',
-                    'button_bg' => '#7c3aed',
-                    'button_bg_hover' => '#6d28d9',
-                    'button_text_color' => '#ffffff',
-                    'button_border_radius' => 999,
-                    'below_form_link_color' => '#a78bfa',
-                    'logo_bottom_margin' => 25,
-                ),
-            ),
-            'ocean' => array(
-                'name' => __('Ocean', 'logindesignerwp-pro'),
-                'settings' => array(
-                    'background_mode' => 'gradient',
-                    'background_gradient_1' => '#0891b2',
-                    'background_gradient_2' => '#164e63',
-                    'form_bg_color' => '#ffffff',
-                    'form_border_radius' => 16,
-                    'form_border_color' => '#a5f3fc',
-                    'form_shadow_enable' => true,
-                    'label_text_color' => '#164e63',
-                    'input_bg_color' => '#ecfeff',
-                    'input_text_color' => '#164e63',
-                    'input_border_color' => '#67e8f9',
-                    'input_border_focus' => '#22d3ee',
-                    'button_bg' => '#0891b2',
-                    'button_bg_hover' => '#0e7490',
-                    'button_text_color' => '#ffffff',
-                    'button_border_radius' => 8,
-                    'below_form_link_color' => '#ffffff',
-                    'logo_bottom_margin' => 25,
-                ),
-            ),
-            'glassmorphism' => array(
-                'name' => __('Glassmorphism', 'logindesignerwp-pro'),
-                'settings' => array(
-                    'background_mode' => 'gradient',
-                    'background_gradient_1' => '#667eea',
-                    'background_gradient_2' => '#764ba2',
-                    'form_bg_color' => 'rgba(255,255,255,0.15)',
-                    'form_border_radius' => 20,
-                    'form_border_color' => 'rgba(255,255,255,0.3)',
-                    'form_shadow_enable' => true,
-                    'label_text_color' => '#ffffff',
-                    'input_bg_color' => 'rgba(255,255,255,0.2)',
-                    'input_text_color' => '#ffffff',
-                    'input_border_color' => 'rgba(255,255,255,0.3)',
-                    'input_border_focus' => '#ffffff',
-                    'button_bg' => '#ffffff',
-                    'button_bg_hover' => '#f0f0f0',
-                    'button_text_color' => '#667eea',
-                    'button_border_radius' => 999,
-                    'below_form_link_color' => '#e0e7ff',
-                    // Enable glassmorphism effects
-                    'glass_enabled' => true,
-                    'glass_blur' => 14,
-                    'glass_transparency' => 72,
-                    'glass_border' => true,
-                    'logo_bottom_margin' => 25,
-                ),
-            ),
-            'neon_glow' => array(
-                'name' => __('Neon Glow', 'logindesignerwp-pro'),
-                'settings' => array(
-                    'background_mode' => 'solid',
-                    'background_color' => '#0a0a0a',
-                    'form_bg_color' => '#141414',
-                    'form_border_radius' => 16,
-                    'form_border_color' => '#22d3ee',
-                    'form_shadow_enable' => true,
-                    'label_text_color' => '#22d3ee',
-                    'input_bg_color' => '#0a0a0a',
-                    'input_text_color' => '#f0f0f0',
-                    'input_border_color' => '#22d3ee',
-                    'input_border_focus' => '#06b6d4',
-                    'button_bg' => '#22d3ee',
-                    'button_bg_hover' => '#06b6d4',
-                    'button_text_color' => '#0a0a0a',
-                    'button_border_radius' => 8,
-                    'below_form_link_color' => '#67e8f9',
-                    'logo_bottom_margin' => 25,
-                ),
-            ),
-            'elegant' => array(
-                'name' => __('Elegant', 'logindesignerwp-pro'),
-                'settings' => array(
-                    'background_mode' => 'solid',
-                    'background_color' => '#1c1917',
-                    'form_bg_color' => '#fafaf9',
-                    'form_border_radius' => 8,
-                    'form_border_color' => '#d6d3d1',
-                    'form_shadow_enable' => true,
-                    'label_text_color' => '#44403c',
-                    'input_bg_color' => '#ffffff',
-                    'input_text_color' => '#1c1917',
-                    'input_border_color' => '#a8a29e',
-                    'input_border_focus' => '#78716c',
-                    'button_bg' => '#78716c',
-                    'button_bg_hover' => '#57534e',
-                    'button_text_color' => '#ffffff',
-                    'button_border_radius' => 4,
-                    'below_form_link_color' => '#a8a29e',
-                    'logo_bottom_margin' => 25,
-                ),
-            ),
-            'tech' => array(
-                'name' => __('Tech', 'logindesignerwp-pro'),
-                'settings' => array(
-                    'background_mode' => 'solid',
-                    'background_color' => '#18181b',
-                    'form_bg_color' => '#27272a',
-                    'form_border_radius' => 16,
-                    'form_border_color' => '#3f3f46',
-                    'form_shadow_enable' => true,
-                    'label_text_color' => '#a1a1aa',
-                    'input_bg_color' => '#18181b',
-                    'input_text_color' => '#fafafa',
-                    'input_border_color' => '#52525b',
-                    'input_border_focus' => '#a855f7',
-                    'button_bg' => '#a855f7',
-                    'button_bg_hover' => '#9333ea',
-                    'button_text_color' => '#ffffff',
-                    'button_border_radius' => 8,
-                    'below_form_link_color' => '#c4b5fd',
-                    'logo_bottom_margin' => 25,
-                ),
-            ),
-            'creative' => array(
-                'name' => __('Creative', 'logindesignerwp-pro'),
-                'settings' => array(
-                    'background_mode' => 'gradient',
-                    'background_gradient_1' => '#f97316',
-                    'background_gradient_2' => '#ec4899',
-                    'form_bg_color' => '#ffffff',
-                    'form_border_radius' => 24,
-                    'form_border_color' => '#fecdd3',
-                    'form_shadow_enable' => true,
-                    'label_text_color' => '#831843',
-                    'input_bg_color' => '#fff1f2',
-                    'input_text_color' => '#831843',
-                    'input_border_color' => '#fda4af',
-                    'input_border_focus' => '#ec4899',
-                    'button_bg' => '#ec4899',
-                    'button_bg_hover' => '#db2777',
-                    'button_text_color' => '#ffffff',
-                    'button_border_radius' => 999,
-                    'below_form_link_color' => '#ffffff',
-                    'logo_bottom_margin' => 25,
-                ),
-            ),
-        );
+        // Use the centralized Core Presets Manager
+        if (class_exists('Login_Designer_WP_Presets_Core')) {
+            $this->built_in_presets = \Login_Designer_WP_Presets_Core::get_presets();
+        } else {
+            // Fallback (should not happen providing core is loaded)
+            $this->built_in_presets = array();
+        }
     }
 
     /**
@@ -364,6 +93,9 @@ class LoginDesignerWP_Pro_Presets
                         grid-template-columns: repeat(4, 1fr);
                         gap: 20px;
                         margin-bottom: 20px;
+                        max-height: 500px;
+                        overflow-y: auto;
+                        padding: 4px 2px;
                     }
 
                     .logindesignerwp-preset-card {
@@ -438,6 +170,40 @@ class LoginDesignerWP_Pro_Presets
                         gap: 10px;
                         align-items: center;
                     }
+
+                    .logindesignerwp-preset-delete-icon {
+                        position: absolute;
+                        top: 5px;
+                        right: 5px;
+                        color: #ef4444;
+                        cursor: pointer;
+                        background: #fff;
+                        border-radius: 50%;
+                        padding: 4px;
+                        /* Space around icon */
+                        font-size: 16px;
+                        /* Icon size */
+                        width: 24px;
+                        height: 24px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                        opacity: 0;
+                        transition: all 0.2s ease;
+                        z-index: 10;
+                        line-height: 1;
+                    }
+
+                    .logindesignerwp-preset-card:hover .logindesignerwp-preset-delete-icon {
+                        opacity: 1;
+                    }
+
+                    .logindesignerwp-preset-delete-icon:hover {
+                        transform: scale(1.1);
+                        background: #fee2e2;
+                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+                    }
                 </style>
 
                 <div id="logindesignerwp-presets-grid" class="logindesignerwp-presets-grid">
@@ -479,6 +245,8 @@ class LoginDesignerWP_Pro_Presets
                             $btn_bg = isset($preset['settings']['button_bg']) ? $preset['settings']['button_bg'] : '#2271b1';
                             ?>
                             <div class="logindesignerwp-preset-card" data-preset="<?php echo esc_attr($key); ?>" data-is-custom="true">
+                                <span class="dashicons dashicons-trash logindesignerwp-preset-delete-icon"
+                                    title="<?php esc_attr_e('Delete Preset', 'logindesignerwp-pro'); ?>"></span>
                                 <div class="logindesignerwp-preset-preview" style="background: <?php echo esc_attr($bg); ?>;">
                                     <div class="logindesignerwp-preset-preview-form"
                                         style="background: <?php echo esc_attr($form_bg); ?>;">
@@ -525,6 +293,31 @@ class LoginDesignerWP_Pro_Presets
 
         <script>
             jQuery(document).ready(function ($) {
+
+                // Delete Preset Icon Click
+                $('.logindesignerwp-preset-delete-icon').on('click', function (e) {
+                    e.stopPropagation(); // Prevent applying the preset
+                    if (!confirm('<?php echo esc_js(__('Are you sure you want to delete this preset?', 'logindesignerwp-pro')); ?>')) return;
+
+                    var $icon = $(this);
+                    var $card = $icon.closest('.logindesignerwp-preset-card');
+                    var preset = $card.data('preset');
+
+                    $card.css('opacity', '0.4');
+
+                    $.post(ajaxurl, {
+                        action: 'logindesignerwp_delete_preset',
+                        preset: preset,
+                        nonce: '<?php echo wp_create_nonce('logindesignerwp_preset_nonce'); ?>'
+                    }, function (response) {
+                        if (response.success) {
+                            $card.fadeOut(300, function () { $(this).remove(); });
+                        } else {
+                            alert(response.data);
+                            $card.css('opacity', '1');
+                        }
+                    });
+                });
 
                 // Instant Preset Application
                 $('.logindesignerwp-preset-card').on('click', function () {

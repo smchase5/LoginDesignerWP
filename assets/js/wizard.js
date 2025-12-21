@@ -113,282 +113,7 @@
         }
     }
 
-    // Preset definitions
-    var presets = {
-        // Free presets
-        'modern-light': {
-            name: 'Modern Light',
-            pro: false,
-            settings: {
-                background_mode: 'solid',
-                background_color: '#f8fafc',
-                form_bg_color: '#ffffff',
-                form_border_radius: 12,
-                form_border_color: '#e2e8f0',
-                label_text_color: '#334155',
-                input_bg_color: '#ffffff',
-                input_text_color: '#1e293b',
-                input_border_color: '#cbd5e1',
-                button_bg: '#3b82f6',
-                button_bg_hover: '#2563eb',
-                button_text_color: '#ffffff',
-                button_border_radius: 8,
-                glass_enabled: 0,
-                logo_bottom_margin: 25
-            }
-        },
-        'modern-dark': {
-            name: 'Modern Dark',
-            pro: false,
-            settings: {
-                background_mode: 'solid',
-                background_color: '#0f172a',
-                form_bg_color: '#1e293b',
-                form_border_radius: 12,
-                form_border_color: '#334155',
-                label_text_color: '#e2e8f0',
-                input_bg_color: '#0f172a',
-                input_text_color: '#f1f5f9',
-                input_border_color: '#475569',
-                button_bg: '#3b82f6',
-                button_bg_hover: '#2563eb',
-                button_text_color: '#ffffff',
-                button_border_radius: 8,
-                glass_enabled: 0,
-                logo_bottom_margin: 25
-            }
-        },
-        'minimal': {
-            name: 'Minimal',
-            pro: false,
-            settings: {
-                background_mode: 'solid',
-                background_color: '#ffffff',
-                form_bg_color: '#ffffff',
-                form_border_radius: 0,
-                form_border_color: '#e5e7eb',
-                label_text_color: '#111827',
-                input_bg_color: '#f9fafb',
-                input_text_color: '#111827',
-                input_border_color: '#d1d5db',
-                button_bg: '#111827',
-                button_bg_hover: '#374151',
-                button_text_color: '#ffffff',
-                button_border_radius: 4,
-                glass_enabled: 0,
-                logo_bottom_margin: 25
-            }
-        },
-        // Pro presets
-        'glassmorphism': {
-            name: 'Glassmorphism',
-            pro: true,
-            settings: {
-                background_mode: 'gradient',
-                background_gradient_1: '#667eea',
-                background_gradient_2: '#764ba2',
-                gradient_type: 'linear',
-                gradient_angle: 135,
-                gradient_position: 'center center',
-                form_bg_color: 'rgba(255,255,255,0.15)',
-                form_border_radius: 20,
-                form_border_color: 'rgba(255,255,255,0.3)',
-                label_text_color: '#ffffff',
-                input_bg_color: 'rgba(255,255,255,0.2)',
-                input_text_color: '#ffffff',
-                input_border_color: 'rgba(255,255,255,0.3)',
-                button_bg: '#ffffff',
-                button_bg_hover: '#f0f0f0',
-                button_text_color: '#667eea',
-                button_border_radius: 999,
-                // Glassmorphism feature settings
-                glass_enabled: 1,
-                glass_blur: 10,
-                glass_transparency: 85,
-                logo_bottom_margin: 25
-            }
-        },
-        'neon-glow': {
-            name: 'Neon Glow',
-            pro: true,
-            settings: {
-                background_mode: 'solid',
-                background_color: '#0a0a0a',
-                form_bg_color: '#141414',
-                form_border_radius: 16,
-                form_border_color: '#22d3ee',
-                label_text_color: '#22d3ee',
-                input_bg_color: '#0a0a0a',
-                input_text_color: '#f0f0f0',
-                input_border_color: '#22d3ee',
-                button_bg: '#22d3ee',
-                button_bg_hover: '#06b6d4',
-                button_text_color: '#0a0a0a',
-                button_border_radius: 8,
-                glass_enabled: 0,
-                logo_bottom_margin: 25
-            }
-        },
-        'corporate': {
-            name: 'Corporate',
-            pro: true,
-            settings: {
-                background_mode: 'solid',
-                background_color: '#1e3a5f',
-                form_bg_color: '#ffffff',
-                form_border_radius: 4,
-                form_border_color: '#d1d5db',
-                label_text_color: '#1f2937',
-                input_bg_color: '#f9fafb',
-                input_text_color: '#111827',
-                input_border_color: '#9ca3af',
-                button_bg: '#1e3a5f',
-                button_bg_hover: '#0f2744',
-                button_text_color: '#ffffff',
-                button_border_radius: 4,
-                glass_enabled: 0,
-                logo_bottom_margin: 25
-            }
-        },
-        'creative': {
-            name: 'Creative',
-            pro: true,
-            settings: {
-                background_mode: 'gradient',
-                background_gradient_1: '#f97316',
-                background_gradient_2: '#ec4899',
-                gradient_type: 'linear',
-                gradient_angle: 135,
-                gradient_position: 'center center',
-                form_bg_color: '#ffffff',
-                form_border_radius: 24,
-                form_border_color: '#fecdd3',
-                label_text_color: '#831843',
-                input_bg_color: '#fff1f2',
-                input_text_color: '#831843',
-                input_border_color: '#fda4af',
-                button_bg: '#ec4899',
-                button_bg_hover: '#db2777',
-                button_text_color: '#ffffff',
-                button_border_radius: 999,
-                glass_enabled: 0,
-                logo_bottom_margin: 25
-            }
-        },
-        'ocean': {
-            name: 'Ocean',
-            pro: true,
-            settings: {
-                background_mode: 'gradient',
-                background_gradient_1: '#0891b2',
-                background_gradient_2: '#164e63',
-                gradient_type: 'linear',
-                gradient_angle: 135,
-                gradient_position: 'center center',
-                form_bg_color: '#ffffff',
-                form_border_radius: 16,
-                form_border_color: '#a5f3fc',
-                label_text_color: '#164e63',
-                input_bg_color: '#ecfeff',
-                input_text_color: '#164e63',
-                input_border_color: '#67e8f9',
-                button_bg: '#0891b2',
-                button_bg_hover: '#0e7490',
-                button_text_color: '#ffffff',
-                button_border_radius: 8,
-                glass_enabled: 0,
-                logo_bottom_margin: 25
-            }
-        },
-        'sunset': {
-            name: 'Sunset',
-            pro: true,
-            settings: {
-                background_mode: 'gradient',
-                background_gradient_1: '#ff6b6b',
-                background_gradient_2: '#feca57',
-                gradient_type: 'linear',
-                gradient_angle: 135,
-                gradient_position: 'center center',
-                form_bg_color: '#fffbeb',
-                form_border_radius: 20,
-                form_border_color: '#fde68a',
-                label_text_color: '#92400e',
-                input_bg_color: '#ffffff',
-                input_text_color: '#78350f',
-                input_border_color: '#fcd34d',
-                button_bg: '#f59e0b',
-                button_bg_hover: '#d97706',
-                button_text_color: '#000000',
-                button_border_radius: 12,
-                glass_enabled: 0,
-                logo_bottom_margin: 25
-            }
-        },
-        'forest': {
-            name: 'Forest',
-            pro: true,
-            settings: {
-                background_mode: 'solid',
-                background_color: '#14532d',
-                form_bg_color: '#f0fdf4',
-                form_border_radius: 12,
-                form_border_color: '#86efac',
-                label_text_color: '#14532d',
-                input_bg_color: '#ffffff',
-                input_text_color: '#166534',
-                input_border_color: '#4ade80',
-                button_bg: '#16a34a',
-                button_bg_hover: '#15803d',
-                button_text_color: '#ffffff',
-                button_border_radius: 8,
-                glass_enabled: 0,
-                logo_bottom_margin: 25
-            }
-        },
-        'elegant': {
-            name: 'Elegant',
-            pro: true,
-            settings: {
-                background_mode: 'solid',
-                background_color: '#1c1917',
-                form_bg_color: '#fafaf9',
-                form_border_radius: 8,
-                form_border_color: '#d6d3d1',
-                label_text_color: '#44403c',
-                input_bg_color: '#ffffff',
-                input_text_color: '#1c1917',
-                input_border_color: '#a8a29e',
-                button_bg: '#78716c',
-                button_bg_hover: '#57534e',
-                button_text_color: '#ffffff',
-                button_border_radius: 4,
-                glass_enabled: 0,
-                logo_bottom_margin: 25
-            }
-        },
-        'tech': {
-            name: 'Tech',
-            pro: true,
-            settings: {
-                background_mode: 'solid',
-                background_color: '#18181b',
-                form_bg_color: '#27272a',
-                form_border_radius: 16,
-                form_border_color: '#3f3f46',
-                label_text_color: '#a1a1aa',
-                input_bg_color: '#18181b',
-                input_text_color: '#fafafa',
-                input_border_color: '#52525b',
-                button_bg: '#a855f7',
-                button_bg_hover: '#9333ea',
-                button_text_color: '#ffffff',
-                button_border_radius: 8,
-                glass_enabled: 0,
-                logo_bottom_margin: 25
-            }
-        }
-    };
+    // Presets are now loaded dynamically via data-settings attributes
 
     // Initialize wizard
     function init() {
@@ -421,7 +146,16 @@
         $(document).on('click', '.ldwp-wizard-apply', applySettings);
 
         // Preset selection
-        $(document).on('click', '.ldwp-wizard-preset:not(.is-locked)', selectPreset);
+        $(document).on('click', '.ldwp-wizard-preset:not(.is-locked)', function () {
+            var $el = $(this);
+            // Highlight
+            $('.ldwp-wizard-preset').removeClass('is-selected');
+            $el.addClass('is-selected');
+
+            selectPreset(this);
+        });
+
+
 
         // Collapsible sections toggle
         $(document).on('click', '.ldwp-wizard-collapsible-toggle', function () {
@@ -945,20 +679,24 @@
     }
 
     // Select a preset
-    function selectPreset() {
-        var $preset = $(this);
-        var presetId = $preset.data('preset');
+    function selectPreset(presetOrEl) {
+        var settings = {};
+        var presetId = '';
 
-        if (!presets[presetId]) return;
+        // If element passed (from click)
+        if (presetOrEl && (presetOrEl.nodeType || presetOrEl instanceof jQuery)) {
+            var $el = $(presetOrEl);
+            settings = $el.data('settings');
+            presetId = $el.data('preset');
+        } else {
+            return;
+        }
 
-        // Update selection UI
-        $('.ldwp-wizard-preset').removeClass('is-selected');
-        $preset.addClass('is-selected');
+        if (!settings) return;
 
         // Merge preset settings on top of FRESH defaults
-        // This ensures previous preset settings (ghost data) are cleared
-        wizard.settings = $.extend(true, {}, defaultSettings, presets[presetId].settings);
-        wizard.settings.preset = presetId; // Store preset ID, not name
+        wizard.settings = $.extend(true, {}, defaultSettings, settings);
+        wizard.settings.preset = presetId;
 
         // Sync to preview
         syncAllSettingsToPreview();
