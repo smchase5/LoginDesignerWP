@@ -337,6 +337,7 @@ class LoginDesignerWP_Pro_Presets
         ?>
         <div class="logindesignerwp-card" data-section-id="presets">
             <h2>
+                <span class="drag-handle dashicons dashicons-move"></span>
                 <span class="logindesignerwp-card-title-wrapper">
                     <span class="dashicons dashicons-art"></span>
                     <?php esc_html_e('Design Presets', 'logindesignerwp-pro'); ?>
@@ -348,7 +349,7 @@ class LoginDesignerWP_Pro_Presets
                 <style>
                     .logindesignerwp-presets-grid {
                         display: grid;
-                        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                        grid-template-columns: repeat(4, 1fr);
                         gap: 20px;
                         margin-bottom: 20px;
                     }
@@ -512,42 +513,30 @@ class LoginDesignerWP_Pro_Presets
 
         <script>
             jQuery(document).ready(function ($) {
-                // Card selection
+
+                // Instant Preset Application
                 $('.logindesignerwp-preset-card').on('click', function () {
-                    $('.logindesignerwp-preset-card').removeClass('active');
-                    $(this).addClass('active');
+                    var $card = $(this);
 
-                    var preset = $(this).data('preset');
-                    var isCustom = $(this).data('is-custom');
+                    // Don't restart if already processing
+                    if ($card.hasClass('is-loading')) return;
 
-                    $('#logindesignerwp-preset-select').val(preset);
-                    $('#logindesignerwp-apply-preset').prop('disabled', false);
+                    var preset = $card.data('preset');
 
-                    if (isCustom) {
-                        $('#logindesignerwp-delete-preset').show();
-                    } else {
-                        $('#logindesignerwp-delete-preset').hide();
-                    }
-                });
-
-                // Apply preset
-                $('#logindesignerwp-apply-preset').on('click', function () {
-                    var preset = $('#logindesignerwp-preset-select').val();
-                    if (!preset) {
-                        alert('<?php echo esc_js(__('Please select a preset.', 'logindesignerwp-pro')); ?>');
-                        return;
-                    }
-
-                    var $btn = $(this);
-                    $btn.prop('disabled', true).text('<?php echo esc_js(__('Applying...', 'logindesignerwp-pro')); ?>');
+                    // Add loading state
+                    $card.addClass('is-loading');
+                    $card.css('opacity', '0.6');
 
                     $.post(ajaxurl, {
                         action: 'logindesignerwp_apply_preset',
                         preset: preset,
                         nonce: '<?php echo wp_create_nonce('logindesignerwp_preset_nonce'); ?>'
                     }, function (response) {
+                        $card.removeClass('is-loading').css('opacity', '1');
+
                         if (response.success) {
                             var settings = response.data.settings;
+                            var bgImageUrl = response.data.background_image_url || '';
 
                             // Update all form fields with new settings
                             $.each(settings, function (key, value) {
@@ -557,13 +546,44 @@ class LoginDesignerWP_Pro_Presets
                                         $field.prop('checked', !!value);
                                     } else if ($field.is(':radio')) {
                                         $field.filter('[value="' + value + '"]').prop('checked', true);
-                                    } else if ($field.is('select')) {
-                                        $field.val(value);
                                     } else {
                                         $field.val(value);
                                     }
                                 }
                             });
+
+                            // Update Background Image Preview specifically
+                            if (response.data.background_image_url) {
+                                var $bgParams = $('.logindesignerwp-image-preview');
+                                // Find the background image section (usually the one in the background tab)
+                                var $bgSection = $('[data-section-id="background"]');
+                                var $previewImg = $bgSection.find('.logindesignerwp-image-preview img');
+                                var $removeBtn = $bgSection.find('.logindesignerwp-remove-image');
+
+                                if ($previewImg.length) {
+                                    $previewImg.attr('src', response.data.background_image_url);
+                                    $bgSection.find('.logindesignerwp-image-preview').show();
+                                    $removeBtn.show();
+                                }
+
+                                // Add URL to settings for batch update
+                                settings.background_image = response.data.background_image_url;
+                            } else if (settings.background_image_id == 0 || !settings.background_image_id) {
+                                // Handle removal
+                                var $bgSection = $('[data-section-id="background"]');
+                                $bgSection.find('.logindesignerwp-image-preview').hide();
+                                $bgSection.find('.logindesignerwp-remove-image').hide();
+                                settings.background_image = '';
+                            }
+
+                            // Apply preview update using Batch API if available
+                            if (typeof window.ldwpUpdatePreviewBatch === 'function') {
+                                window.ldwpUpdatePreviewBatch(settings);
+                            } else if (typeof window.ldwpApplyPreview === 'function') {
+                                setTimeout(function () {
+                                    window.ldwpApplyPreview();
+                                }, 50);
+                            }
 
                             // Update WordPress color pickers
                             $('.ldwp-color-picker').each(function () {
@@ -572,12 +592,10 @@ class LoginDesignerWP_Pro_Presets
                                 if (name) {
                                     var settingKey = name.replace('logindesignerwp_settings[', '').replace(']', '');
                                     if (settings.hasOwnProperty(settingKey) && settings[settingKey]) {
-                                        // wpColorPicker stores color in input, update and trigger iris
                                         $input.val(settings[settingKey]);
                                         var $wpPicker = $input.closest('.wp-picker-container');
                                         if ($wpPicker.length) {
                                             $wpPicker.find('.wp-color-result').css('background-color', settings[settingKey]);
-                                            // Also update iris if available
                                             if ($input.data('wp-wpColorPicker')) {
                                                 $input.wpColorPicker('color', settings[settingKey]);
                                             }
@@ -586,9 +604,15 @@ class LoginDesignerWP_Pro_Presets
                                 }
                             });
 
+                            // Update active preset visual
+                            $('.logindesignerwp-preset-card').removeClass('active');
+                            $card.addClass('active');
+
                             // Update background mode radios visual state
                             var bgMode = settings.background_mode || 'solid';
                             $('input[name="logindesignerwp_settings[background_mode]"][value="' + bgMode + '"]').prop('checked', true).trigger('change');
+                            $('.ldwp-bg-type-option').removeClass('is-active');
+                            $('.ldwp-bg-type-option[data-value="' + bgMode + '"]').addClass('is-active');
 
                             // Apply preview update
                             if (typeof window.ldwpApplyPreview === 'function') {
@@ -597,22 +621,14 @@ class LoginDesignerWP_Pro_Presets
                                 }, 50);
                             }
 
-                            // Show success message
-                            $btn.text('<?php echo esc_js(__('Applied!', 'logindesignerwp-pro')); ?>');
-                            setTimeout(function () {
-                                $btn.prop('disabled', false).text('<?php echo esc_js(__('Apply Selected Preset', 'logindesignerwp-pro')); ?>');
-                            }, 1500);
-
-                        } else {
-                            alert(response.data);
-                            $btn.prop('disabled', false).text('<?php echo esc_js(__('Apply Selected Preset', 'logindesignerwp-pro')); ?>');
+                            // Mark as dirty so "Save" button works if needed
+                            $('.logindesignerwp-preview-badge').addClass('is-unsaved');
                         }
-                    }).fail(function () {
-                        // Handle AJAX errors
-                        alert('<?php echo esc_js(__('An error occurred while applying the preset.', 'logindesignerwp-pro')); ?>');
-                        $btn.prop('disabled', false).text('<?php echo esc_js(__('Apply Selected Preset', 'logindesignerwp-pro')); ?>');
                     });
                 });
+
+
+
 
                 // Delete preset
                 $('#logindesignerwp-delete-preset').on('click', function () {
@@ -691,15 +707,28 @@ class LoginDesignerWP_Pro_Presets
 
         // Merge preset settings with current settings.
         $new_settings = array_merge($current_settings, $preset['settings']);
-        $new_settings['active_preset'] = $preset_key;
 
-        update_option('logindesignerwp_settings', $new_settings);
+        // Fix Stickiness: Force disable Glassmorphism if not explicitly enabled in preset
+        if (!isset($preset['settings']['glass_enabled'])) {
+            $new_settings['glass_enabled'] = 0;
+        }
+
+        // Don't save to DB - preview only (client-side application)
+        // $new_settings['active_preset'] = $preset_key; 
+        // update_option('logindesignerwp_settings', $new_settings);
+
+        // Get Image URL if ID exists for preview
+        $bg_image_url = '';
+        if (!empty($new_settings['background_image_id'])) {
+            $bg_image_url = wp_get_attachment_image_url($new_settings['background_image_id'], 'medium');
+        }
 
         // Return new settings for AJAX update
         wp_send_json_success(array(
             'message' => 'Preset applied!',
             'settings' => $new_settings,
             'preset_name' => $preset['name'],
+            'background_image_url' => $bg_image_url
         ));
     }
 
@@ -743,6 +772,11 @@ class LoginDesignerWP_Pro_Presets
             'button_text_color' => $current_settings['button_text_color'],
             'button_border_radius' => $current_settings['button_border_radius'],
             'below_form_link_color' => $current_settings['below_form_link_color'],
+            // Pro Features
+            'glassmorphism_enable' => isset($current_settings['glassmorphism_enable']) ? $current_settings['glassmorphism_enable'] : 0,
+            'glassmorphism_blur' => isset($current_settings['glassmorphism_blur']) ? $current_settings['glassmorphism_blur'] : 10,
+            'glassmorphism_transparency' => isset($current_settings['glassmorphism_transparency']) ? $current_settings['glassmorphism_transparency'] : 20,
+            'glassmorphism_border' => isset($current_settings['glassmorphism_border']) ? $current_settings['glassmorphism_border'] : 0,
         );
 
         // Generate unique key.

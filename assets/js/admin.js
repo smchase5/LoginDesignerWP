@@ -43,6 +43,7 @@
         var $container = null;
         var $statusText = null;
         var $saveStatus = null;
+        var $discardBtn = null;
         var isUpdating = false;
         var isSaved = true;
         var isInitializing = true; // Flag to skip markUnsaved during initial load
@@ -65,6 +66,16 @@
             $container = $('.logindesignerwp-preview-container');
             $statusText = $badge.find('.ldwp-status-text');
             $saveStatus = $badge.find('.ldwp-save-status');
+            $discardBtn = $('#ldwp-discard-btn');
+
+            // Discard functionality
+            if ($discardBtn.length) {
+                $discardBtn.on('click', function () {
+                    if (confirm('Are you sure you want to discard unsaved changes?')) {
+                        location.reload();
+                    }
+                });
+            }
         }
 
         function startUpdate() {
@@ -128,6 +139,7 @@
                 isSaved = false;
                 $badge.addClass(config.unsavedClass);
                 $saveStatus.text(config.unsavedText);
+                if ($discardBtn) $discardBtn.show();
             }
         }
 
@@ -136,6 +148,7 @@
             isSaved = true;
             $badge.removeClass(config.unsavedClass);
             $saveStatus.text(config.savedText);
+            if ($discardBtn) $discardBtn.hide();
         }
 
         function finishInitializing() {
@@ -1081,6 +1094,8 @@
             form_border_radius: $('input[name="logindesignerwp_settings[form_border_radius]"]').val(),
             form_border_color: $('input[name="logindesignerwp_settings[form_border_color]"]').val(),
             form_shadow_enable: $('input[name="logindesignerwp_settings[form_shadow_enable]"]').is(':checked'),
+            background_mode: $('.ldwp-bg-mode-value').val(),
+            background_color: $('input[name="logindesignerwp_settings[background_color]"]').val(),
             label_text_color: $('input[name="logindesignerwp_settings[label_text_color]"]').val(),
             input_bg_color: $('input[name="logindesignerwp_settings[input_bg_color]"]').val(),
             input_text_color: $('input[name="logindesignerwp_settings[input_text_color]"]').val(),
@@ -1100,6 +1115,12 @@
             social_login_style: $('select[name="logindesignerwp_settings[social_login_style]"]').val(),
             background_blur: $('#logindesignerwp-bg-blur').val()
         };
+
+        // Pre-populate background image cache from data attribute
+        var initialBgImage = $('.logindesignerwp-preview-container').attr('data-bg-image');
+        if (initialBgImage) {
+            updatePreview('background_image', initialBgImage, true);
+        }
 
         // Apply each setting
         for (var key in settings) {

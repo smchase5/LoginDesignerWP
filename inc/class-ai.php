@@ -709,6 +709,7 @@ Return ONLY valid JSON with these exact keys (no markdown, no explanation, just 
         ?>
         <div class="logindesignerwp-card" data-section-id="ai_tools">
             <h2>
+                <span class="drag-handle dashicons dashicons-move"></span>
                 <span class="logindesignerwp-card-title-wrapper">
                     <span class="dashicons dashicons-superhero"></span>
                     <?php esc_html_e('AI Tools', 'logindesignerwp'); ?>

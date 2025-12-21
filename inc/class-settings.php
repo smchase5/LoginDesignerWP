@@ -348,6 +348,12 @@ class LoginDesignerWP_Settings
                                             <span class="ldwp-status-separator">·</span>
                                             <span
                                                 class="ldwp-save-status"><?php esc_html_e('Saved', 'logindesignerwp'); ?></span>
+
+                                            <!-- Discard Changes Button (Hidden by default) -->
+                                            <span class="ldwp-discard-changes dashicons dashicons-undo" id="ldwp-discard-btn"
+                                                title="<?php esc_attr_e('Discard Changes', 'logindesignerwp'); ?>"
+                                                style="display:none; margin-left: 8px; cursor: pointer; color: #d63638; font-size: 18px; vertical-align: middle;">
+                                            </span>
                                         </span>
                                         <!-- Preview Background -->
                                         <div class="logindesignerwp-preview-bg" id="ldwp-preview-bg">

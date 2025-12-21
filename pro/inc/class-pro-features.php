@@ -429,6 +429,7 @@ class LoginDesignerWP_Pro_Features
         ?>
         <div class="logindesignerwp-card" data-section-id="glassmorphism">
             <h2>
+                <span class="drag-handle dashicons dashicons-move"></span>
                 <span class="logindesignerwp-card-title-wrapper">
                     <span class="dashicons dashicons-filter"></span>
                     <?php esc_html_e('Glassmorphism Effects', 'logindesignerwp-pro'); ?>
@@ -492,6 +493,7 @@ class LoginDesignerWP_Pro_Features
         ?>
         <div class="logindesignerwp-card" data-section-id="layout">
             <h2>
+                <span class="drag-handle dashicons dashicons-move"></span>
                 <span class="logindesignerwp-card-title-wrapper">
                     <span class="dashicons dashicons-layout"></span>
                     <?php esc_html_e('Layout Options', 'logindesignerwp-pro'); ?>
@@ -607,8 +609,9 @@ class LoginDesignerWP_Pro_Features
         ?>
         <div class="logindesignerwp-card" data-section-id="redirects">
             <h2>
+                <span class="drag-handle dashicons dashicons-move"></span>
                 <span class="logindesignerwp-card-title-wrapper">
-                    <span class="dashicons dashicons-randomize"></span>
+                    <span class="dashicons dashicons-migrate"></span>
                     <?php esc_html_e('Redirects & Behavior', 'logindesignerwp-pro'); ?>
                     <span class="logindesignerwp-pro-badge">PRO</span>
                 </span>
@@ -663,8 +666,9 @@ class LoginDesignerWP_Pro_Features
         ?>
         <div class="logindesignerwp-card" data-section-id="advanced">
             <h2>
+                <span class="drag-handle dashicons dashicons-move"></span>
                 <span class="logindesignerwp-card-title-wrapper">
-                    <span class="dashicons dashicons-hammer"></span>
+                    <span class="dashicons dashicons-admin-tools"></span>
                     <?php esc_html_e('Advanced Tools', 'logindesignerwp-pro'); ?>
                     <span class="logindesignerwp-pro-badge">PRO</span>
                 </span>

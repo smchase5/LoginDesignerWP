@@ -28,7 +28,7 @@
 /* Two-column layout - 50/50 split */
 .logindesignerwp-layout {
     display: flex;
-    gap: 30px;
+    gap: 20px;
     align-items: flex-start;
 }
 
@@ -100,7 +100,7 @@
 /* Design Tab 2-Column Layout */
 .logindesignerwp-design-layout {
     display: flex;
-    gap: 30px;
+    gap: 20px;
     align-items: flex-start;
 }
 
@@ -224,8 +224,8 @@
     background: #fff;
     border: 1px solid #c3c4c7;
     border-radius: 4px;
-    padding: 20px 24px;
-    margin-bottom: 20px;
+    padding: 15px 20px;
+    margin-bottom: 15px;
 }
 
 .logindesignerwp-card h2 {
@@ -233,8 +233,8 @@
     align-items: center;
     justify-content: space-between;
     margin-top: 0;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
     border-bottom: 1px solid #eee;
     font-size: 18px;
     font-weight: 600;
@@ -790,7 +790,7 @@
    ======================================== */
 .logindesignerwp-presets-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 20px;
     margin-bottom: 20px;
 }
@@ -1449,4 +1449,36 @@
     width: 18px;
     height: 18px;
     margin-top: 1px;
+}
+
+/* Loading State for Preset Cards */
+.logindesignerwp-preset-card.is-loading {
+    pointer-events: none;
+    position: relative;
+    opacity: 0.7;
+}
+
+.logindesignerwp-preset-card.is-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #2271b1;
+    border-radius: 50%;
+    animation: ldwp-spin 1s linear infinite;
+    z-index: 10;
+}
+
+@keyframes ldwp-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
