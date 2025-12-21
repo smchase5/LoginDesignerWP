@@ -275,6 +275,7 @@ class LoginDesignerWP_Settings
                             <span class="dashicons dashicons-share"></span>
                             <?php esc_html_e('Social', 'logindesignerwp'); ?>
                         </a>
+                        <?php do_action('logindesignerwp_settings_tabs', $active_tab); ?>
                     </nav>
 
                     <!-- Design Tab -->
@@ -534,6 +535,8 @@ class LoginDesignerWP_Settings
                         </form>
                     </div>
                     <!-- End Social Tab -->
+
+                    <?php do_action('logindesignerwp_settings_content', $active_tab); ?>
 
                 </div>
             </div>
@@ -1019,6 +1022,8 @@ class LoginDesignerWP_Settings
                             <th scope="row"><?php esc_html_e('Logo Image', 'logindesignerwp'); ?></th>
                             <td>
                                 <div class="logindesignerwp-image-upload">
+                                    <input type="hidden" name="logindesignerwp_settings[logo_background_enable]"
+                                        value="<?php echo esc_attr($settings['logo_background_enable']); ?>">
                                     <input type="hidden" name="logindesignerwp_settings[logo_id]"
                                         class="logindesignerwp-image-id" value="<?php echo esc_attr($settings['logo_id']); ?>">
                                     <div class="logindesignerwp-image-preview logindesignerwp-logo-preview"

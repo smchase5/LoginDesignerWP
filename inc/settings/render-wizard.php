@@ -399,66 +399,118 @@ $is_pro = function_exists('logindesignerwp_is_pro_active') && logindesignerwp_is
                 <p><?php esc_html_e('Upload your logo and customize how it appears.', 'logindesignerwp'); ?></p>
             </div>
             <div class="ldwp-wizard-step-content">
-                <!-- Logo Upload -->
-                <div class="ldwp-wizard-logo-section">
-                    <div class="ldwp-wizard-logo-upload-area">
-                        <span class="dashicons dashicons-format-image"></span>
-                        <p><?php esc_html_e('Click to upload your logo', 'logindesignerwp'); ?></p>
-                        <button type="button"
-                            class="button ldwp-wizard-logo-btn"><?php esc_html_e('Select Logo', 'logindesignerwp'); ?></button>
+                <!-- Logo Upload (Compact) -->
+                <div class="ldwp-wizard-control-row ldwp-wizard-logo-compact-row">
+                    <div class="ldwp-wizard-logo-thumb-wrapper">
+                        <!-- Placeholder Icon -->
+                        <div class="ldwp-wizard-logo-placeholder">
+                            <span class="dashicons dashicons-format-image"></span>
+                        </div>
+                        <!-- Actual Thumb (Hidden by default) -->
+                        <img src="" class="ldwp-wizard-logo-thumb-img" style="display:none;">
                     </div>
-                    <div class="ldwp-wizard-logo-preview-area" style="display: none;">
-                        <img src="" alt="Logo preview" class="ldwp-wizard-logo-img">
-                        <button type="button"
-                            class="button ldwp-wizard-logo-remove"><?php esc_html_e('Remove', 'logindesignerwp'); ?></button>
+                    <div class="ldwp-wizard-logo-controls">
+                        <label><?php esc_html_e('Custom Logo', 'logindesignerwp'); ?></label>
+                        <div class="ldwp-wizard-logo-actions">
+                            <button type="button"
+                                class="button ldwp-wizard-logo-btn"><?php esc_html_e('Select Logo', 'logindesignerwp'); ?></button>
+                            <button type="button" class="button-link ldwp-wizard-logo-remove"
+                                style="display:none; color: #b32d2e;"><?php esc_html_e('Remove', 'logindesignerwp'); ?></button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Logo Options -->
                 <div class="ldwp-wizard-logo-options">
-                    <!-- Logo Size -->
-                    <div class="ldwp-wizard-control-row">
-                        <label><?php esc_html_e('Width (px)', 'logindesignerwp'); ?></label>
-                        <input type="number" class="ldwp-wizard-number" data-setting="logo_width" value="84" min="20" max="500">
-                    </div>
-                    <div class="ldwp-wizard-control-row">
-                        <label><?php esc_html_e('Height (px)', 'logindesignerwp'); ?></label>
-                        <input type="number" class="ldwp-wizard-number" data-setting="logo_height" value="84" min="20" max="500">
-                    </div>
-                    
-                    <!-- Logo Corners - Visual Selector -->
-                    <div class="ldwp-wizard-control-row ldwp-wizard-control-row-block">
-                        <label><?php esc_html_e('Logo Corners', 'logindesignerwp'); ?></label>
-                        <div class="ldwp-wizard-corner-selector" data-setting="logo_border_radius">
-                            <label class="ldwp-wizard-corner-option is-active" data-value="0">
-                                <div class="ldwp-wizard-corner-preview" style="border-radius: 0;"></div>
-                                <span><?php esc_html_e('Square', 'logindesignerwp'); ?></span>
-                            </label>
-                            <label class="ldwp-wizard-corner-option" data-value="8">
-                                <div class="ldwp-wizard-corner-preview" style="border-radius: 8px;"></div>
-                                <span><?php esc_html_e('Rounded', 'logindesignerwp'); ?></span>
-                            </label>
-                            <label class="ldwp-wizard-corner-option" data-value="50">
-                                <div class="ldwp-wizard-corner-preview" style="border-radius: 50%;"></div>
-                                <span><?php esc_html_e('Circle', 'logindesignerwp'); ?></span>
-                            </label>
+
+                    <!-- Main Logo Settings (Dimensions & Styling Combined) -->
+                    <div class="ldwp-wizard-group">
+                        <h4 class="ldwp-wizard-group-title"><?php esc_html_e('Logo Settings', 'logindesignerwp'); ?>
+                        </h4>
+
+                        <!-- Width / Height Grid -->
+                        <div class="ldwp-wizard-grid-2 ldwp-wizard-control-row">
+                            <div class="ldwp-wizard-control-col">
+                                <label><?php esc_html_e('Width', 'logindesignerwp'); ?></label>
+                                <div class="ldwp-wizard-input-wrapper">
+                                    <input type="number" class="ldwp-wizard-number" data-setting="logo_width" value="84"
+                                        min="20" max="500">
+                                    <span class="ldwp-wizard-unit">px</span>
+                                </div>
+                            </div>
+                            <div class="ldwp-wizard-control-col">
+                                <label><?php esc_html_e('Height', 'logindesignerwp'); ?></label>
+                                <div class="ldwp-wizard-input-wrapper">
+                                    <input type="number" class="ldwp-wizard-number" data-setting="logo_height"
+                                        value="84" min="20" max="500">
+                                    <span class="ldwp-wizard-unit">px</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Radius / Margin Grid -->
+                        <div class="ldwp-wizard-grid-2 ldwp-wizard-control-row">
+                            <div class="ldwp-wizard-control-col">
+                                <label><?php esc_html_e('Corner Radius', 'logindesignerwp'); ?></label>
+                                <div class="ldwp-wizard-range-wrapper">
+                                    <input type="range" class="ldwp-wizard-range" data-setting="logo_border_radius"
+                                        min="0" max="100" value="0">
+                                    <span class="ldwp-wizard-range-value">0px</span>
+                                </div>
+                            </div>
+                            <div class="ldwp-wizard-control-col">
+                                <label><?php esc_html_e('Bottom Margin', 'logindesignerwp'); ?></label>
+                                <div class="ldwp-wizard-range-wrapper">
+                                    <input type="range" class="ldwp-wizard-range" data-setting="logo_bottom_margin"
+                                        min="0" max="100" value="0">
+                                    <span class="ldwp-wizard-range-value">0px</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    
-                    <!-- Bottom Margin -->
-                    <div class="ldwp-wizard-control-row">
-                        <label><?php esc_html_e('Bottom Margin', 'logindesignerwp'); ?></label>
-                        <div class="ldwp-wizard-range-wrapper">
-                            <input type="range" class="ldwp-wizard-range" data-setting="logo_bottom_margin" min="0" max="50" value="0">
-                            <span class="ldwp-wizard-range-value">0px</span>
+
+                    <!-- Background Group -->
+                    <div class="ldwp-wizard-group">
+                        <div class="ldwp-wizard-control-row ldwp-wizard-toggle-row">
+                            <div>
+                                <label
+                                    class="ldwp-wizard-label-lg"><?php esc_html_e('Logo Background', 'logindesignerwp'); ?></label>
+                            </div>
+                            <!-- Fixed Width Wrapper for Toggle -->
+                            <div style="flex: 0 0 40px; width: 40px;">
+                                <label class="ldwp-wizard-switch">
+                                    <input type="checkbox" class="ldwp-wizard-toggle"
+                                        data-setting="logo_background_enable" value="1">
+                                    <span class="ldwp-wizard-slider round"></span>
+                                </label>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <!-- Background Color -->
-                    <div class="ldwp-wizard-control-row">
-                        <label><?php esc_html_e('Background Color', 'logindesignerwp'); ?></label>
-                        <input type="text" class="ldwp-wizard-color" data-setting="logo_background_color" value="">
-                        <span class="ldwp-wizard-hint"><?php esc_html_e('Optional', 'logindesignerwp'); ?></span>
+
+                        <!-- Nested Background Options (Hidden by default) -->
+                        <div class="ldwp-wizard-logo-bg-group" style="display: none;">
+
+                            <!-- Color / Padding Grid -->
+                            <div class="ldwp-wizard-grid-2">
+                                <!-- Background Color -->
+                                <div class="ldwp-wizard-control-col">
+                                    <label><?php esc_html_e('Color', 'logindesignerwp'); ?></label>
+                                    <div class="ldwp-wizard-color-wrapper">
+                                        <input type="text" class="ldwp-wizard-color"
+                                            data-setting="logo_background_color" value="#ffffff">
+                                    </div>
+                                </div>
+
+                                <!-- Padding -->
+                                <div class="ldwp-wizard-control-col">
+                                    <label><?php esc_html_e('Padding', 'logindesignerwp'); ?></label>
+                                    <div class="ldwp-wizard-input-wrapper" style="width: 100%;">
+                                        <input type="number" class="ldwp-wizard-number" data-setting="logo_padding"
+                                            min="0" max="50" value="10">
+                                        <span class="ldwp-wizard-unit">px</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

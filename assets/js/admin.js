@@ -860,33 +860,27 @@
 
             case 'logo_width':
                 if (!skipRender) {
-                    // Check if using image
-                    var $img = $previewLogo.find('img');
-                    if ($img.length && $img.is(':visible')) {
-                        $previewLogo.find('a').css('width', value + 'px');
-                        $previewLogo.find('a').css('background-size', 'contain'); // Force recheck
-                    } else {
-                        // SVG/Default
-                        $previewLogo.find('a').css('width', value + 'px');
-                        $previewLogo.find('a').css('background-size', value + 'px ' + value + 'px'); // Keep it tight
-                    }
+                    var w = (value == 0 || value == '') ? 'auto' : value + 'px';
+                    // Apply to image/svg directly
+                    $previewLogo.find('img, svg').css('width', w);
+                    $previewLogo.find('a').css('width', 'auto'); // Reset anchor width constraint
                 }
                 break;
 
             case 'logo_height':
-                var h = (value == 0 || value == '') ? '84px' : value + 'px';
-                $previewLogo.find('a').css('height', h);
-                // Also update background size cover/contain logic if needed, but 'contain' usually fine
+                var h = (value == 0 || value == '') ? 'auto' : value + 'px';
+                // Apply to image/svg directly
+                $previewLogo.find('img, svg').css('height', h);
+                $previewLogo.find('a').css('height', 'auto'); // Reset anchor height constraint
                 break;
 
             case 'logo_padding':
-                $previewLogo.find('a').css('padding', value + 'px');
-                // Ensure bg clip content box if using background? No, usually padding adds space inside border-box
-                // Just standard padding works effectively for 'badge' look
+                // Padding applies to the image/svg (which has background color)
+                $previewLogo.find('img, svg').css('padding', value + 'px');
                 break;
 
             case 'logo_border_radius':
-                $previewLogo.find('a').css('border-radius', value + 'px');
+                $previewLogo.find('img, svg').css('border-radius', value + 'px');
                 break;
 
             case 'logo_bottom_margin':
@@ -894,9 +888,7 @@
                 break;
 
             case 'logo_background_color':
-                $previewLogo.find('a').css('background-color', value);
-                // Ensure background-image (logo) sits ON TOP of color. 
-                // Default WP CSS puts image in background-image. Color works fine with that.
+                $previewLogo.find('img, svg').css('background-color', value);
                 break;
 
             // Social Login

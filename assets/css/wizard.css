@@ -640,7 +640,22 @@
     background: #f9fafb;
     border-radius: 8px;
     padding: 16px;
+    padding: 16px;
     margin-bottom: 16px;
+}
+
+.ldwp-wizard-logo-preview-area {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.ldwp-wizard-logo-img {
+    display: inline-block;
+    max-width: 100%;
+    box-sizing: content-box;
+    /* Ensure padding adds to width, not shrinks content */
+    vertical-align: middle;
+    transition: all 0.2s ease;
 }
 
 /* ========================================
@@ -1045,4 +1060,312 @@
         width: 100%;
         justify-content: center;
     }
+}
+
+/* ========================================
+   Focus Mode (When Wizard is Active)
+   ======================================== */
+
+/* Dark Backdrop Overlay */
+body.ldwp-wizard-active::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 99990;
+    /* High z-index to cover admin menu/bar */
+    pointer-events: auto;
+    /* Block clicks on background */
+    animation: ldwpFadeIn 0.3s ease;
+}
+
+@keyframes ldwpFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Lift Layout above Overlay */
+body.ldwp-wizard-active .logindesignerwp-design-layout {
+    position: relative;
+    z-index: 99995;
+    /* Above the overlay */
+}
+
+/* Ensure Tabs stay behind overlay (so they are dimmed) */
+body.ldwp-wizard-active .logindesignerwp-tabs {
+    position: relative;
+    z-index: auto;
+    /* Keep below overlay */
+}
+
+/* Disable main Save button when wizard is active */
+body.ldwp-wizard-active .logindesignerwp-preview-actions button[type="submit"] {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
+    filter: grayscale(100%);
+}
+
+/* Logo Options Restyle */
+.ldwp-wizard-group {
+    background: #f8f9fa;
+    border: 1px solid #e2e4e7;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.ldwp-wizard-group-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #646970;
+    margin: 0 0 10px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* 2 Column Grid */
+.ldwp-wizard-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.ldwp-wizard-input-wrapper {
+    position: relative;
+    width: 100%;
+    /* Full width of grid cell */
+}
+
+.ldwp-wizard-control-row {
+    margin-bottom: 12px;
+}
+
+.ldwp-wizard-control-row:last-child {
+    margin-bottom: 0;
+}
+
+.ldwp-wizard-unit {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #646970;
+    font-size: 12px;
+    pointer-events: none;
+}
+
+/* Larger Labels */
+.ldwp-wizard-label-lg {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e1e1e;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.ldwp-wizard-desc {
+    font-size: 11px;
+    color: #646970;
+    margin: 0;
+    line-height: 1.3;
+    max-width: 250px;
+}
+
+/* Toggle Row Layout */
+.ldwp-wizard-toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0 !important;
+}
+
+/* Color Wrapper */
+.ldwp-wizard-color-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.ldwp-wizard-logo-bg-group {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e2e4e7;
+    background: transparent !important;
+    /* Override inline */
+    border: none !important;
+    /* Override inline */
+    padding: 12px 0 0 0 !important;
+    /* Override inline */
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   Toggle Switch
+   ======================================== */
+.ldwp-wizard-switch {
+    display: inline-block;
+    position: relative;
+    width: 40px !important;
+    height: 24px;
+    flex: 0 0 40px;
+    /* Prevent flex stretching */
+}
+
+.ldwp-wizard-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.ldwp-wizard-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.ldwp-wizard-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked+.ldwp-wizard-slider {
+    background-color: #2271b1;
+}
+
+input:focus+.ldwp-wizard-slider {
+    box-shadow: 0 0 1px #2271b1;
+}
+
+input:checked+.ldwp-wizard-slider:before {
+    -webkit-transform: translateX(16px);
+    -ms-transform: translateX(16px);
+    transform: translateX(16px);
+}
+
+/* Rounded sliders */
+.ldwp-wizard-slider.round {
+    border-radius: 24px;
+}
+
+.ldwp-wizard-slider.round:before {
+    border-radius: 50%;
+}
+
+/* ========================================
+   Compact Logo Selector
+   ======================================== */
+.ldwp-wizard-logo-compact-row {
+    flex-direction: row !important;
+    /* Force row */
+    align-items: center;
+    gap: 16px;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 24px;
+}
+
+.ldwp-wizard-logo-thumb-wrapper {
+    width: 60px;
+    height: 60px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.ldwp-wizard-logo-placeholder {
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ldwp-wizard-logo-placeholder .dashicons {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+}
+
+.ldwp-wizard-logo-thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.ldwp-wizard-logo-controls {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ldwp-wizard-logo-controls label {
+    font-weight: 500;
+    color: #1e293b;
+    font-size: 14px;
+    margin: 0;
+}
+
+.ldwp-wizard-logo-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Remove 'Remove' button styles to keep it link-like but colored */
+.ldwp-wizard-logo-remove {
+    text-decoration: none;
+    font-size: 13px;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    cursor: pointer;
+}
+
+.ldwp-wizard-logo-remove:hover {
+    color: #ef4444 !important;
+    text-decoration: underline;
+    background: none !important;
 }

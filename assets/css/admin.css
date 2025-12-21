@@ -462,12 +462,18 @@
 .logindesignerwp-preview-logo img {
     max-width: 100%;
     height: auto;
-    max-height: 100px;
+    /* max-height: 100px; Remove fixed max height to allow wizard settings */
     transition: width 0.3s ease;
+    display: inline-block;
+    vertical-align: middle;
+    box-sizing: content-box;
+    /* Ensure padding adds to size, doesn't shrink image */
 }
 
 .logindesignerwp-preview-logo svg {
     transition: width 0.3s ease;
+    display: inline-block;
+    vertical-align: middle;
 }
 
 /* Login container */

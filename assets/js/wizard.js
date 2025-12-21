@@ -516,19 +516,22 @@
         });
 
         // Logo upload button
-        $(document).on('click', '.ldwp-wizard-logo-btn, .ldwp-wizard-logo-upload-area', function (e) {
-            if ($(e.target).hasClass('button')) {
-                // Button clicked
-            }
+        $(document).on('click', '.ldwp-wizard-logo-btn', function (e) {
+            e.preventDefault();
             uploadLogo();
         });
 
         // Logo remove button
-        $(document).on('click', '.ldwp-wizard-logo-remove', function () {
+        $(document).on('click', '.ldwp-wizard-logo-remove', function (e) {
+            e.preventDefault();
             wizard.settings.logo_id = 0;
             wizard.settings.logo_url = '';
-            $('.ldwp-wizard-logo-upload-area').show();
-            $('.ldwp-wizard-logo-preview-area').hide();
+
+            // Reset UI
+            $('.ldwp-wizard-logo-thumb-img').attr('src', '').hide();
+            $('.ldwp-wizard-logo-placeholder').show();
+            $(this).hide(); // Hide remove button
+
             updateLivePreview('logo_image', '');
         });
 
@@ -569,6 +572,9 @@
 
         // Initialize color pickers if not already done
         initColorPickers();
+
+        // Sync UI inputs with current settings (e.g. Logo Thumb)
+        updateAllInputs();
     }
 
     // Initialize WordPress color pickers on wizard color inputs
@@ -578,13 +584,77 @@
             if (!$input.hasClass('wp-color-picker')) {
                 $input.wpColorPicker({
                     change: function (event, ui) {
-                        var setting = $(event.target).data('setting');
-                        var color = ui.color.toString();
-                        if (setting && wizard.settings.hasOwnProperty(setting)) {
-                            wizard.settings[setting] = color;
+                        var $el = $(this);
+                        var setting = $el.data('setting');
+                        var val = ui.color.toString();
+
+                        // Direct validation update
+                        $el.val(val);
+
+                        // Trigger input to fire updateColor or generic listener
+                        $el.trigger('input');
+
+                        // Immediate preview update for logo background
+                        if (setting === 'logo_background_color') {
+                            var isEnabled = $('input[data-setting="logo_background_enable"]').is(':checked');
+                            if (isEnabled) {
+                                $('.ldwp-wizard-logo-img').css('background-color', val);
+                            }
+                        }
+                    },
+                    clear: function () {
+                        var $el = $(this).prev(); // Input is hidden previous sibling
+                        $el.val('').trigger('change');
+                        if ($el.data('setting') === 'logo_background_color') {
+                            $('.ldwp-wizard-logo-img').css('background-color', 'transparent');
                         }
                     }
                 });
+            }
+        });
+
+        // Initialize Toggle Switch
+        // Unbind first to prevent duplicate listeners if init is called multiple times
+        $('.ldwp-wizard-toggle').off('change.wizard').on('change.wizard', function () {
+            var $toggle = $(this);
+            var setting = $toggle.data('setting');
+            var isChecked = $toggle.is(':checked');
+            var value = isChecked ? 1 : 0;
+
+            if (setting === 'logo_background_enable') {
+                if (isChecked) {
+                    $('.ldwp-wizard-logo-bg-group').slideDown(200);
+
+                    // Apply current values to preview
+                    var color = $('input[data-setting="logo_background_color"]').val();
+                    var padding = $('input[data-setting="logo_padding"]').val();
+
+                    $('.ldwp-wizard-logo-img').css({
+                        'background-color': color || 'transparent',
+                        'padding': (padding || 0) + 'px'
+                    });
+                } else {
+                    $('.ldwp-wizard-logo-bg-group').slideUp(200);
+
+                    // Remove styles from preview
+                    $('.ldwp-wizard-logo-img').css({
+                        'background-color': 'transparent',
+                        'padding': '0px'
+                    });
+                }
+            }
+
+            if (setting && wizard.settings.hasOwnProperty(setting)) {
+                wizard.settings[setting] = value;
+            }
+        });
+
+        // Set initial state of toggle group based on checkbox
+        $('.ldwp-wizard-toggle[data-setting="logo_background_enable"]').each(function () {
+            if ($(this).is(':checked')) {
+                $('.ldwp-wizard-logo-bg-group').show();
+            } else {
+                $('.ldwp-wizard-logo-bg-group').hide();
             }
         });
     }
@@ -599,6 +669,7 @@
         wizard.currentStep = 1;
         $('.ldwp-wizard-inline').addClass('is-visible').show();
         $('.ldwp-settings-cards').hide();
+        $('body').addClass('ldwp-wizard-active'); // Enable Focus Mode
         updateStepDisplay();
         initColorPickers();
     }
@@ -607,6 +678,8 @@
     function closeInlineWizard() {
         $('.ldwp-wizard-inline').removeClass('is-visible').hide();
         $('.ldwp-settings-cards').show();
+        $('body').removeClass('ldwp-wizard-active'); // Disable Focus Mode
+        // Ensure any random styles are cleared if needed, but CSS handles transition
     }
 
     // Upload background image
@@ -681,6 +754,11 @@
         if (wizard.currentStep < wizard.totalSteps) {
             wizard.currentStep++;
             updateStepDisplay();
+        } else if (wizard.currentStep === wizard.totalSteps) {
+            // If on final step, Next button hits this.
+            // But UI should show Apply button instead.
+            // Just in case, try to apply if somehow clicked.
+            applySettings();
         }
     }
 
@@ -718,9 +796,14 @@
         var $applyBtn = $('.ldwp-wizard-btn-apply');
 
         if (wizard.currentStep === 1) {
-            $prevBtn.hide();
+            $prevBtn.css('visibility', 'hidden'); // Use visibility to maintain layout spacing if needed, OR hide()
+            // To match User request "no back buttons", implying they want to see them.
+            // If we use hide(), it removes it from layout.
+            // The template uses style="visibility: hidden;".
+            // Let's use CSS visibility to toggle.
         } else {
-            $prevBtn.show();
+            $prevBtn.css('visibility', 'visible');
+            $prevBtn.show(); // Ensure display is not none
         }
 
         if (wizard.currentStep === wizard.totalSteps) {
@@ -731,8 +814,9 @@
             $applyBtn.hide();
         }
 
-        // Update logo preview background when on step 4 (Logo & Branding)
-        if (wizard.currentStep === 4) {
+        // Update logo preview background when on step 3 (Logo & Branding)
+        // Update logo preview background when on step 3 (Logo & Branding)
+        if (wizard.currentStep === 3) {
             var s = wizard.settings;
             var bgStyle = s.background_mode === 'gradient'
                 ? 'linear-gradient(135deg, ' + s.background_gradient_1 + ', ' + s.background_gradient_2 + ')'
@@ -745,11 +829,23 @@
                 'border-radius': '12px'
             });
 
-            // Style the logo upload area with the forms settings
-            $('.ldwp-wizard-logo-upload').css({
+            // Style the logo upload area to look like the form background
+            $('.ldwp-wizard-logo-upload-area').css({
                 'background': s.form_bg_color,
                 'border-radius': (s.form_border_radius || 4) + 'px'
             });
+
+            // Apply logo-specific styles to the image
+            // Only apply background/padding if enabled
+            var isBgEnabled = !!s.logo_background_enable;
+
+            var logoStyles = {
+                'border-radius': (s.logo_border_radius || 0) + 'px',
+                'background-color': isBgEnabled ? (s.logo_background_color || 'transparent') : 'transparent',
+                'padding': isBgEnabled ? ((s.logo_padding || 0) + 'px') : '0px'
+            };
+
+            $('.ldwp-wizard-logo-img').css(logoStyles);
         }
 
         // Update preview on final step
@@ -776,22 +872,96 @@
 
         // Sync to preview
         syncAllSettingsToPreview();
+
+        // Sync to inputs (UI)
+        updateAllInputs();
+    }
+
+    // Update all inputs from wizard state
+    function updateAllInputs() {
+        // 1. Update Background Mode Visual Selector
+        var bgMode = wizard.settings.background_mode || 'solid';
+        $('.ldwp-wizard-bg-type-option').removeClass('is-active');
+        $('.ldwp-wizard-bg-type-option[data-value="' + bgMode + '"]').addClass('is-active');
+
+        // Show/Hide Panels
+        $('.ldwp-wizard-bg-panel').removeClass('is-active');
+        $('.ldwp-wizard-bg-panel[data-panel="' + bgMode + '"]').addClass('is-active');
+
+        // 2. Update Colors
+        updateColorInputs();
+
+        // 3. Update Range Sliders & Text
+        $('.ldwp-wizard-range').each(function () {
+            var $input = $(this);
+            var setting = $input.data('setting');
+            if (setting && wizard.settings.hasOwnProperty(setting)) {
+                var val = wizard.settings[setting];
+                $input.val(val);
+                // Update display text
+                var $display = $input.closest('.ldwp-wizard-range-wrapper').find('.ldwp-wizard-range-value');
+                if (setting === 'gradient_angle') $display.text(val + '°');
+                else if (['background_blur', 'logo_bottom_margin', 'logo_border_radius', 'logo_padding'].includes(setting)) $display.text(val + 'px');
+                else $display.text(val);
+            }
+        });
+
+        // 4. Update Number Inputs (Width/Height)
+        $('.ldwp-wizard-number').each(function () {
+            var $input = $(this);
+            var setting = $input.data('setting');
+            if (setting && wizard.settings.hasOwnProperty(setting)) {
+                $input.val(wizard.settings[setting]);
+            }
+        });
+
+        // 5. Update Toggles
+        $('.ldwp-wizard-toggle').each(function () {
+            var $input = $(this);
+            var setting = $input.data('setting');
+            if (setting && wizard.settings.hasOwnProperty(setting)) {
+                var isChecked = !!wizard.settings[setting];
+                $input.prop('checked', isChecked);
+                // Trigger change to update UI groups (like showing logo background options)
+                $input.trigger('change.wizard');
+            }
+        });
+
+        // 6. Update Gradient Type (Radial/Linear)
+        if (wizard.settings.gradient_type) {
+            var $gradSelect = $('.ldwp-wizard-select[data-setting="gradient_type"]');
+            $gradSelect.val(wizard.settings.gradient_type).trigger('change');
+        }
+
+        // 7. Update Logo Image (Compact UI)
+        if (wizard.settings.logo_url) {
+            $('.ldwp-wizard-logo-thumb-img').attr('src', wizard.settings.logo_url).show();
+            $('.ldwp-wizard-logo-placeholder').hide();
+            $('.ldwp-wizard-logo-remove').show();
+        } else {
+            $('.ldwp-wizard-logo-thumb-img').attr('src', '').hide();
+            $('.ldwp-wizard-logo-placeholder').show();
+            $('.ldwp-wizard-logo-remove').hide();
+        }
     }
 
     // Update color inputs from wizard state
     function updateColorInputs() {
-        $('input[name="wizard_background_color"]').val(wizard.settings.background_color);
-        $('input[name="wizard_form_bg_color"]').val(wizard.settings.form_bg_color);
-        $('input[name="wizard_button_bg"]').val(wizard.settings.button_bg);
-        $('input[name="wizard_label_text_color"]').val(wizard.settings.label_text_color);
-        $('input[name="wizard_input_bg_color"]').val(wizard.settings.input_bg_color);
-        $('input[name="wizard_input_text_color"]').val(wizard.settings.input_text_color);
-
-        // Trigger color pickers to update if they exist
+        // Dynamic update for ALL color inputs based on data-setting
         $('.ldwp-wizard-color').each(function () {
             var $input = $(this);
-            if ($input.data('wpWpColorPicker')) {
-                $input.wpColorPicker('color', $input.val());
+            var setting = $input.data('setting');
+
+            if (setting && wizard.settings.hasOwnProperty(setting)) {
+                var colorVal = wizard.settings[setting];
+
+                // Update input value
+                $input.val(colorVal);
+
+                // Update WP Color Picker UI if initialized
+                if ($input.data('wpWpColorPicker')) {
+                    $input.wpColorPicker('color', colorVal);
+                }
             }
         });
     }
@@ -802,42 +972,93 @@
         var setting = $input.data('setting');
         var value = $input.val();
 
+        // Special handling for logo background color immediate update
+        if (setting === 'logo_background_color') {
+            // Only apply if toggle is on or if we force it? 
+            // If user is picking a color, they probably want to see it.
+            // But if toggle is off, maybe we shouldn't?
+            // Let's assume picking a color implies enabling it, or just show it.
+            // But better to check toggle state logic if we want strictness.
+            var isEnabled = $('input[data-setting="logo_background_enable"]').is(':checked');
+            if (isEnabled || value) { // If value is being set, show it
+                $('.ldwp-wizard-logo-img').css('background-color', value);
+            }
+        }
+
         if (setting && wizard.settings.hasOwnProperty(setting)) {
             wizard.settings[setting] = value;
+            updateLivePreview(setting, value);
+        }
+    }
+
+    // Update number/range inputs
+    function updateInput() {
+        var $input = $(this);
+        var setting = $input.data('setting');
+        var value = $input.val();
+
+        // Update range value display
+        if ($input.hasClass('ldwp-wizard-range')) {
+            $input.siblings('.ldwp-wizard-range-value').text(value + 'px');
+        }
+
+        // Live update for wizard logo preview
+        if (setting === 'logo_width') {
+            $('.ldwp-wizard-logo-img').attr('width', value); // Update attribute for immediate effect if needed or CSS
+            $('.ldwp-wizard-logo-img').css('width', value + 'px');
+        }
+        if (setting === 'logo_height') {
+            $('.ldwp-wizard-logo-img').attr('height', value);
+            $('.ldwp-wizard-logo-img').css('height', value + 'px');
+        }
+        if (setting === 'logo_border_radius') {
+            var radius = parseInt(value);
+            // If value is 50, usually circle, but let's stick to px unless UI specifies unit.
+            // The UI sets data-value="50" for Circle. 
+            // Logic: if 50 and context implies circle, use %. But here simple px or % logic:
+            $('.ldwp-wizard-logo-img').css('border-radius', radius > 40 ? '50%' : radius + 'px');
+        }
+        if (setting === 'logo_padding') {
+            $('.ldwp-wizard-logo-img').css('padding', value + 'px');
+        }
+
+        if (setting && wizard.settings.hasOwnProperty(setting)) {
+            wizard.settings[setting] = value;
+            updateLivePreview(setting, value);
         }
     }
 
     // Upload logo
-    function uploadLogo() {
-        var mediaUploader;
+    var logoUploader; // Persistent variable for uploader
 
-        if (mediaUploader) {
-            mediaUploader.open();
+    function uploadLogo() {
+        if (logoUploader) {
+            logoUploader.open();
             return;
         }
 
-        mediaUploader = wp.media({
+        logoUploader = wp.media({
             title: 'Choose Logo',
             button: { text: 'Use this logo' },
             multiple: false
         });
 
-        mediaUploader.on('select', function () {
-            var attachment = mediaUploader.state().get('selection').first().toJSON();
+        logoUploader.on('select', function () {
+            var attachment = logoUploader.state().get('selection').first().toJSON();
             wizard.settings.logo_id = attachment.id;
             wizard.settings.logo_url = attachment.url;
 
             // Update wizard preview
-            $('.ldwp-wizard-logo-preview').html('<img src="' + attachment.url + '" alt="Logo">');
-            $('.ldwp-wizard-logo-preview').show();
-            $('.ldwp-wizard-logo-upload-area').hide();
-            $('.ldwp-wizard-logo-preview-area').show();
+            // Update wizard preview (Compact UI)
+            $('.ldwp-wizard-logo-thumb-img').attr('src', attachment.url).show();
+            $('.ldwp-wizard-logo-placeholder').hide();
+            $('.ldwp-wizard-logo-remove').show(); // Show remove button
 
             // Update live preview
             updateLivePreview('logo_image', attachment.url);
         });
 
-        mediaUploader.open();
+        logoUploader.open();
     }
 
     // Update final preview
@@ -911,6 +1132,27 @@
         } else {
             // Default WordPress-style icon
             $logoContainer.html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.52 122.523" width="84" height="84" style="display: inline-block;"><circle fill="#2271b1" cx="61.26" cy="61.26" r="61.26"/><path fill="#fff" d="M61.262 8.805c28.939 0 52.455 23.516 52.455 52.455s-23.516 52.455-52.455 52.455S8.807 90.199 8.807 61.26 32.323 8.805 61.262 8.805z"/><path fill="#2271b1" d="M61.262 14.805c25.663 0 46.455 20.792 46.455 46.455s-20.792 46.455-46.455 46.455S14.807 86.923 14.807 61.26s20.792-46.455 46.455-46.455z"/></svg>');
+        }
+
+        // Apply logo background color
+        // Apply logo background color
+        // Apply logo background color
+        if (s.logo_background_color && (s.logo_background_enable == 1 || s.logo_background_enable === '1' || s.logo_background_enable === true)) {
+            $logoContainer.find('img, svg').css('background-color', s.logo_background_color);
+        } else {
+            $logoContainer.find('img, svg').css('background-color', 'transparent');
+        }
+
+        // Apply logo padding if set
+        if (s.logo_padding) {
+            // Check if user wants padding even without bg? 
+            // The padding control is inside the BG group, so implies it's tied to BG.
+            // But if we hide the group, user implies "No BG features".
+            if (!s.logo_background_enable || s.logo_background_enable == '0') {
+                $logoContainer.find('img, svg').css('padding', '0');
+            } else {
+                $logoContainer.find('img, svg').css('padding', s.logo_padding + 'px');
+            }
         }
 
         // Style labels
@@ -1006,9 +1248,37 @@
         $('input[name="logindesignerwp_settings[logo_height]"]').val(s.logo_height).trigger('input');
         $('input[name="logindesignerwp_settings[logo_border_radius]"]').val(s.logo_border_radius).trigger('input');
         $('input[name="logindesignerwp_settings[logo_bottom_margin]"]').val(s.logo_bottom_margin).trigger('input');
-        if (s.logo_background_color) {
-            $('input[name="logindesignerwp_settings[logo_background_color]"]').val(s.logo_background_color).trigger('change');
+
+        // Logo padding (needs to be added to main settings?)
+        // If it exists in main settings, update it.
+        var $logoPadding = $('input[name="logindesignerwp_settings[logo_padding]"]');
+        if ($logoPadding.length) {
+            $logoPadding.val(s.logo_padding).trigger('input');
         }
+
+        // Handle Logo Background Color based on enable toggle
+        var logoBgColor = s.logo_background_color;
+
+        // If toggle exists in wizard but is off, clear color. 
+        // Note: s.logo_background_enable might be string "1" or number 1 or undefined.
+        // If I haven't added it to defaultSettings, it might be undefined initially.
+        // Let's check checked state of the toggle input directly or rely on wizard.settings.
+        // The toggle handler updates wizard.settings.logo_background_enable.
+
+        if (!s.logo_background_enable || s.logo_background_enable == '0') {
+            logoBgColor = ''; // Clear it
+        }
+
+        $('input[name="logindesignerwp_settings[logo_background_color]"]').val(logoBgColor).trigger('change');
+
+        // Also ensure we update the LIVE preview immediately
+        if (typeof window.updatePreview === 'function') {
+            updatePreview('logo_background_color', logoBgColor);
+            // Verify this key matches what class-settings.php expects/renders
+        }
+
+        // Also persist the toggle if main settings has it (optional feature for future)
+        // $('input[name="logindesignerwp_settings[logo_background_enable]"]').prop('checked', !!s.logo_background_enable);
 
         // Update color pickers
         $('.wp-color-picker').each(function () {
@@ -1022,6 +1292,21 @@
                 }
             }
         });
+
+        // Force update preview with precise Wizard settings (bypassing potential color picker Hex conversion issues)
+        // This ensures Glassmorphism (RGBA) and other sensitive styles render correctly immediately
+        if (typeof window.updatePreview === 'function') {
+            updatePreview('form_bg_color', s.form_bg_color);
+            updatePreview('form_border_color', s.form_border_color);
+            updatePreview('input_bg_color', s.input_bg_color);
+            updatePreview('input_border_color', s.input_border_color);
+            updatePreview('button_bg', s.button_bg);
+            updatePreview('button_bg_hover', s.button_bg_hover);
+            updatePreview('label_text_color', s.label_text_color);
+            updatePreview('background_color', s.background_color);
+            // Re-apply background mode to ensure correct layers
+            updatePreview('background_mode', s.background_mode);
+        }
 
         // Close inline wizard
         closeInlineWizard();

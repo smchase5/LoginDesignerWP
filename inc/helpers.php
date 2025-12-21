@@ -85,6 +85,7 @@ function logindesignerwp_get_defaults()
         'logo_padding' => 0,
         'logo_border_radius' => 0,
         'logo_bottom_margin' => 0,
+        'logo_background_enable' => 0,
         'logo_background_color' => '',
         'logo_url' => '',
         'logo_title' => '',
@@ -207,6 +208,7 @@ function logindesignerwp_sanitize_settings($input)
     $sanitized['logo_padding'] = absint($input['logo_padding'] ?? $defaults['logo_padding']);
     $sanitized['logo_border_radius'] = absint($input['logo_border_radius'] ?? $defaults['logo_border_radius']);
     $sanitized['logo_bottom_margin'] = absint($input['logo_bottom_margin'] ?? $defaults['logo_bottom_margin']);
+    $sanitized['logo_background_enable'] = !empty($input['logo_background_enable']) ? 1 : 0;
     $sanitized['logo_background_color'] = sanitize_hex_color($input['logo_background_color'] ?? $defaults['logo_background_color']);
     $sanitized['logo_url'] = esc_url_raw($input['logo_url'] ?? '');
     $sanitized['logo_title'] = sanitize_text_field($input['logo_title'] ?? '');
