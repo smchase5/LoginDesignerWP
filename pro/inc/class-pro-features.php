@@ -441,9 +441,11 @@ class LoginDesignerWP_Pro_Features
                     <tr>
                         <th scope="row"><?php esc_html_e('Enable Glass Effect', 'logindesignerwp-pro'); ?></th>
                         <td>
-                            <label>
+                            <label class="ldwp-toggle">
                                 <input type="checkbox" name="logindesignerwp_settings[glass_enabled]" value="1" <?php checked($settings['glass_enabled']); ?>>
-                                <?php esc_html_e('Enable glassmorphism effect', 'logindesignerwp-pro'); ?>
+                                <span class="ldwp-toggle-slider"></span>
+                                <span
+                                    class="ldwp-toggle-label"><?php esc_html_e('Enable glassmorphism effect', 'logindesignerwp-pro'); ?></span>
                             </label>
                             <p class="description">
                                 <?php esc_html_e('Requires a background image to be visible.', 'logindesignerwp-pro'); ?>

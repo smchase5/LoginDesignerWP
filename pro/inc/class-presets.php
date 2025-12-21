@@ -586,7 +586,7 @@ class LoginDesignerWP_Pro_Presets
                             }
 
                             // Update WordPress color pickers
-                            $('.ldwp-color-picker').each(function () {
+                            $('.logindesignerwp-color-picker, .ldwp-color-picker').each(function () {
                                 var $input = $(this);
                                 var name = $input.attr('name');
                                 if (name) {
@@ -608,11 +608,25 @@ class LoginDesignerWP_Pro_Presets
                             $('.logindesignerwp-preset-card').removeClass('active');
                             $card.addClass('active');
 
-                            // Update background mode radios visual state
-                            var bgMode = settings.background_mode || 'solid';
-                            $('input[name="logindesignerwp_settings[background_mode]"][value="' + bgMode + '"]').prop('checked', true).trigger('change');
-                            $('.ldwp-bg-type-option').removeClass('is-active');
-                            $('.ldwp-bg-type-option[data-value="' + bgMode + '"]').addClass('is-active');
+                            // Update Background Mode Visual Selector and Visibility
+                            if (settings.background_mode) {
+                                var $bgSelector = $('.ldwp-bg-type-selector');
+                                // Update active card
+                                $bgSelector.find('.ldwp-bg-type-option').removeClass('is-active');
+                                $bgSelector.find('[data-value="' + settings.background_mode + '"]').addClass('is-active');
+
+                                // Update hidden input value
+                                $('.ldwp-bg-mode-value').val(settings.background_mode);
+
+                                // Show/Hide relevant controls
+                                $('.logindesignerwp-bg-options').hide();
+                                $('.logindesignerwp-bg-' + settings.background_mode).show();
+                            }
+
+                            // Trigger change on Gradient Type to update visibility of sub-controls
+                            if (settings.gradient_type) {
+                                $('select.logindesignerwp-gradient-type').trigger('change');
+                            }
 
                             // Apply preview update
                             if (typeof window.ldwpApplyPreview === 'function') {

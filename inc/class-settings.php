@@ -867,10 +867,12 @@ class LoginDesignerWP_Settings
                         <tr>
                             <th scope="row"><?php esc_html_e('Box Shadow', 'logindesignerwp'); ?></th>
                             <td>
-                                <label>
+                                <label class="ldwp-toggle">
                                     <input type="checkbox"
                                         name="<?php echo esc_attr($this->option_name); ?>[form_shadow_enable]" value="1" <?php checked($settings['form_shadow_enable']); ?>>
-                                    <?php esc_html_e('Enable box shadow', 'logindesignerwp'); ?>
+                                    <span class="ldwp-toggle-slider"></span>
+                                    <span
+                                        class="ldwp-toggle-label"><?php esc_html_e('Enable box shadow', 'logindesignerwp'); ?></span>
                                 </label>
                             </td>
                         </tr>

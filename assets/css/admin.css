@@ -1482,3 +1482,97 @@
         transform: rotate(360deg);
     }
 }
+
+/* ========================================
+   Toggle Switch Component
+   ======================================== */
+.ldwp-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.ldwp-toggle input[type="checkbox"] {
+    display: none;
+}
+
+.ldwp-toggle-slider {
+    width: 40px;
+    height: 22px;
+    background: #ccc;
+    border-radius: 11px;
+    position: relative;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+}
+
+.ldwp-toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.ldwp-toggle input:checked+.ldwp-toggle-slider {
+    background: #2271b1;
+}
+
+.ldwp-toggle input:checked+.ldwp-toggle-slider::before {
+    transform: translateX(18px);
+}
+
+.ldwp-toggle-label {
+    font-size: 13px;
+    color: #50575e;
+}
+
+/* ========================================
+   Styled Range Slider
+   ======================================== */
+.logindesignerwp-wrap input[type="range"] {
+    -webkit-appearance: none;
+    width: 200px;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    outline: none;
+    margin: 0;
+    vertical-align: middle;
+}
+
+.logindesignerwp-wrap input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    background: #2271b1;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.1s ease;
+}
+
+.logindesignerwp-wrap input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+}
+
+.logindesignerwp-wrap input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: #2271b1;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+}
+
+.logindesignerwp-wrap input[type="range"]::-moz-range-track {
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+}
