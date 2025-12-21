@@ -44,6 +44,9 @@ function logindesignerwp_get_defaults()
         'background_image_pos' => 'center',
         'background_image_repeat' => 'no-repeat',
         'background_blur' => 0,
+        'background_overlay_enable' => 0,
+        'background_overlay_color' => '#000000',
+        'background_overlay_opacity' => 50,
         'preset_background_url' => '',
 
         // Form container settings - WP default is white with shadow
@@ -84,7 +87,7 @@ function logindesignerwp_get_defaults()
         'logo_height' => 84,
         'logo_padding' => 0,
         'logo_border_radius' => 0,
-        'logo_bottom_margin' => 0,
+        'logo_bottom_margin' => 25,
         'logo_background_enable' => 0,
         'logo_background_color' => '',
         'logo_url' => '',
@@ -144,6 +147,7 @@ function logindesignerwp_sanitize_settings($input)
         'button_bg_hover',
         'button_text_color',
         'below_form_link_color',
+        'background_overlay_color',
     );
 
     foreach ($color_fields as $field) {
@@ -152,6 +156,10 @@ function logindesignerwp_sanitize_settings($input)
 
     // Image ID.
     $sanitized['background_image_id'] = absint($input['background_image_id'] ?? 0);
+
+    // Background Overlay.
+    $sanitized['background_overlay_enable'] = !empty($input['background_overlay_enable']) ? 1 : 0;
+    $sanitized['background_overlay_opacity'] = max(0, min(100, intval($input['background_overlay_opacity'] ?? 50)));
 
     // Social Login.
     $sanitized['google_login_enable'] = !empty($input['google_login_enable']) ? 1 : 0;

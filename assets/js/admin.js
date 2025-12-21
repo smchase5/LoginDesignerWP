@@ -287,7 +287,26 @@
         // Logo background
         $('input[name="logindesignerwp_settings[logo_background_color]"]').wpColorPicker({
             change: function (event, ui) {
-                updatePreview('logo_background_color', ui.color.toString());
+                var colorVal = ui.color.toString();
+                updatePreview('logo_background_color', colorVal);
+                // Also set the enable flag when a color is picked
+                if (colorVal) {
+                    $('input[name="logindesignerwp_settings[logo_background_enable]"]').val('1');
+                }
+            },
+            clear: function () {
+                updatePreview('logo_background_color', '');
+                $('input[name="logindesignerwp_settings[logo_background_enable]"]').val('0');
+            }
+        });
+
+        // Background overlay color
+        $('input[name="logindesignerwp_settings[background_overlay_color]"]').wpColorPicker({
+            change: function (event, ui) {
+                updatePreview('background_overlay_color', ui.color.toString());
+            },
+            clear: function () {
+                updatePreview('background_overlay_color', '#000000');
             }
         });
     }
@@ -641,6 +660,24 @@
         $('input[name="logindesignerwp_settings[form_shadow_enable]"]').on('change', function () {
             updatePreview('form_shadow_enable', $(this).is(':checked'));
         });
+
+        // Background Overlay toggle
+        $('input[name="logindesignerwp_settings[background_overlay_enable]"]').on('change', function () {
+            var isChecked = $(this).is(':checked');
+            if (isChecked) {
+                $('.logindesignerwp-overlay-options').show();
+            } else {
+                $('.logindesignerwp-overlay-options').hide();
+            }
+            updatePreview('background_overlay_enable', isChecked ? 1 : 0);
+        });
+
+        // Background Overlay opacity
+        $('input[name="logindesignerwp_settings[background_overlay_opacity]"]').on('input change', function () {
+            var val = $(this).val();
+            $(this).next('.logindesignerwp-range-value').text(val + '%');
+            updatePreview('background_overlay_opacity', val);
+        });
     }
 
     /**
@@ -700,6 +737,15 @@
 
         // If skipRender is undefined, default to false
         skipRender = skipRender || false;
+
+        // Ensure preview elements are cached (safety check for early calls)
+        if (!$previewBg || !$previewBg.length) {
+            $previewBg = $('#ldwp-preview-bg');
+            if (!$previewBg.length) {
+                // Preview container not in DOM yet, skip silently
+                return;
+            }
+        }
 
         switch (setting) {
             // Background settings
@@ -762,9 +808,64 @@
                 if (!skipRender) applyBackgroundPreview();
                 break;
 
+            // Background Overlay
+            case 'background_overlay_enable':
+            case 'background_overlay_color':
+            case 'background_overlay_opacity':
+                // Update inputs so updateOverlay() can read them
+                if (setting === 'background_overlay_enable') {
+                    var isEnabled = (value == 1 || value === '1' || value === true);
+                    $('input[name="logindesignerwp_settings[background_overlay_enable]"]').prop('checked', isEnabled);
+                } else if (setting === 'background_overlay_color') {
+                    $('input[name="logindesignerwp_settings[background_overlay_color]"]').val(value);
+                } else if (setting === 'background_overlay_opacity') {
+                    $('input[name="logindesignerwp_settings[background_overlay_opacity]"]').val(value);
+                }
+
+                if (!skipRender) updateOverlay();
+                break;
+
             // Form container
             case 'form_bg_color':
-                if (!skipRender) $previewForm.css('background-color', value);
+                if (!skipRender) {
+                    // Check if glassmorphism is enabled
+                    var $glassEnabledInput = $('input[name="logindesignerwp_settings[glass_enabled]"]');
+                    var isGlassEnabled = $glassEnabledInput.length && $glassEnabledInput.is(':checked');
+
+                    if (isGlassEnabled) {
+                        // Reapply glass effect with the new color
+                        var blur = $('input[name="logindesignerwp_settings[glass_blur]"]').val() || 10;
+                        var transparency = $('input[name="logindesignerwp_settings[glass_transparency]"]').val() || 85;
+                        var opacity = 1 - (parseInt(transparency) / 100);
+
+                        // Check if value is already rgba
+                        if (value && value.indexOf('rgba') === 0) {
+                            $previewForm.css({
+                                'background-color': value,
+                                'backdrop-filter': 'blur(' + blur + 'px)',
+                                '-webkit-backdrop-filter': 'blur(' + blur + 'px)'
+                            });
+                        } else {
+                            // Convert hex to rgba
+                            var hex = (value || '#ffffff').replace('#', '');
+                            if (hex.length === 3) {
+                                hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+                            }
+                            var r = parseInt(hex.substring(0, 2), 16) || 255;
+                            var g = parseInt(hex.substring(2, 4), 16) || 255;
+                            var b = parseInt(hex.substring(4, 6), 16) || 255;
+                            var rgba = 'rgba(' + r + ',' + g + ',' + b + ',' + opacity + ')';
+
+                            $previewForm.css({
+                                'background-color': rgba,
+                                'backdrop-filter': 'blur(' + blur + 'px)',
+                                '-webkit-backdrop-filter': 'blur(' + blur + 'px)'
+                            });
+                        }
+                    } else {
+                        $previewForm.css('background-color', value);
+                    }
+                }
                 break;
 
             case 'form_border_radius':
@@ -904,6 +1005,62 @@
                 $previewLogo.find('img, svg').css('background-color', value);
                 break;
 
+            case 'logo_background_enable':
+                // When disabled, clear the background color from preview
+                if (!value || value === '0' || value === 0) {
+                    $previewLogo.find('img, svg').css('background-color', 'transparent');
+                }
+                break;
+
+            // Glassmorphism effects
+            case 'glass_enabled':
+            case 'glass_blur':
+            case 'glass_transparency':
+                // Trigger the glassmorphism preview update
+                // We need to apply backdrop-filter and adjusted background
+                (function () {
+                    var isEnabled = (setting === 'glass_enabled')
+                        ? (value == 1 || value === '1' || value === true)
+                        : $('input[name="logindesignerwp_settings[glass_enabled]"]').is(':checked');
+
+                    var blur = (setting === 'glass_blur')
+                        ? value
+                        : ($('input[name="logindesignerwp_settings[glass_blur]"]').val() || 10);
+
+                    var transparency = (setting === 'glass_transparency')
+                        ? value
+                        : ($('input[name="logindesignerwp_settings[glass_transparency]"]').val() || 85);
+
+                    if (isEnabled) {
+                        var opacity = 1 - (parseInt(transparency) / 100);
+                        // Get base color and convert to rgba
+                        var baseColor = $('input[name="logindesignerwp_settings[form_bg_color]"]').val() || '#ffffff';
+                        var hex = baseColor.replace('#', '');
+                        if (hex.length === 3) {
+                            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+                        }
+                        var r = parseInt(hex.substring(0, 2), 16) || 255;
+                        var g = parseInt(hex.substring(2, 4), 16) || 255;
+                        var b = parseInt(hex.substring(4, 6), 16) || 255;
+                        var rgba = 'rgba(' + r + ',' + g + ',' + b + ',' + opacity + ')';
+
+                        $previewForm.css({
+                            'background-color': rgba,
+                            'backdrop-filter': 'blur(' + blur + 'px)',
+                            '-webkit-backdrop-filter': 'blur(' + blur + 'px)'
+                        });
+                    } else {
+                        // Remove glass effects
+                        var standardBg = $('input[name="logindesignerwp_settings[form_bg_color]"]').val() || '#ffffff';
+                        $previewForm.css({
+                            'background-color': standardBg,
+                            'backdrop-filter': '',
+                            '-webkit-backdrop-filter': ''
+                        });
+                    }
+                })();
+                break;
+
             // Social Login
             case 'social_login_layout':
                 if ($previewSocial.length) {
@@ -958,6 +1115,57 @@
      * Apply background preview based on current mode.
      * @param {string} [overrideMode] Optional mode to force render (bypassing cache race conditions)
      */
+    /**
+     * Update the background overlay.
+     * Only shows if enabled AND in image mode AND image is present.
+     */
+    function updateOverlay() {
+        var $overlay = $('#ldwp-preview-overlay');
+
+        // Ensure overlay element exists
+        if (!$overlay.length && $previewBg && $previewBg.length) {
+            $overlay = $('<div id="ldwp-preview-overlay"></div>');
+            $previewBg.prepend($overlay);
+            $overlay.css({
+                'position': 'absolute',
+                'top': '0',
+                'left': '0',
+                'right': '0',
+                'bottom': '0',
+                'z-index': '1',
+                'pointer-events': 'none'
+            });
+        }
+
+        // Get settings
+        var enabled = $('input[name="logindesignerwp_settings[background_overlay_enable]"]').is(':checked');
+        var color = $('input[name="logindesignerwp_settings[background_overlay_color]"]').val() || '#000000';
+        var opacity = $('input[name="logindesignerwp_settings[background_overlay_opacity]"]').val() || 50;
+
+        // Get background state
+        // Use cache first as it's most up to date during updates
+        var mode = previewCache.bgMode || $('input.ldwp-bg-mode-value').val() || 'solid';
+        var image = previewCache.bgImage || $('input[name="logindesignerwp_settings[background_image]"]').val();
+
+        // Only show if ENABLED + IMAGE MODE + IMAGE EXISTS
+        if (enabled && mode === 'image' && image) {
+            // Convert hex to rgba
+            var hex = color.replace('#', '');
+            if (hex.length === 3) {
+                hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+            }
+            var r = parseInt(hex.substring(0, 2), 16) || 0;
+            var g = parseInt(hex.substring(2, 4), 16) || 0;
+            var b = parseInt(hex.substring(4, 6), 16) || 0;
+            var alpha = parseInt(opacity) / 100;
+            var rgba = 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+
+            $overlay.css('background-color', rgba).show();
+        } else {
+            $overlay.hide();
+        }
+    }
+
     function applyBackgroundPreview(overrideMode) {
         // Use override first, then previewCache, then fall back to DOM inputs
         var mode = overrideMode || previewCache.bgMode || $('input.ldwp-bg-mode-value').val() || $('input[name="logindesignerwp_settings[background_mode]"]').val();
@@ -1065,7 +1273,11 @@
                 }
                 break;
         }
+
+        // Update overlay visibility (needs to check mode/image)
+        updateOverlay();
     }
+
 
     /**
      * Initialize button hover effect.
@@ -1113,7 +1325,10 @@
             social_login_layout: $('select[name="logindesignerwp_settings[social_login_layout]"]').val(),
             social_login_shape: $('select[name="logindesignerwp_settings[social_login_shape]"]').val(),
             social_login_style: $('select[name="logindesignerwp_settings[social_login_style]"]').val(),
-            background_blur: $('#logindesignerwp-bg-blur').val()
+            background_blur: $('#logindesignerwp-bg-blur').val(),
+            background_overlay_enable: $('input[name="logindesignerwp_settings[background_overlay_enable]"]').is(':checked') ? 1 : 0,
+            background_overlay_color: $('input[name="logindesignerwp_settings[background_overlay_color]"]').val() || '#000000',
+            background_overlay_opacity: $('input[name="logindesignerwp_settings[background_overlay_opacity]"]').val() || 50
         };
 
         // Pre-populate background image cache from data attribute
@@ -2367,17 +2582,67 @@
             applyBackgroundPreview(explicitMode);
 
             // 4. Fast CSS Render: Apply simple CSS updates for non-background elements
+            // Exclude glass settings - we'll handle them last with full context
             var backgroundKeys = [
                 'background_mode', 'background_color', 'background_image',
                 'background_gradient_1', 'background_gradient_2', 'background_gradient_3',
                 'gradient_type', 'gradient_angle', 'gradient_position', 'background_blur'
             ];
+            var glassKeys = ['glass_enabled', 'glass_blur', 'glass_transparency'];
 
             $.each(settings, function (key, value) {
-                if (backgroundKeys.indexOf(key) === -1) {
+                if (backgroundKeys.indexOf(key) === -1 && glassKeys.indexOf(key) === -1) {
                     updatePreview(key, value, false);
                 }
             });
+
+            // 5. Handle Glassmorphism effect with full batch context
+            if (settings.hasOwnProperty('glass_enabled')) {
+                var glassEnabled = settings.glass_enabled == 1 || settings.glass_enabled === '1' || settings.glass_enabled === true;
+                var glassBlur = settings.glass_blur !== undefined ? settings.glass_blur : 10;
+                var glassTransparency = settings.glass_transparency !== undefined ? settings.glass_transparency : 85;
+
+                var $form = $('.logindesignerwp-preview-form');
+
+                if (glassEnabled) {
+                    // Use form_bg_color from settings if it's rgba, otherwise calculate
+                    var formBg = settings.form_bg_color || '#ffffff';
+
+                    // If the form_bg_color is already rgba, use it directly
+                    if (formBg.indexOf('rgba') === 0) {
+                        $form.css({
+                            'background-color': formBg,
+                            'backdrop-filter': 'blur(' + glassBlur + 'px)',
+                            '-webkit-backdrop-filter': 'blur(' + glassBlur + 'px)'
+                        });
+                    } else {
+                        // Calculate rgba from hex
+                        var opacity = 1 - (parseInt(glassTransparency) / 100);
+                        var hex = formBg.replace('#', '');
+                        if (hex.length === 3) {
+                            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+                        }
+                        var r = parseInt(hex.substring(0, 2), 16) || 255;
+                        var g = parseInt(hex.substring(2, 4), 16) || 255;
+                        var b = parseInt(hex.substring(4, 6), 16) || 255;
+                        var rgba = 'rgba(' + r + ',' + g + ',' + b + ',' + opacity + ')';
+
+                        $form.css({
+                            'background-color': rgba,
+                            'backdrop-filter': 'blur(' + glassBlur + 'px)',
+                            '-webkit-backdrop-filter': 'blur(' + glassBlur + 'px)'
+                        });
+                    }
+                } else {
+                    // Glass disabled - remove glass effects
+                    var standardBg = settings.form_bg_color || '#ffffff';
+                    $form.css({
+                        'background-color': standardBg,
+                        'backdrop-filter': '',
+                        '-webkit-backdrop-filter': ''
+                    });
+                }
+            }
 
             console.log('LDWP: Batch Update Complete');
         };

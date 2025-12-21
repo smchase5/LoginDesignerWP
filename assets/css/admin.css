@@ -420,6 +420,26 @@
     overflow: hidden;
 }
 
+/* Preview overlay element */
+#ldwp-preview-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Ensure preview content is above overlay */
+.logindesignerwp-preview-logo,
+.logindesignerwp-preview-login,
+.logindesignerwp-preview-links,
+.logindesignerwp-preview-backtoblog {
+    position: relative;
+    z-index: 2;
+}
+
 /* Blur effect using pseudo-element */
 .logindesignerwp-preview-bg.has-blur {
     background-image: none !important;

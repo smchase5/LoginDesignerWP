@@ -66,6 +66,7 @@ class LoginDesignerWP_Pro_Presets
                     'button_text_color' => '#ffffff',
                     'button_border_radius' => 8,
                     'below_form_link_color' => '#94a3b8',
+                    'logo_bottom_margin' => 25,
                 ),
             ),
             'corporate_blue' => array(
@@ -88,6 +89,7 @@ class LoginDesignerWP_Pro_Presets
                     'button_text_color' => '#ffffff',
                     'button_border_radius' => 6,
                     'below_form_link_color' => '#ffffff',
+                    'logo_bottom_margin' => 25,
                 ),
             ),
             'minimal_light' => array(
@@ -109,6 +111,7 @@ class LoginDesignerWP_Pro_Presets
                     'button_text_color' => '#ffffff',
                     'button_border_radius' => 4,
                     'below_form_link_color' => '#64748b',
+                    'logo_bottom_margin' => 25,
                 ),
             ),
             'sunset_gradient' => array(
@@ -131,6 +134,7 @@ class LoginDesignerWP_Pro_Presets
                     'button_text_color' => '#ffffff',
                     'button_border_radius' => 999,
                     'below_form_link_color' => '#ffffff',
+                    'logo_bottom_margin' => 25,
                 ),
             ),
             'forest' => array(
@@ -153,6 +157,7 @@ class LoginDesignerWP_Pro_Presets
                     'button_text_color' => '#ffffff',
                     'button_border_radius' => 8,
                     'below_form_link_color' => '#bbf7d0',
+                    'logo_bottom_margin' => 25,
                 ),
             ),
             'midnight' => array(
@@ -175,6 +180,7 @@ class LoginDesignerWP_Pro_Presets
                     'button_text_color' => '#ffffff',
                     'button_border_radius' => 999,
                     'below_form_link_color' => '#a78bfa',
+                    'logo_bottom_margin' => 25,
                 ),
             ),
             'ocean' => array(
@@ -197,6 +203,7 @@ class LoginDesignerWP_Pro_Presets
                     'button_text_color' => '#ffffff',
                     'button_border_radius' => 8,
                     'below_form_link_color' => '#ffffff',
+                    'logo_bottom_margin' => 25,
                 ),
             ),
             'glassmorphism' => array(
@@ -224,6 +231,7 @@ class LoginDesignerWP_Pro_Presets
                     'glass_blur' => 14,
                     'glass_transparency' => 72,
                     'glass_border' => true,
+                    'logo_bottom_margin' => 25,
                 ),
             ),
             'neon_glow' => array(
@@ -245,6 +253,7 @@ class LoginDesignerWP_Pro_Presets
                     'button_text_color' => '#0a0a0a',
                     'button_border_radius' => 8,
                     'below_form_link_color' => '#67e8f9',
+                    'logo_bottom_margin' => 25,
                 ),
             ),
             'elegant' => array(
@@ -266,6 +275,7 @@ class LoginDesignerWP_Pro_Presets
                     'button_text_color' => '#ffffff',
                     'button_border_radius' => 4,
                     'below_form_link_color' => '#a8a29e',
+                    'logo_bottom_margin' => 25,
                 ),
             ),
             'tech' => array(
@@ -287,6 +297,7 @@ class LoginDesignerWP_Pro_Presets
                     'button_text_color' => '#ffffff',
                     'button_border_radius' => 8,
                     'below_form_link_color' => '#c4b5fd',
+                    'logo_bottom_margin' => 25,
                 ),
             ),
             'creative' => array(
@@ -309,6 +320,7 @@ class LoginDesignerWP_Pro_Presets
                     'button_text_color' => '#ffffff',
                     'button_border_radius' => 999,
                     'below_form_link_color' => '#ffffff',
+                    'logo_bottom_margin' => 25,
                 ),
             ),
         );
@@ -626,6 +638,29 @@ class LoginDesignerWP_Pro_Presets
                             // Trigger change on Gradient Type to update visibility of sub-controls
                             if (settings.gradient_type) {
                                 $('select.logindesignerwp-gradient-type').trigger('change');
+                            }
+
+                            // Update Glassmorphism toggle based on preset
+                            if (typeof settings.glass_enabled !== 'undefined') {
+                                var $glassToggle = $('input[name="logindesignerwp_settings[glass_enabled]"]');
+                                if ($glassToggle.length) {
+                                    $glassToggle.prop('checked', !!settings.glass_enabled).trigger('change');
+                                }
+                            }
+                            // Update glass blur and transparency if present
+                            if (settings.glass_blur !== undefined) {
+                                $('input[name="logindesignerwp_settings[glass_blur]"]').val(settings.glass_blur).trigger('input');
+                            }
+                            if (settings.glass_transparency !== undefined) {
+                                $('input[name="logindesignerwp_settings[glass_transparency]"]').val(settings.glass_transparency).trigger('input');
+                            }
+
+                            // Update logo bottom margin if present
+                            if (settings.logo_bottom_margin !== undefined) {
+                                $('input[name="logindesignerwp_settings[logo_bottom_margin]"]').val(settings.logo_bottom_margin);
+                                if (typeof window.ldwpUpdatePreview === 'function') {
+                                    window.ldwpUpdatePreview('logo_bottom_margin', settings.logo_bottom_margin);
+                                }
                             }
 
                             // Apply preview update

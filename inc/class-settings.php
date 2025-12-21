@@ -794,6 +794,44 @@ class LoginDesignerWP_Settings
                                     </p>
                                 </td>
                             </tr>
+                            <tr>
+                                <th scope="row"><?php esc_html_e('Color Overlay', 'logindesignerwp'); ?></th>
+                                <td>
+                                    <label class="ldwp-toggle">
+                                        <input type="checkbox"
+                                            name="<?php echo esc_attr($this->option_name); ?>[background_overlay_enable]"
+                                            value="1" <?php checked(!empty($settings['background_overlay_enable'])); ?>>
+                                        <span class="ldwp-toggle-slider"></span>
+                                    </label>
+                                    <span
+                                        class="ldwp-toggle-label"><?php esc_html_e('Enable color overlay on background image', 'logindesignerwp'); ?></span>
+                                </td>
+                            </tr>
+                            <tr class="logindesignerwp-overlay-options"
+                                style="<?php echo empty($settings['background_overlay_enable']) ? 'display:none;' : ''; ?>">
+                                <th scope="row"><?php esc_html_e('Overlay Color', 'logindesignerwp'); ?></th>
+                                <td>
+                                    <input type="text" class="logindesignerwp-color-picker"
+                                        name="<?php echo esc_attr($this->option_name); ?>[background_overlay_color]"
+                                        value="<?php echo esc_attr($settings['background_overlay_color'] ?? '#000000'); ?>">
+                                </td>
+                            </tr>
+                            <tr class="logindesignerwp-overlay-options"
+                                style="<?php echo empty($settings['background_overlay_enable']) ? 'display:none;' : ''; ?>">
+                                <th scope="row"><?php esc_html_e('Overlay Opacity', 'logindesignerwp'); ?></th>
+                                <td>
+                                    <div class="logindesignerwp-range-slider">
+                                        <input type="range" min="0" max="100" step="5"
+                                            name="<?php echo esc_attr($this->option_name); ?>[background_overlay_opacity]"
+                                            value="<?php echo esc_attr($settings['background_overlay_opacity'] ?? 50); ?>">
+                                        <span
+                                            class="logindesignerwp-range-value"><?php echo esc_html($settings['background_overlay_opacity'] ?? 50); ?>%</span>
+                                    </div>
+                                    <p class="description">
+                                        <?php esc_html_e('Adjust overlay transparency (0% = invisible, 100% = solid)', 'logindesignerwp'); ?>
+                                    </p>
+                                </td>
+                            </tr>
                         </table>
                     </div>
                 </div>

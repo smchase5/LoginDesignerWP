@@ -137,6 +137,34 @@ class LoginDesignerWP_Login_Style
         }
         $css .= "}\n";
 
+        // Background Overlay (for image backgrounds)
+        if ('image' === $s['background_mode'] && !empty($s['background_overlay_enable']) && !empty($bg_image_url)) {
+            $overlay_color = isset($s['background_overlay_color']) ? $s['background_overlay_color'] : '#000000';
+            $overlay_opacity = isset($s['background_overlay_opacity']) ? intval($s['background_overlay_opacity']) : 50;
+
+            // Convert hex to rgba
+            $hex = ltrim($overlay_color, '#');
+            $r = hexdec(substr($hex, 0, 2));
+            $g = hexdec(substr($hex, 2, 2));
+            $b = hexdec(substr($hex, 4, 2));
+            $alpha = $overlay_opacity / 100;
+
+            $css .= "body.login::after {\n";
+            $css .= "    content: '';\n";
+            $css .= "    position: fixed;\n";
+            $css .= "    top: 0; left: 0; right: 0; bottom: 0;\n";
+            $css .= "    background-color: rgba(" . $r . "," . $g . "," . $b . "," . $alpha . ");\n";
+            $css .= "    z-index: 0;\n";
+            $css .= "    pointer-events: none;\n";
+            $css .= "}\n";
+
+            // Ensure form is above overlay
+            $css .= "#login {\n";
+            $css .= "    position: relative;\n";
+            $css .= "    z-index: 1;\n";
+            $css .= "}\n";
+        }
+
         // Form Container
         $css .= "body.login div#login form#loginform,\n";
         $css .= "body.login div#login form#registerform,\n";
@@ -226,7 +254,7 @@ class LoginDesignerWP_Login_Style
         $css .= "    max-width: 100% !important;\n";
         $css .= "    padding: " . intval($s['logo_padding']) . "px !important;\n";
         $css .= "    border-radius: " . intval($s['logo_border_radius']) . "px !important;\n";
-        if (!empty($s['logo_background_color'])) {
+        if (!empty($s['logo_background_enable']) && !empty($s['logo_background_color'])) {
             $css .= "    background-color: " . esc_attr($s['logo_background_color']) . " !important;\n";
         }
 

@@ -1221,6 +1221,42 @@ body.ldwp-wizard-active .logindesignerwp-preview-actions button[type="submit"] {
     }
 }
 
+/* Overlay Options Panel */
+.ldwp-wizard-overlay-options {
+    margin-top: 16px;
+    padding: 16px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e2e4e7;
+}
+
+.ldwp-wizard-overlay-options .ldwp-wizard-row {
+    margin-bottom: 16px;
+}
+
+.ldwp-wizard-overlay-options .ldwp-wizard-row:last-child {
+    margin-bottom: 0;
+}
+
+/* Fix the color picker layout in wizard overlay */
+.ldwp-wizard-overlay-options .wp-picker-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ldwp-wizard-overlay-options .wp-color-result {
+    margin: 0 !important;
+    min-width: 30px;
+    min-height: 30px;
+}
+
+.ldwp-wizard-overlay-options .wp-picker-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
 /* ========================================
    Toggle Switch
    ======================================== */
@@ -1368,4 +1404,69 @@ input:checked+.ldwp-wizard-slider:before {
     color: #ef4444 !important;
     text-decoration: underline;
     background: none !important;
+}
+
+/* ========================================
+   Collapsible Section
+   ======================================== */
+.ldwp-wizard-collapsible {
+    margin-top: 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.ldwp-wizard-collapsible-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 16px;
+    background: #f9fafb;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    transition: background 0.2s ease;
+}
+
+.ldwp-wizard-collapsible-toggle:hover {
+    background: #f3f4f6;
+}
+
+.ldwp-wizard-collapsible-toggle .dashicons {
+    color: #6b7280;
+}
+
+.ldwp-wizard-collapsible-arrow {
+    margin-left: auto;
+    transition: transform 0.2s ease;
+}
+
+.ldwp-wizard-collapsible.is-open .ldwp-wizard-collapsible-arrow {
+    transform: rotate(180deg);
+}
+
+.ldwp-wizard-collapsible-content {
+    padding: 16px;
+    background: #fff;
+    border-top: 1px solid #e5e7eb;
+}
+
+.ldwp-wizard-collapsible-content .ldwp-wizard-color-group {
+    margin-bottom: 16px;
+}
+
+.ldwp-wizard-collapsible-content .ldwp-wizard-color-group:last-child {
+    margin-bottom: 0;
+}
+
+.ldwp-wizard-collapsible-content .ldwp-wizard-color-group h5 {
+    margin: 0 0 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e1e1e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }

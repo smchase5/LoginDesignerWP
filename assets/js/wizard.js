@@ -44,8 +44,18 @@
         logo_width: 84,
         logo_height: 84,
         logo_border_radius: 0,
-        logo_bottom_margin: 0,
-        logo_background_color: ''
+        logo_bottom_margin: 25,
+        logo_background_enable: 0,
+        logo_background_color: '',
+        logo_padding: 0,
+        // Glassmorphism settings
+        glass_enabled: 0,
+        glass_blur: 10,
+        glass_transparency: 85,
+        // Background overlay settings
+        background_overlay_enable: 0,
+        background_overlay_color: '#000000',
+        background_overlay_opacity: 50
     };
 
     // Wizard state
@@ -122,7 +132,9 @@
                 button_bg: '#3b82f6',
                 button_bg_hover: '#2563eb',
                 button_text_color: '#ffffff',
-                button_border_radius: 8
+                button_border_radius: 8,
+                glass_enabled: 0,
+                logo_bottom_margin: 25
             }
         },
         'modern-dark': {
@@ -141,7 +153,9 @@
                 button_bg: '#3b82f6',
                 button_bg_hover: '#2563eb',
                 button_text_color: '#ffffff',
-                button_border_radius: 8
+                button_border_radius: 8,
+                glass_enabled: 0,
+                logo_bottom_margin: 25
             }
         },
         'minimal': {
@@ -160,7 +174,9 @@
                 button_bg: '#111827',
                 button_bg_hover: '#374151',
                 button_text_color: '#ffffff',
-                button_border_radius: 4
+                button_border_radius: 4,
+                glass_enabled: 0,
+                logo_bottom_margin: 25
             }
         },
         // Pro presets
@@ -184,7 +200,12 @@
                 button_bg: '#ffffff',
                 button_bg_hover: '#f0f0f0',
                 button_text_color: '#667eea',
-                button_border_radius: 999
+                button_border_radius: 999,
+                // Glassmorphism feature settings
+                glass_enabled: 1,
+                glass_blur: 10,
+                glass_transparency: 85,
+                logo_bottom_margin: 25
             }
         },
         'neon-glow': {
@@ -203,7 +224,9 @@
                 button_bg: '#22d3ee',
                 button_bg_hover: '#06b6d4',
                 button_text_color: '#0a0a0a',
-                button_border_radius: 8
+                button_border_radius: 8,
+                glass_enabled: 0,
+                logo_bottom_margin: 25
             }
         },
         'corporate': {
@@ -222,7 +245,9 @@
                 button_bg: '#1e3a5f',
                 button_bg_hover: '#0f2744',
                 button_text_color: '#ffffff',
-                button_border_radius: 4
+                button_border_radius: 4,
+                glass_enabled: 0,
+                logo_bottom_margin: 25
             }
         },
         'creative': {
@@ -245,7 +270,9 @@
                 button_bg: '#ec4899',
                 button_bg_hover: '#db2777',
                 button_text_color: '#ffffff',
-                button_border_radius: 999
+                button_border_radius: 999,
+                glass_enabled: 0,
+                logo_bottom_margin: 25
             }
         },
         'ocean': {
@@ -268,7 +295,9 @@
                 button_bg: '#0891b2',
                 button_bg_hover: '#0e7490',
                 button_text_color: '#ffffff',
-                button_border_radius: 8
+                button_border_radius: 8,
+                glass_enabled: 0,
+                logo_bottom_margin: 25
             }
         },
         'sunset': {
@@ -291,7 +320,9 @@
                 button_bg: '#f59e0b',
                 button_bg_hover: '#d97706',
                 button_text_color: '#000000',
-                button_border_radius: 12
+                button_border_radius: 12,
+                glass_enabled: 0,
+                logo_bottom_margin: 25
             }
         },
         'forest': {
@@ -310,7 +341,9 @@
                 button_bg: '#16a34a',
                 button_bg_hover: '#15803d',
                 button_text_color: '#ffffff',
-                button_border_radius: 8
+                button_border_radius: 8,
+                glass_enabled: 0,
+                logo_bottom_margin: 25
             }
         },
         'elegant': {
@@ -329,7 +362,9 @@
                 button_bg: '#78716c',
                 button_bg_hover: '#57534e',
                 button_text_color: '#ffffff',
-                button_border_radius: 4
+                button_border_radius: 4,
+                glass_enabled: 0,
+                logo_bottom_margin: 25
             }
         },
         'tech': {
@@ -348,7 +383,9 @@
                 button_bg: '#a855f7',
                 button_bg_hover: '#9333ea',
                 button_text_color: '#ffffff',
-                button_border_radius: 8
+                button_border_radius: 8,
+                glass_enabled: 0,
+                logo_bottom_margin: 25
             }
         }
     };
@@ -385,6 +422,21 @@
 
         // Preset selection
         $(document).on('click', '.ldwp-wizard-preset:not(.is-locked)', selectPreset);
+
+        // Collapsible sections toggle
+        $(document).on('click', '.ldwp-wizard-collapsible-toggle', function () {
+            var $toggle = $(this);
+            var $collapsible = $toggle.closest('.ldwp-wizard-collapsible');
+            var $content = $collapsible.find('.ldwp-wizard-collapsible-content');
+
+            $collapsible.toggleClass('is-open');
+            $content.slideToggle(200);
+
+            // Initialize color pickers when opened
+            if ($collapsible.hasClass('is-open')) {
+                initColorPickers();
+            }
+        });
 
         // Background type selector (visual)
         $(document).on('click', '.ldwp-wizard-bg-type-option', function () {
@@ -486,6 +538,8 @@
                 $valueDisplay.text(value + '°');
             } else if (setting === 'background_blur' || setting === 'logo_bottom_margin') {
                 $valueDisplay.text(value + 'px');
+            } else if (setting === 'background_overlay_opacity') {
+                $valueDisplay.text(value + '%');
             } else {
                 $valueDisplay.text(value);
             }
@@ -601,6 +655,12 @@
                                 $('.ldwp-wizard-logo-img').css('background-color', val);
                             }
                         }
+
+                        // Update preview for overlay color
+                        if (setting === 'background_overlay_color') {
+                            wizard.settings.background_overlay_color = val;
+                            updateLivePreview('background_overlay_color', val);
+                        }
                     },
                     clear: function () {
                         var $el = $(this).prev(); // Input is hidden previous sibling
@@ -641,6 +701,36 @@
                         'background-color': 'transparent',
                         'padding': '0px'
                     });
+                }
+            }
+
+            // Background Overlay toggle
+            if (setting === 'background_overlay_enable') {
+                if (isChecked) {
+                    $('.ldwp-wizard-overlay-options').slideDown(200, function () {
+                        // Initialize color picker if not already initialized
+                        var $colorInput = $(this).find('.ldwp-wizard-color');
+                        if ($colorInput.length && !$colorInput.hasClass('wp-color-picker')) {
+                            $colorInput.wpColorPicker({
+                                change: function (event, ui) {
+                                    var val = ui.color.toString();
+                                    wizard.settings.background_overlay_color = val;
+                                    updateLivePreview('background_overlay_color', val);
+                                },
+                                clear: function () {
+                                    wizard.settings.background_overlay_color = '#000000';
+                                    updateLivePreview('background_overlay_color', '#000000');
+                                }
+                            });
+                        }
+                    });
+                    // Send all overlay values to preview
+                    updateLivePreview('background_overlay_enable', 1);
+                    updateLivePreview('background_overlay_color', wizard.settings.background_overlay_color || '#000000');
+                    updateLivePreview('background_overlay_opacity', wizard.settings.background_overlay_opacity || 50);
+                } else {
+                    $('.ldwp-wizard-overlay-options').slideUp(200);
+                    updateLivePreview('background_overlay_enable', 0);
                 }
             }
 
@@ -1226,6 +1316,22 @@
         $('input[name="logindesignerwp_settings[form_border_radius]"]').val(s.form_border_radius).trigger('input');
         $('input[name="logindesignerwp_settings[form_border_color]"]').val(s.form_border_color).trigger('change');
 
+        // Glassmorphism settings (Pro feature)
+        var $glassEnabled = $('input[name="logindesignerwp_settings[glass_enabled]"]');
+        var $glassBlur = $('input[name="logindesignerwp_settings[glass_blur]"]');
+        var $glassTransparency = $('input[name="logindesignerwp_settings[glass_transparency]"]');
+
+        if ($glassEnabled.length) {
+            // Set checkbox state based on preset
+            $glassEnabled.prop('checked', !!s.glass_enabled).trigger('change');
+        }
+        if ($glassBlur.length && s.glass_blur !== undefined) {
+            $glassBlur.val(s.glass_blur).trigger('input');
+        }
+        if ($glassTransparency.length && s.glass_transparency !== undefined) {
+            $glassTransparency.val(s.glass_transparency).trigger('input');
+        }
+
         $('input[name="logindesignerwp_settings[label_text_color]"]').val(s.label_text_color).trigger('change');
         $('input[name="logindesignerwp_settings[input_bg_color]"]').val(s.input_bg_color).trigger('change');
         $('input[name="logindesignerwp_settings[input_text_color]"]').val(s.input_text_color).trigger('change');
@@ -1277,8 +1383,11 @@
             // Verify this key matches what class-settings.php expects/renders
         }
 
-        // Also persist the toggle if main settings has it (optional feature for future)
-        // $('input[name="logindesignerwp_settings[logo_background_enable]"]').prop('checked', !!s.logo_background_enable);
+        // Update the hidden logo_background_enable input in main settings
+        var $logoBgEnable = $('input[name="logindesignerwp_settings[logo_background_enable]"]');
+        if ($logoBgEnable.length) {
+            $logoBgEnable.val(s.logo_background_enable ? '1' : '0');
+        }
 
         // Update color pickers
         $('.wp-color-picker').each(function () {

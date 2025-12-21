@@ -371,6 +371,35 @@ $is_pro = function_exists('logindesignerwp_is_pro_active') && logindesignerwp_is
                                 <span class="ldwp-wizard-range-value">0px</span>
                             </div>
                         </div>
+
+                        <!-- Color Overlay -->
+                        <div class="ldwp-wizard-control-row ldwp-wizard-toggle-row">
+                            <label><?php esc_html_e('Color Overlay', 'logindesignerwp'); ?></label>
+                            <div style="flex: 0 0 40px; width: 40px;">
+                                <label class="ldwp-wizard-switch">
+                                    <input type="checkbox" class="ldwp-wizard-toggle"
+                                        data-setting="background_overlay_enable" value="1">
+                                    <span class="ldwp-wizard-slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="ldwp-wizard-overlay-options" style="display: none;">
+                            <div class="ldwp-wizard-control-row">
+                                <label><?php esc_html_e('Overlay Color', 'logindesignerwp'); ?></label>
+                                <div class="ldwp-wizard-color-wrapper">
+                                    <input type="text" class="ldwp-wizard-color" data-setting="background_overlay_color"
+                                        value="#000000">
+                                </div>
+                            </div>
+                            <div class="ldwp-wizard-control-row">
+                                <label><?php esc_html_e('Opacity', 'logindesignerwp'); ?></label>
+                                <div class="ldwp-wizard-range-wrapper">
+                                    <input type="range" class="ldwp-wizard-range"
+                                        data-setting="background_overlay_opacity" min="0" max="100" value="50">
+                                    <span class="ldwp-wizard-range-value">50%</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -388,6 +417,70 @@ $is_pro = function_exists('logindesignerwp_is_pro_active') && logindesignerwp_is
                         <span class="ldwp-wizard-pro-badge">PRO</span>
                     </div>
                 <?php endif; ?>
+
+                <!-- Collapsible Fine-tune Colors Section -->
+                <div class="ldwp-wizard-collapsible">
+                    <button type="button" class="ldwp-wizard-collapsible-toggle">
+                        <span class="dashicons dashicons-admin-appearance"></span>
+                        <?php esc_html_e('Fine-tune Colors', 'logindesignerwp'); ?>
+                        <span class="ldwp-wizard-collapsible-arrow dashicons dashicons-arrow-down-alt2"></span>
+                    </button>
+                    <div class="ldwp-wizard-collapsible-content" style="display: none;">
+                        <!-- Form Colors -->
+                        <div class="ldwp-wizard-color-group">
+                            <h5><?php esc_html_e('Form', 'logindesignerwp'); ?></h5>
+                            <div class="ldwp-wizard-control-row">
+                                <label><?php esc_html_e('Form Background', 'logindesignerwp'); ?></label>
+                                <input type="text" class="ldwp-wizard-color" data-setting="form_bg_color"
+                                    value="#ffffff">
+                            </div>
+                            <div class="ldwp-wizard-control-row">
+                                <label><?php esc_html_e('Form Border', 'logindesignerwp'); ?></label>
+                                <input type="text" class="ldwp-wizard-color" data-setting="form_border_color"
+                                    value="#e5e7eb">
+                            </div>
+                        </div>
+
+                        <!-- Input Colors -->
+                        <div class="ldwp-wizard-color-group">
+                            <h5><?php esc_html_e('Inputs', 'logindesignerwp'); ?></h5>
+                            <div class="ldwp-wizard-control-row">
+                                <label><?php esc_html_e('Label Color', 'logindesignerwp'); ?></label>
+                                <input type="text" class="ldwp-wizard-color" data-setting="label_text_color"
+                                    value="#1e1e1e">
+                            </div>
+                            <div class="ldwp-wizard-control-row">
+                                <label><?php esc_html_e('Input Background', 'logindesignerwp'); ?></label>
+                                <input type="text" class="ldwp-wizard-color" data-setting="input_bg_color"
+                                    value="#ffffff">
+                            </div>
+                            <div class="ldwp-wizard-control-row">
+                                <label><?php esc_html_e('Input Text', 'logindesignerwp'); ?></label>
+                                <input type="text" class="ldwp-wizard-color" data-setting="input_text_color"
+                                    value="#1e1e1e">
+                            </div>
+                            <div class="ldwp-wizard-control-row">
+                                <label><?php esc_html_e('Input Border', 'logindesignerwp'); ?></label>
+                                <input type="text" class="ldwp-wizard-color" data-setting="input_border_color"
+                                    value="#d1d5db">
+                            </div>
+                        </div>
+
+                        <!-- Button Colors -->
+                        <div class="ldwp-wizard-color-group">
+                            <h5><?php esc_html_e('Button', 'logindesignerwp'); ?></h5>
+                            <div class="ldwp-wizard-control-row">
+                                <label><?php esc_html_e('Button Color', 'logindesignerwp'); ?></label>
+                                <input type="text" class="ldwp-wizard-color" data-setting="button_bg" value="#2271b1">
+                            </div>
+                            <div class="ldwp-wizard-control-row">
+                                <label><?php esc_html_e('Button Text', 'logindesignerwp'); ?></label>
+                                <input type="text" class="ldwp-wizard-color" data-setting="button_text_color"
+                                    value="#ffffff">
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
