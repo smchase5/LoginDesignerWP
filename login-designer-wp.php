@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: LoginDesignerWP
+ * Plugin Name: Login Designer WP
  * Plugin URI:  https://github.com/smchase5/LoginDesignerWP
  * Description: A lightweight way to visually customize the default WordPress login screen.
  * Version:     1.1.0

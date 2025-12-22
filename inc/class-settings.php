@@ -78,8 +78,8 @@ class LoginDesignerWP_Settings
     public function add_settings_page()
     {
         add_options_page(
-            __('LoginDesignerWP', 'logindesignerwp'),
-            __('LoginDesignerWP', 'logindesignerwp'),
+            __('Login Designer WP', 'logindesignerwp'),
+            __('Login Designer WP', 'logindesignerwp'),
             'manage_options',
             'logindesignerwp',
             array($this, 'render_settings_page')
