@@ -86,6 +86,15 @@ class License_Handler
         }
 
         if ($response_code === 200 && isset($data['success']) && $data['success'] === true) {
+
+            // Validate Product ID
+            // "61" is the ID for Login Designer WP Pro
+            $product_id = isset($data['data']['productId']) ? (int) $data['data']['productId'] : 0;
+
+            if ($product_id !== 61) {
+                return new \WP_Error('activation_failed', 'Invalid license key.');
+            }
+
             // Save license status
             update_option(
                 self::LICENSE_OPTION,
@@ -93,6 +102,7 @@ class License_Handler
                     'key' => $license_key,
                     'status' => 'valid',
                     'expiry' => $data['data']['expiresAt'] ?? '',
+                    'activation_token' => $data['data']['token'] ?? '', // Store token for deactivation
                 ]
             );
             return $data;
