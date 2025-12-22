@@ -1182,6 +1182,140 @@
     }
 
 
+    // AI Theme Generator Logic
+    $(document).on('click', '.ldwp-wizard-ai-banner', function () {
+        if ($(this).hasClass('is-locked')) {
+            alert('Unlock the Magic! ✨\n\nUpgrade to Pro to use the AI Theme Generator.');
+            return;
+        }
+        $('.ldwp-ai-modal').fadeIn(200).css('display', 'flex');
+        $('#ldwp-ai-prompt').focus();
+    });
+
+    $('.ldwp-ai-cancel').on('click', function () {
+        $('.ldwp-ai-modal').fadeOut(200);
+    });
+
+    $('.ldwp-ai-generate').on('click', function () {
+        var $input = $('#ldwp-ai-prompt');
+        var prompt = $input.val().trim();
+        if (!prompt) {
+            $input.css('border-color', '#d63638').focus();
+            return;
+        }
+        $input.css('border-color', '#ddd');
+
+        var $btn = $(this);
+        var originalText = $btn.text();
+        $btn.text('Generating Magic...').prop('disabled', true);
+
+        // Real AI Generation
+        $.ajax({
+            url: ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'logindesignerwp_generate_theme',
+                nonce: logindesignerwp_ajax.nonce,
+                prompt: prompt
+            },
+            success: function (response) {
+                if (response.success) {
+                    var theme = response.data.theme;
+                    $btn.text('Saving Preset...');
+
+                    // Save as new preset
+                    $.ajax({
+                        url: ajaxurl,
+                        type: 'POST',
+                        data: {
+                            action: 'logindesignerwp_save_preset',
+                            nonce: logindesignerwp_ajax.nonce,
+                            name: prompt, // Use prompt as preset name
+                            settings: theme
+                        },
+                        success: function (saveResponse) {
+                            if (saveResponse.success) {
+                                var presetId = saveResponse.data.id;
+
+                                // Create new preset card HTML
+                                var cardHtml = '<div class="ldwp-wizard-preset is-custom" data-preset="' + presetId + '" data-name="' + prompt.replace(/"/g, '&quot;') + '">';
+                                cardHtml += '<div class="ldwp-wizard-preset-preview" style="';
+                                cardHtml += 'background: ' + (theme.background_mode === 'gradient'
+                                    ? 'linear-gradient(' + (theme.gradient_angle || 135) + 'deg, ' + (theme.background_gradient_1 || '#fff') + ', ' + (theme.background_gradient_2 || '#000') + ')'
+                                    : (theme.background_color || '#fff')) + '; ';
+                                cardHtml += '">';
+                                cardHtml += '<div class="mini-form" style="background: ' + (theme.form_bg_color || '#fff') + '; border: ' + (theme.form_border_color ? '1px solid ' + theme.form_border_color : 'none') + ';">';
+                                cardHtml += '<div class="mini-input" style="background: ' + (theme.input_bg_color || '#fff') + ';"></div>';
+                                cardHtml += '<div class="mini-input" style="background: ' + (theme.input_bg_color || '#fff') + ';"></div>';
+                                cardHtml += '<div class="mini-button" style="background: ' + (theme.button_bg || '#000') + ';"></div>';
+                                cardHtml += '</div></div>'; // end preview
+                                cardHtml += '</div>'; // end card
+
+                                // Add to grid
+                                var $newCard = $(cardHtml);
+                                $('.ldwp-wizard-presets').prepend($newCard);
+
+                                // Select it
+                                $newCard.trigger('click');
+
+                                // Update wizard settings & sync
+                                wizard.settings = $.extend({}, defaultSettings, theme);
+                                wizard.settings.preset = presetId;
+                                syncAllSettingsToPreview();
+
+                                // Close Modal
+                                $('.ldwp-ai-modal').fadeOut(200);
+                                $btn.text(originalText).prop('disabled', false);
+                                $('#ldwp-ai-prompt').val(''); // clear
+
+                                // Show toast
+                                var $toast = $('<div class="ldwp-wizard-toast">✨ Preset Saved: ' + prompt + '</div>');
+                                $toast.css({
+                                    'position': 'fixed',
+                                    'bottom': '20px',
+                                    'right': '20px',
+                                    'background': '#10b981',
+                                    'color': 'white',
+                                    'padding': '16px 24px',
+                                    'border-radius': '8px',
+                                    'font-size': '14px',
+                                    'font-weight': '500',
+                                    'box-shadow': '0 4px 12px rgba(16, 185, 129, 0.4)',
+                                    'z-index': '100001',
+                                    'animation': 'slideIn 0.3s ease'
+                                });
+                                $('body').append($toast);
+                                setTimeout(function () { $toast.fadeOut(300, function () { $(this).remove(); }); }, 3000);
+
+                                // Advance to Step 2
+                                setTimeout(function () {
+                                    $('.ldwp-wizard-dot[data-step="2"]').trigger('click');
+                                }, 500);
+
+                            } else {
+                                alert('Failed to save preset: ' + (saveResponse.data || 'Unknown error'));
+                                $btn.text(originalText).prop('disabled', false);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Save Preset Error', xhr.responseText);
+                            alert('Network error while saving preset. Check console.');
+                            $btn.text(originalText).prop('disabled', false);
+                        }
+                    });
+
+                } else {
+                    alert('AI Generation Failed: ' + (response.data || 'Unknown error'));
+                    $btn.text(originalText).prop('disabled', false);
+                }
+            },
+            error: function () {
+                alert('Network error during AI generation. Please try again.');
+                $btn.text(originalText).prop('disabled', false);
+            }
+        });
+    });
+
     // Initialize on document ready
     $(document).ready(init);
 

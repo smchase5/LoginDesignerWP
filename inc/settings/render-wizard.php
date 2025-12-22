@@ -54,6 +54,24 @@ $is_pro = function_exists('logindesignerwp_is_pro_active') && logindesignerwp_is
                 $presets = Login_Designer_WP_Presets_Core::get_presets();
                 ?>
 
+                <!-- AI Theme Generator Banner -->
+                <div class="ldwp-wizard-ai-banner <?php echo !$is_pro ? 'is-locked' : ''; ?>" data-action="ai-theme">
+                    <div class="ldwp-wizard-ai-banner-content">
+                        <span class="dashicons dashicons-superhero ldwp-ai-icon"></span>
+                        <div class="ldwp-ai-text">
+                            <h5><?php esc_html_e('Magic AI Theme', 'logindesignerwp'); ?></h5>
+                            <p><?php esc_html_e('Describe your dream login page and let AI build it instantly.', 'logindesignerwp'); ?>
+                            </p>
+                        </div>
+                    </div>
+                    <?php if (!$is_pro): ?>
+                        <div class="ldwp-ai-badge ldwp-ai-badge-pro"><span class="dashicons dashicons-lock"></span> Pro
+                        </div>
+                    <?php else: ?>
+                        <div class="ldwp-ai-badge"><span class="dashicons dashicons-arrow-right-alt2"></span></div>
+                    <?php endif; ?>
+                </div>
+
                 <div class="ldwp-wizard-presets">
                     <?php foreach ($presets as $key => $preset):
                         $is_locked = $preset['is_pro'] && !$is_pro;
@@ -536,6 +554,24 @@ $is_pro = function_exists('logindesignerwp_is_pro_active') && logindesignerwp_is
                 class="button ldwp-wizard-cancel-stay"><?php esc_html_e('Keep Editing', 'logindesignerwp'); ?></button>
             <button type="button"
                 class="button button-primary ldwp-wizard-cancel-confirm"><?php esc_html_e('Exit Wizard', 'logindesignerwp'); ?></button>
+        </div>
+    </div>
+</div>
+
+<!-- AI Theme Modal -->
+<div class="ldwp-ai-modal" style="display: none;">
+    <div class="ldwp-ai-dialog">
+        <h4>✨ <?php esc_html_e('Magic AI Theme Generator', 'logindesignerwp'); ?></h4>
+        <p><?php esc_html_e('Describe your ideal login page (e.g., "Minimalist dark theme for a tech startup").', 'logindesignerwp'); ?>
+        </p>
+        <textarea id="ldwp-ai-prompt" rows="4"
+            placeholder="<?php esc_attr_e('Enter your description...', 'logindesignerwp'); ?>"></textarea>
+        <div class="ldwp-ai-actions">
+            <button type="button"
+                class="button ldwp-ai-cancel"><?php esc_html_e('Cancel', 'logindesignerwp'); ?></button>
+            <button type="button" class="button button-primary ldwp-ai-generate">
+                <?php esc_html_e('Generate Theme', 'logindesignerwp'); ?>
+            </button>
         </div>
     </div>
 </div>

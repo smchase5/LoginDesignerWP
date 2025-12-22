@@ -187,7 +187,8 @@ class LoginDesignerWP_Login_Style
         $css .= "body.login div#login input[type='text'],\n";
         $css .= "body.login div#login input[type='password'],\n";
         $css .= "body.login div#login input[type='email'],\n";
-        $css .= "#login input[type='text'], #login input[type='password'], #login input[type='email'] {\n";
+        $css .= "body.login div#login input[type='number'],\n";
+        $css .= "#login input[type='text'], #login input[type='password'], #login input[type='email'], #login input[type='number'] {\n";
         $css .= "    background: " . esc_attr($s['input_bg_color']) . " !important;\n";
         $css .= "    color: " . esc_attr($s['input_text_color']) . " !important;\n";
         $css .= "    border: 1px solid " . esc_attr($s['input_border_color']) . " !important;\n";
@@ -197,7 +198,7 @@ class LoginDesignerWP_Login_Style
         $css .= "}\n";
 
         // Input Focus
-        $css .= "#login input[type='text']:focus, #login input[type='password']:focus, #login input[type='email']:focus {\n";
+        $css .= "#login input[type='text']:focus, #login input[type='password']:focus, #login input[type='email']:focus, #login input[type='number']:focus {\n";
         $css .= "    border-color: " . esc_attr($s['input_border_focus']) . " !important;\n";
         $css .= "    box-shadow: 0 0 0 1px " . esc_attr($s['input_border_focus']) . " !important;\n";
         $css .= "    outline: none !important;\n";

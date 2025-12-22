@@ -14,11 +14,103 @@ class Login_Designer_WP_Presets_Core
 {
 
     /**
-     * Get all available presets.
+     * Get all available presets (Core + Custom).
      *
      * @return array
      */
     public static function get_presets()
+    {
+        $core_presets = self::get_core_presets();
+        $custom_presets = self::get_custom_presets();
+
+        return array_merge($custom_presets, $core_presets);
+    }
+
+    /**
+     * Get custom user-saved presets.
+     *
+     * @return array
+     */
+    public static function get_custom_presets()
+    {
+        $presets = get_option('logindesignerwp_custom_presets', array());
+        return is_array($presets) ? $presets : array();
+    }
+
+    /**
+     * Save a new custom preset.
+     *
+     * @param string $name Preset name.
+     * @param array  $settings Preset settings.
+     * @return string|WP_Error Preset ID or Error.
+     */
+    public static function save_preset($name, $settings)
+    {
+        if (empty($name) || empty($settings)) {
+            return new WP_Error('invalid_data', __('Invalid preset data', 'logindesignerwp'));
+        }
+
+        $presets = self::get_custom_presets();
+        $id = 'custom_' . uniqid();
+
+        $presets[$id] = array(
+            'name' => sanitize_text_field($name),
+            'category' => 'custom',
+            'is_pro' => false, // AI generated presets are yours to keep
+            'is_custom' => true,
+            'preview' => self::generate_preview_data($settings),
+            'settings' => $settings,
+        );
+
+        update_option('logindesignerwp_custom_presets', $presets);
+
+        return $id;
+    }
+
+    /**
+     * Delete a custom preset.
+     *
+     * @param string $preset_id ID of the preset to delete.
+     * @return bool True on success.
+     */
+    public static function delete_preset($preset_id)
+    {
+        $presets = self::get_custom_presets();
+
+        if (isset($presets[$preset_id])) {
+            unset($presets[$preset_id]);
+            update_option('logindesignerwp_custom_presets', $presets);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Generate preview data from settings for the card.
+     *
+     * @param array $settings Settings array.
+     * @return array Preview styles.
+     */
+    private static function generate_preview_data($settings)
+    {
+        return array(
+            'bg' => isset($settings['background_mode']) && $settings['background_mode'] === 'gradient'
+                ? 'linear-gradient(' . ($settings['gradient_angle'] ?? 135) . 'deg, ' . ($settings['background_gradient_1'] ?? '#ffffff') . ', ' . ($settings['background_gradient_2'] ?? '#000000') . ')'
+                : ($settings['background_color'] ?? '#ffffff'),
+            'form_bg' => $settings['form_bg_color'] ?? '#ffffff',
+            'form_border' => isset($settings['form_border_color']) ? '1px solid ' . $settings['form_border_color'] : 'none',
+            'input_bg' => $settings['input_bg_color'] ?? '#ffffff',
+            'button_bg' => $settings['button_bg'] ?? '#000000',
+        );
+    }
+
+    /**
+     * Get core built-in presets.
+     *
+     * @return array
+     */
+    private static function get_core_presets()
     {
         return array(
             // ============================================

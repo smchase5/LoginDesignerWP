@@ -36,6 +36,40 @@ class LoginDesignerWP_Settings
         add_action('wp_ajax_logindesignerwp_save_settings', array($this, 'ajax_save_settings'));
         add_action('wp_ajax_logindesignerwp_reset_defaults', array($this, 'ajax_reset_defaults'));
         add_action('wp_ajax_logindesignerwp_save_social_settings', array($this, 'ajax_save_social_settings'));
+        add_action('wp_ajax_logindesignerwp_save_preset', array($this, 'ajax_save_preset'));
+    }
+
+    /**
+     * AJAX: Save a custom preset.
+     */
+    public function ajax_save_preset()
+    {
+        check_ajax_referer('logindesignerwp_save_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(__('You do not have permission to do this.', 'logindesignerwp'));
+        }
+
+        $name = isset($_POST['name']) ? sanitize_text_field($_POST['name']) : '';
+        $settings = isset($_POST['settings']) ? $_POST['settings'] : array();
+
+        if (empty($name) || empty($settings)) {
+            wp_send_json_error(__('Missing name or settings.', 'logindesignerwp'));
+        }
+
+        // Sanitize settings (basic recursion)
+        array_walk_recursive($settings, 'sanitize_text_field');
+
+        $result = Login_Designer_WP_Presets_Core::save_preset($name, $settings);
+
+        if (is_wp_error($result)) {
+            wp_send_json_error($result->get_error_message());
+        }
+
+        wp_send_json_success(array(
+            'id' => $result,
+            'message' => __('Preset saved successfully!', 'logindesignerwp')
+        ));
     }
 
     /**
@@ -294,6 +328,13 @@ class LoginDesignerWP_Settings
                                     <form method="post" action="options.php" id="logindesignerwp-settings-form">
                                         <?php settings_fields('logindesignerwp_settings_group'); ?>
 
+                                        <?php
+                                        // Include and Render Presets UI (Core)
+                                        require_once LOGINDESIGNERWP_PATH . 'inc/class-presets-ui.php';
+                                        $presets_ui = new Login_Designer_WP_Presets_UI();
+                                        $presets_ui->render_section($settings);
+                                        ?>
+
                                         <?php $this->render_background_section($settings); ?>
                                         <?php $this->render_form_section($settings); ?>
                                         <?php $this->render_logo_section($settings); ?>
@@ -392,6 +433,11 @@ class LoginDesignerWP_Settings
                                                         <input type="password" id="ldwp-preview-input-pass" value="••••••••"
                                                             readonly>
                                                     </div>
+
+                                                    <!-- Captcha Preview Container -->
+                                                    <div id="ldwp-preview-captcha-container"
+                                                        class="logindesignerwp-preview-captcha"
+                                                        style="margin-bottom: 20px; display: none;"></div>
                                                     <div class="logindesignerwp-preview-submit-row">
                                                         <div class="logindesignerwp-preview-remember">
                                                             <label><input type="checkbox" readonly>

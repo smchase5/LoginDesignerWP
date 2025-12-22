@@ -30,6 +30,7 @@ require_once LOGINDESIGNERWP_PATH . 'inc/class-login-style.php';
 require_once LOGINDESIGNERWP_PATH . 'inc/class-ai.php';
 require_once LOGINDESIGNERWP_PATH . 'inc/class-social-login.php';
 require_once LOGINDESIGNERWP_PATH . 'inc/class-presets-core.php';
+require_once LOGINDESIGNERWP_PATH . 'inc/security/class-security.php';
 
 // Load Pro module (Development Mode / Integrated).
 if (file_exists(LOGINDESIGNERWP_PATH . 'inc/pro/class-pro-manager.php')) {
@@ -56,6 +57,9 @@ function logindesignerwp_init()
 
     // Initialize Social Login.
     new LoginDesignerWP_Social_Login();
+
+    // Initialize Bot Protection.
+    LoginDesignerWP_Security::get_instance();
 
     // Initialize Pro Features.
     if (class_exists('LoginDesignerWP\Pro\Pro_Manager')) {

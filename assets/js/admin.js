@@ -2647,8 +2647,104 @@
             console.log('LDWP: Batch Update Complete');
         };
 
+        // Initialize Security Preview
+        initSecurityPreview();
+
         // Apply initial preview after a short delay to ensure color pickers are ready
         setTimeout(applyInitialPreview, 100);
     });
+
+    /**
+     * Initialize Security (Captcha) Preview.
+     */
+    function initSecurityPreview() {
+        var $previewContainer = $('#ldwp-preview-captcha-container');
+        // Inputs are in #ldwp-security-container
+        var $securityContainer = $('#ldwp-security-container');
+        var $enableToggle = $securityContainer.find('input[name="enabled"]');
+        var $methodSelect = $('#ldwp-security-method');
+        var $mathToggle = $securityContainer.find('input[name="basic_math"]');
+
+        function updateCaptchaPreview() {
+            var isEnabled = $enableToggle.is(':checked');
+            var method = $methodSelect.val();
+
+            // Clear previous
+            $previewContainer.empty().hide();
+
+            if (!isEnabled) {
+                return;
+            }
+
+            if (method === 'basic') {
+                // Check if Math is enabled
+                var isMath = $mathToggle.is(':checked');
+                if (isMath) {
+                    // Use standard field structure for inheritance
+                    var mathHtml = '<div class="logindesignerwp-preview-field">' +
+                        '<label style="display:block; margin-bottom: 0.5em;">Math: 5 + 3 = ?</label>' +
+                        '<input type="text" class="input" size="2" value="">' +
+                        '</div>';
+                    $previewContainer.html(mathHtml).show();
+
+                    // Apply current styles immediately to match other fields
+                    var $newInput = $previewContainer.find('input');
+                    var $newLabel = $previewContainer.find('label');
+
+                    var inputBg = $('input[name="logindesignerwp_settings[input_bg_color]"]').val();
+                    var textColor = $('input[name="logindesignerwp_settings[input_text_color]"]').val();
+                    var borderColor = $('input[name="logindesignerwp_settings[input_border_color]"]').val();
+                    var labelColor = $('input[name="logindesignerwp_settings[label_text_color]"]').val();
+
+                    $newInput.css({
+                        'background-color': inputBg,
+                        'color': textColor,
+                        'border': '1px solid ' + borderColor
+                    });
+
+                    $newLabel.css('color', labelColor);
+                }
+            } else if (method === 'turnstile') {
+                var cfHtml = '<div style="display:flex; justify-content:center; width:100%; margin-bottom: 20px;">' +
+                    '<div style="width: 300px; height: 65px; background: #fff; border: 1px solid #dcdcdc; border-radius: 4px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 1px rgba(0,0,0,0.05);">' +
+                    '<div style="display:flex; align-items:center; gap:10px;">' +
+                    '<div style="width:24px; height:24px; border:2px solid #ccc; border-radius:50%;"></div>' +
+                    '<span style="font-family:sans-serif; color:#333; font-size:14px;">Verify you are human</span>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+
+                $previewContainer.html(cfHtml).show();
+            } else if (method === 'recaptcha') {
+                var rcHtml = '<div style="display:flex; justify-content:center; width:100%; margin-bottom: 20px;">' +
+                    '<div style="width: 302px; height: 74px; background: #f9f9f9; border: 1px solid #d3d3d3; border-radius: 3px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; box-shadow: 0 1px 1px rgba(0,0,0,0.08);">' +
+                    '<div style="display:flex; align-items:center; gap:12px;">' +
+                    '<div style="width:24px; height:24px; border:2px solid #c1c1c1; border-radius:2px; background:#fff;"></div>' + // checkbox
+                    '<span style="font-family:Roboto, helvetica, arial, sans-serif; color: #000; font-size:14px; font-weight: 500;">I\'m not a robot</span>' +
+                    '</div>' +
+                    '<div style="display:flex; flex-direction:column; align-items:center; opacity: 0.6;">' +
+                    '<span style="font-size:24px; color: #555; line-height:1;margin-bottom:2px;" class="dashicons dashicons-update"></span>' +
+                    '<span style="font-size:10px; color: #555;">reCAPTCHA</span>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+                $previewContainer.html(rcHtml).show();
+            }
+
+            // Update global cache to include new elements so live color picking works on them
+            if (typeof $previewInputs !== 'undefined') {
+                $previewInputs = $('#ldwp-preview-input-user, #ldwp-preview-input-pass, #ldwp-preview-captcha-container input[type="text"]');
+                $previewLabels = $('#ldwp-preview-label-user, #ldwp-preview-label-pass, #ldwp-preview-captcha-container label');
+            }
+        }
+
+        // Listeners for method, toggle, and math checkbox
+        $enableToggle.on('change', updateCaptchaPreview);
+        $methodSelect.on('change', updateCaptchaPreview);
+        $mathToggle.on('change', updateCaptchaPreview);
+
+        // Initial run
+        updateCaptchaPreview();
+    }
 
 })(jQuery);

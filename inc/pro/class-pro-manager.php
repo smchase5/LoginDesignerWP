@@ -67,6 +67,21 @@ class Pro_Manager
                 if (class_exists('LoginDesignerWP_Pro_Presets')) {
                     new \LoginDesignerWP_Pro_Presets();
                 }
+
+                // Instantiate Security Modules
+                $sec_settings = get_option('logindesignerwp_security_settings', []);
+
+                // Turnstile
+                if (file_exists(__DIR__ . '/security/class-turnstile.php')) {
+                    require_once __DIR__ . '/security/class-turnstile.php';
+                    new \LoginDesignerWP\Pro\Security\Turnstile($sec_settings);
+                }
+
+                // reCAPTCHA
+                if (file_exists(__DIR__ . '/security/class-recaptcha.php')) {
+                    require_once __DIR__ . '/security/class-recaptcha.php';
+                    new \LoginDesignerWP\Pro\Security\Recaptcha($sec_settings);
+                }
             }
         }
 

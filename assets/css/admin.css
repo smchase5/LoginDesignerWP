@@ -1582,17 +1582,423 @@
     transform: scale(1.1);
 }
 
-.logindesignerwp-wrap input[type="range"]::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
-    background: #2271b1;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
+
+/* ==========================================================================
+   Preset Lock & Badges
+   ========================================================================== */
+.logindesignerwp-preset-card.is-locked {
+    cursor: not-allowed;
+    opacity: 0.8;
 }
 
-.logindesignerwp-wrap input[type="range"]::-moz-range-track {
-    height: 6px;
-    background: #e0e0e0;
-    border-radius: 3px;
+.ldwp-lock-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.logindesignerwp-preset-card.is-locked:hover .ldwp-lock-overlay {
+    opacity: 1;
+}
+
+.ldwp-lock-overlay .dashicons {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: #64748b;
+}
+
+.ldwp-pro-badge {
+    background: #10b981;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 5px;
+    border-radius: 10px;
+    margin-left: auto;
+}
+
+.logindesignerwp-preset-name {
+    /* Updated for badge support */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+border: none;
+cursor: pointer;
+}
+
+
+/* ============================================
+   AI THEME WIZARD STYLES
+   ============================================ */
+
+.ldwp-ai-preset {
+    border: 2px solid #a461d8 !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.ldwp-ai-preset::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg,
+            rgba(255, 255, 255, 0) 40%,
+            rgba(255, 255, 255, 0.2) 50%,
+            rgba(255, 255, 255, 0) 60%);
+    transform: rotate(45deg);
+    animation: ldwpShimmer 3s infinite linear;
+}
+
+@keyframes ldwpShimmer {
+    0% {
+        transform: translateX(-100%) rotate(45deg);
+    }
+
+    100% {
+        transform: translateX(100%) rotate(45deg);
+    }
+}
+
+.ldwp-ai-preset:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(118, 75, 162, 0.3);
+    border-color: #8e44ad !important;
+}
+
+.ldwp-ai-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 160000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+}
+
+.ldwp-ai-dialog {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    width: 420px;
+    max-width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    animation: ldwpPopIn 0.3s ease;
+    border-top: 4px solid #764ba2;
+}
+
+@keyframes ldwpPopIn {
+    0% {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.ldwp-ai-dialog h4 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: #333;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ldwp-ai-dialog p {
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.ldwp-ai-dialog textarea {
+    width: 100%;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 12px;
+    min-height: 100px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.ldwp-ai-dialog textarea:focus {
+    border-color: #764ba2;
+    outline: none;
+    box-shadow: 0 0 0 1px #764ba2;
+}
+
+.ldwp-ai-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.ldwp-ai-generate {
+    background: linear-gradient(to right, #667eea, #764ba2) !important;
+    border: none !important;
+    transition: transform 0.2s !important;
+}
+
+.ldwp-ai-generate:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
+}
+
+/* ============================================
+   AI THEME WIZARD STYLES
+   ============================================ */
+
+.ldwp-ai-preset {
+    border: 2px solid #a461d8 !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.ldwp-ai-preset::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg,
+            rgba(255, 255, 255, 0) 40%,
+            rgba(255, 255, 255, 0.2) 50%,
+            rgba(255, 255, 255, 0) 60%);
+    transform: rotate(45deg);
+    animation: ldwpShimmer 3s infinite linear;
+}
+
+@keyframes ldwpShimmer {
+    0% {
+        transform: translateX(-100%) rotate(45deg);
+    }
+
+    100% {
+        transform: translateX(100%) rotate(45deg);
+    }
+}
+
+.ldwp-ai-preset:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(118, 75, 162, 0.3);
+    border-color: #8e44ad !important;
+}
+
+.ldwp-ai-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 160000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+}
+
+.ldwp-ai-dialog {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    width: 420px;
+    max-width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    animation: ldwpPopIn 0.3s ease;
+    border-top: 4px solid #764ba2;
+}
+
+@keyframes ldwpPopIn {
+    0% {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.ldwp-ai-dialog h4 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: #333;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ldwp-ai-dialog p {
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.ldwp-ai-dialog textarea {
+    width: 100%;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 12px;
+    min-height: 100px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.ldwp-ai-dialog textarea:focus {
+    border-color: #764ba2;
+    outline: none;
+    box-shadow: 0 0 0 1px #764ba2;
+}
+
+.ldwp-ai-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.ldwp-ai-generate {
+    background: linear-gradient(to right, #667eea, #764ba2) !important;
+    border: none !important;
+    transition: transform 0.2s !important;
+}
+
+.ldwp-ai-generate:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
+}
+
+/* ============================================
+   NEW AI BANNER STYLES
+   ============================================ */
+.ldwp-wizard-ai-banner {
+    background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
+    border: 1px solid #cce4ff;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.ldwp-wizard-ai-banner:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(100, 149, 237, 0.2);
+    border-color: #9dc6ff;
+}
+
+.ldwp-wizard-ai-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.ldwp-ai-icon {
+    font-size: 32px;
+    color: #2271b1;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e6f2ff;
+    border-radius: 50%;
+    padding: 8px;
+}
+
+.ldwp-ai-text h5 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e1e1e;
+}
+
+.ldwp-ai-text p {
+    margin: 0;
+    font-size: 13px;
+    color: #646970;
+}
+
+.ldwp-ai-badge {
+    color: #2271b1;
+    background: #e6f2ff;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: margin 0.3s ease;
+}
+
+.ldwp-wizard-ai-banner:hover .ldwp-ai-badge {
+    background: #2271b1;
+    color: white;
+}
+
+/* Locked State (Pro) */
+.ldwp-wizard-ai-banner.is-locked {
+    background: #fafafa;
+    border-color: #e5e5e5;
+    opacity: 0.9;
+}
+
+.ldwp-wizard-ai-banner.is-locked .ldwp-ai-icon {
+    background: #f0f0f1;
+    color: #8c8f94;
+}
+
+.ldwp-ai-badge-pro {
+    width: auto;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: #f0f0f1;
+    color: #8c8f94;
+    font-size: 12px;
+    font-weight: 600;
+    gap: 4px;
+}
+
+.ldwp-wizard-ai-banner.is-locked:hover {
+    border-color: #dcdcde;
+    transform: none;
+    box-shadow: none;
+    cursor: default;
 }
