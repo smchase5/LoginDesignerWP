@@ -212,7 +212,11 @@ function logindesignerwp_sanitize_settings($input)
     // Logo settings.
     $sanitized['logo_id'] = absint($input['logo_id'] ?? 0);
     $sanitized['logo_width'] = max(50, min(500, absint($input['logo_width'] ?? $defaults['logo_width'])));
-    $sanitized['logo_height'] = absint($input['logo_height'] ?? $defaults['logo_height']);
+    // Allow 0 or empty to signal 'auto', defaulting to 84 only if key is missing entirely
+    // If input is '0' or '', absint will return 0, which is what we want for auto.
+    // The previous logic used ?? $defaults['logo_height'] which works if input is unset,
+    // but we need to ensure we don't force min/max if we want 0.
+    $sanitized['logo_height'] = isset($input['logo_height']) ? absint($input['logo_height']) : $defaults['logo_height'];
     $sanitized['logo_padding'] = absint($input['logo_padding'] ?? $defaults['logo_padding']);
     $sanitized['logo_border_radius'] = absint($input['logo_border_radius'] ?? $defaults['logo_border_radius']);
     $sanitized['logo_bottom_margin'] = absint($input['logo_bottom_margin'] ?? $defaults['logo_bottom_margin']);

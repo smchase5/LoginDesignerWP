@@ -15,6 +15,24 @@ if (!defined('ABSPATH')) {
 class Login_Designer_WP_Presets_UI
 {
 
+    /**
+     * @var Login_Designer_WP_Presets_UI
+     */
+    private static $instance = null;
+
+    /**
+     * Get instance.
+     *
+     * @return Login_Designer_WP_Presets_UI
+     */
+    public static function get_instance()
+    {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
     public function __construct()
     {
         // AJAX handlers

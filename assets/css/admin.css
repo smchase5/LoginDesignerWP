@@ -2002,3 +2002,66 @@ cursor: pointer;
     box-shadow: none;
     cursor: default;
 }
+/* Toggle Switch Styles */
+.logindesignerwp-toggle-checkbox {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 24px;
+    user-select: none;
+    padding-left: 46px; /* Space for switch */
+    min-height: 24px;
+}
+
+.logindesignerwp-toggle-checkbox input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.logindesignerwp-toggle-checkbox::before {
+    /* Track */
+    content: '';
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 20px;
+    background-color: #e5e7eb;
+    border-radius: 20px;
+    transition: background-color 0.2s;
+    border: 1px solid #d1d5db;
+    box-sizing: border-box;
+}
+
+.logindesignerwp-toggle-checkbox::after {
+    /* Thumb */
+    content: '';
+    display: block;
+    position: absolute;
+    left: 2px;
+    top: 50%;
+    margin-top: -8px; 
+    width: 16px;
+    height: 16px;
+    background-color: white;
+    border-radius: 50%;
+    transition: left 0.2s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Checked State using :has() */
+.logindesignerwp-toggle-checkbox:has(input:checked)::before {
+    background-color: #2271b1;
+    border-color: #2271b1;
+}
+
+.logindesignerwp-toggle-checkbox:has(input:checked)::after {
+    left: 18px;
+}

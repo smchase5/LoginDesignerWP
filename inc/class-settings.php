@@ -330,9 +330,9 @@ class LoginDesignerWP_Settings
 
                                         <?php
                                         // Include and Render Presets UI (Core)
-                                        require_once LOGINDESIGNERWP_PATH . 'inc/class-presets-ui.php';
-                                        $presets_ui = new Login_Designer_WP_Presets_UI();
-                                        $presets_ui->render_section($settings);
+                                        if (class_exists('Login_Designer_WP_Presets_UI')) {
+                                            Login_Designer_WP_Presets_UI::get_instance()->render_section($settings);
+                                        }
                                         ?>
 
                                         <?php $this->render_background_section($settings); ?>
@@ -402,22 +402,39 @@ class LoginDesignerWP_Settings
                                             <div class="logindesignerwp-preview-login" id="ldwp-preview-login">
                                                 <!-- Logo -->
                                                 <div class="logindesignerwp-preview-logo" id="ldwp-preview-logo">
-                                                    <a href="#">
-                                                        <?php if ($logo_url): ?>
-                                                            <img src="<?php echo esc_url($logo_url); ?>" alt="Logo"
-                                                                id="ldwp-preview-logo-img">
-                                                        <?php else: ?>
-                                                            <svg id="ldwp-preview-logo-wp" xmlns="http://www.w3.org/2000/svg"
-                                                                viewBox="0 0 122.52 122.523" width="84" height="84">
-                                                                <path fill="#2271b1"
-                                                                    d="M8.708 61.26c0 20.802 12.089 38.779 29.619 47.298L13.258 39.872a52.354 52.354 0 00-4.55 21.388zM96.74 58.608c0-6.495-2.333-10.993-4.334-14.494-2.664-4.329-5.161-7.995-5.161-12.324 0-4.831 3.664-9.328 8.825-9.328.233 0 .454.029.681.042-9.35-8.566-21.807-13.796-35.489-13.796-18.36 0-34.513 9.42-43.91 23.688 1.233.037 2.395.063 3.382.063 5.497 0 14.006-.667 14.006-.667 2.833-.167 3.167 3.994.337 4.329 0 0-2.847.335-6.015.501L48.2 93.547l11.501-34.493-8.188-22.434c-2.83-.166-5.511-.501-5.511-.501-2.832-.166-2.5-4.496.332-4.329 0 0 8.679.667 13.843.667 5.496 0 14.006-.667 14.006-.667 2.835-.167 3.168 3.994.337 4.329 0 0-2.853.335-6.015.501l18.992 56.494 5.242-17.517c2.272-7.269 4.001-12.49 4.001-16.989z" />
-                                                                <path fill="#2271b1"
-                                                                    d="M62.184 65.857l-15.768 45.819a52.552 52.552 0 0032.29-.838 4.693 4.693 0 01-.37-.712L62.184 65.857zM107.376 36.046a42.584 42.584 0 01.358 5.708c0 5.651-1.057 12.002-4.229 19.94l-16.973 49.082c16.519-9.627 27.618-27.628 27.618-48.18 0-9.762-2.499-18.929-6.774-26.55z" />
-                                                                <path fill="#2271b1"
-                                                                    d="M61.262 0C27.483 0 0 27.481 0 61.26c0 33.783 27.483 61.263 61.262 61.263 33.778 0 61.265-27.48 61.265-61.263C122.526 27.481 95.04 0 61.262 0zm0 119.715c-32.23 0-58.453-26.223-58.453-58.455 0-32.23 26.222-58.451 58.453-58.451 32.229 0 58.45 26.221 58.45 58.451 0 32.232-26.221 58.455-58.45 58.455z" />
-                                                            </svg>
-                                                        <?php endif; ?>
-                                                    </a>
+                                                    <?php
+                                                    $logo_style = '';
+                                                    $logo_color = isset($settings['label_text_color']) ? ltrim($settings['label_text_color'], '#') : '1e1e1e';
+
+                                                    // Default Logo SVG Data URI
+                                                    $default_svg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 122.52 122.523'%3E%3Cpath fill='%23" . $logo_color . "' d='M8.708 61.26c0 20.802 12.089 38.779 29.619 47.298L13.258 39.872a52.354 52.354 0 00-4.55 21.388zM96.74 58.608c0-6.495-2.333-10.993-4.334-14.494-2.664-4.329-5.161-7.995-5.161-12.324 0-4.831 3.664-9.328 8.825-9.328.233 0 .454.029.681.042-9.35-8.566-21.807-13.796-35.489-13.796-18.36 0-34.513 9.42-43.91 23.688 1.233.037 2.395.063 3.382.063 5.497 0 14.006-.667 14.006-.667 2.833-.167 3.167 3.994.337 4.329 0 0-2.847.335-6.015.501L48.2 93.547l11.501-34.493-8.188-22.434c-2.83-.166-5.511-.501-5.511-.501-2.832-.166-2.5-4.496.332-4.329 0 0 8.679.667 13.843.667 5.496 0 14.006-.667 14.006-.667 2.835-.167 3.168 3.994.337 4.329 0 0-2.853.335-6.015.501l18.992 56.494 5.242-17.517c2.272-7.269 4.001-12.49 4.001-16.989z'/%3E%3Cpath fill='%23" . $logo_color . "' d='M62.184 65.857l-15.768 45.819a52.552 52.552 0 0032.29-.838 4.693 4.693 0 01-.37-.712L62.184 65.857zM107.376 36.046a42.584 42.584 0 01.358 5.708c0 5.651-1.057 12.002-4.229 19.94l-16.973 49.082c16.519-9.627 27.618-27.628 27.618-48.18 0-9.762-2.499-18.929-6.774-26.55z'/%3E%3Cpath fill='%23" . $logo_color . "' d='M61.262 0C27.483 0 0 27.481 0 61.26c0 33.783 27.483 61.263 61.262 61.263 33.778 0 61.265-27.48 61.265-61.263C122.526 27.481 95.04 0 61.262 0zm0 119.715c-32.23 0-58.453-26.223-58.453-58.455 0-32.23 26.222-58.451 58.453-58.451 32.229 0 58.45 26.221 58.45 58.451 0 32.232-26.221 58.455-58.45 58.455z'/%3E%3C/svg%3E";
+
+                                                    if ($logo_url) {
+                                                        $logo_style .= "    background-image: url('" . esc_url($logo_url) . "');";
+                                                        $logo_style .= "    background-size: contain;";
+                                                    } else {
+                                                        $logo_style .= "    background-image: url(\"" . $default_svg . "\");";
+                                                        $logo_style .= "    background-size: " . intval($settings['logo_width']) . "px " . intval($settings['logo_height']) . "px;";
+                                                    }
+                                                    $logo_style .= "    width: " . intval($settings['logo_width']) . "px;";
+                                                    $logo_style .= "    height: " . intval($settings['logo_height']) . "px;";
+                                                    $logo_style .= "    padding: " . intval($settings['logo_padding']) . "px;";
+                                                    $logo_style .= "    border-radius: " . intval($settings['logo_border_radius']) . "px;";
+                                                    $logo_style .= "    margin-bottom: " . intval($settings['logo_bottom_margin']) . "px;"; // Wait, margin is on h1 usually, but here we can put on a
+                                            
+                                                    if (!empty($settings['logo_background_enable'])) {
+                                                        $logo_style .= "    background-color: " . esc_attr($settings['logo_background_color']) . ";";
+                                                    }
+
+                                                    // Standard WP Login CSS uses background-position: center; background-repeat: no-repeat;
+                                                    $logo_style .= "    background-position: center;";
+                                                    $logo_style .= "    background-repeat: no-repeat;";
+                                                    $logo_style .= "    background-origin: content-box;";
+                                                    $logo_style .= "    box-sizing: content-box;";
+                                                    $logo_style .= "    display: block;";
+                                                    $logo_style .= "    margin-left: auto; margin-right: auto;"; // Centering
+                                                    ?>
+                                                    <a href="#" style="<?php echo esc_attr($logo_style); ?>"></a>
                                                 </div>
 
                                                 <!-- Form -->
@@ -1114,8 +1131,6 @@ class LoginDesignerWP_Settings
                             <th scope="row"><?php esc_html_e('Logo Image', 'logindesignerwp'); ?></th>
                             <td>
                                 <div class="logindesignerwp-image-upload">
-                                    <input type="hidden" name="logindesignerwp_settings[logo_background_enable]"
-                                        value="<?php echo esc_attr($settings['logo_background_enable']); ?>">
                                     <input type="hidden" name="logindesignerwp_settings[logo_id]"
                                         class="logindesignerwp-image-id" value="<?php echo esc_attr($settings['logo_id']); ?>">
                                     <div class="logindesignerwp-image-preview logindesignerwp-logo-preview"
@@ -1134,37 +1149,55 @@ class LoginDesignerWP_Settings
 
                         <!-- Logo Width -->
                         <tr>
-                            <th scope="row"><?php esc_html_e('Logo Width (px)', 'logindesignerwp'); ?></th>
+                            <th scope="row"><?php esc_html_e('Logo Width', 'logindesignerwp'); ?></th>
                             <td>
-                                <input type="number" name="logindesignerwp_settings[logo_width]"
-                                    value="<?php echo esc_attr($settings['logo_width']); ?>" min="0" max="500">
+                                <div class="logindesignerwp-range-wrapper">
+                                    <input type="range" name="logindesignerwp_settings[logo_width]"
+                                        value="<?php echo esc_attr($settings['logo_width']); ?>" min="0" max="500"
+                                        oninput="this.nextElementSibling.value = this.value">
+                                    <output><?php echo esc_attr($settings['logo_width']); ?></output> px
+                                </div>
                             </td>
                         </tr>
 
                         <!-- Logo Height -->
                         <tr>
-                            <th scope="row"><?php esc_html_e('Logo Height (px)', 'logindesignerwp'); ?></th>
+                            <th scope="row"><?php esc_html_e('Logo Height', 'logindesignerwp'); ?></th>
                             <td>
-                                <input type="number" name="logindesignerwp_settings[logo_height]"
-                                    value="<?php echo esc_attr($settings['logo_height']); ?>" min="0" max="500">
-                                <p class="description">
-                                    <?php esc_html_e('Set to 0 or 84 (default) to keep WP standard.', 'logindesignerwp'); ?>
-                                </p>
+                                <div class="logindesignerwp-logo-height-controls">
+                                    <label class="logindesignerwp-toggle-checkbox">
+                                        <input type="checkbox" id="ldwp-custom-height-toggle" <?php checked(!empty($settings['logo_height']) && $settings['logo_height'] > 0); ?>>
+                                        <?php esc_html_e('Custom Height', 'logindesignerwp'); ?>
+                                    </label>
+
+                                    <div class="logindesignerwp-height-slider" style="margin-top: 10px; display: none;">
+                                        <div class="logindesignerwp-range-wrapper">
+                                            <input type="range" name="logindesignerwp_settings[logo_height]"
+                                                value="<?php echo esc_attr($settings['logo_height']); ?>" min="0" max="500"
+                                                oninput="this.nextElementSibling.value = this.value">
+                                            <output><?php echo esc_attr($settings['logo_height']); ?></output> px
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
 
                         <!-- Padding -->
                         <tr>
-                            <th scope="row"><?php esc_html_e('Padding (px)', 'logindesignerwp'); ?></th>
+                            <th scope="row"><?php esc_html_e('Padding', 'logindesignerwp'); ?></th>
                             <td>
-                                <input type="number" name="logindesignerwp_settings[logo_padding]"
-                                    value="<?php echo esc_attr($settings['logo_padding']); ?>" min="0" max="100">
+                                <div class="logindesignerwp-range-wrapper">
+                                    <input type="range" name="logindesignerwp_settings[logo_padding]"
+                                        value="<?php echo esc_attr($settings['logo_padding']); ?>" min="0" max="100"
+                                        oninput="this.nextElementSibling.value = this.value">
+                                    <output><?php echo esc_attr($settings['logo_padding']); ?></output> px
+                                </div>
                             </td>
                         </tr>
 
                         <!-- Bottom Margin -->
                         <tr>
-                            <th scope="row"><?php esc_html_e('Bottom Margin (px)', 'logindesignerwp'); ?></th>
+                            <th scope="row"><?php esc_html_e('Bottom Margin', 'logindesignerwp'); ?></th>
                             <td>
                                 <div class="logindesignerwp-range-wrapper">
                                     <input type="range" name="logindesignerwp_settings[logo_bottom_margin]"
@@ -1175,45 +1208,63 @@ class LoginDesignerWP_Settings
                             </td>
                         </tr>
 
-                        <!-- Logo Corners -->
+                        <!-- Logo Background Toggle -->
                         <tr>
-                            <th scope="row"><?php esc_html_e('Logo Corners', 'logindesignerwp'); ?></th>
+                            <th scope="row"><?php esc_html_e('Background', 'logindesignerwp'); ?></th>
                             <td>
-                                <input type="hidden" name="logindesignerwp_settings[logo_border_radius]"
-                                    value="<?php echo esc_attr($settings['logo_border_radius']); ?>" class="ldwp-corner-value">
-                                <div class="ldwp-corner-selector" data-setting="logo_border_radius">
-                                    <label
-                                        class="ldwp-corner-option<?php echo ($settings['logo_border_radius'] == 0) ? ' is-active' : ''; ?>"
-                                        data-value="0">
-                                        <div class="ldwp-corner-preview" style="border-radius: 0;"></div>
-                                        <span><?php esc_html_e('Square', 'logindesignerwp'); ?></span>
-                                    </label>
-                                    <label
-                                        class="ldwp-corner-option<?php echo ($settings['logo_border_radius'] > 0 && $settings['logo_border_radius'] < 50) ? ' is-active' : ''; ?>"
-                                        data-value="8">
-                                        <div class="ldwp-corner-preview" style="border-radius: 8px;"></div>
-                                        <span><?php esc_html_e('Rounded', 'logindesignerwp'); ?></span>
-                                    </label>
-                                    <label
-                                        class="ldwp-corner-option<?php echo ($settings['logo_border_radius'] >= 50) ? ' is-active' : ''; ?>"
-                                        data-value="50">
-                                        <div class="ldwp-corner-preview" style="border-radius: 50%;"></div>
-                                        <span><?php esc_html_e('Full', 'logindesignerwp'); ?></span>
-                                    </label>
-                                </div>
+                                <label class="logindesignerwp-toggle-checkbox">
+                                    <input type="checkbox" name="logindesignerwp_settings[logo_background_enable]" value="1"
+                                        id="ldwp-logo-bg-toggle" <?php checked($settings['logo_background_enable'], 1); ?>>
+                                    <?php esc_html_e('Enable Background', 'logindesignerwp'); ?>
+                                </label>
                             </td>
                         </tr>
 
-                        <!-- Background Color -->
-                        <tr>
-                            <th scope="row"><?php esc_html_e('Background Color', 'logindesignerwp'); ?></th>
-                            <td>
-                                <input type="text" class="logindesignerwp-color-picker"
-                                    name="logindesignerwp_settings[logo_background_color]"
-                                    value="<?php echo esc_attr($settings['logo_background_color']); ?>"
-                                    data-preview-target="logo-background">
-                            </td>
-                        </tr>
+                        <!-- Background Settings Group -->
+                        <tbody id="ldwp-logo-bg-settings" style="display: none;">
+                            <!-- Background Color -->
+                            <tr>
+                                <th scope="row" style="padding-top: 0;">
+                                    <?php esc_html_e('Background Color', 'logindesignerwp'); ?>
+                                </th>
+                                <td style="padding-top: 0;">
+                                    <input type="text" class="logindesignerwp-color-picker"
+                                        name="logindesignerwp_settings[logo_background_color]"
+                                        value="<?php echo esc_attr($settings['logo_background_color']); ?>"
+                                        data-preview-target="logo-background">
+                                </td>
+                            </tr>
+
+                            <!-- Logo Corners -->
+                            <tr>
+                                <th scope="row"><?php esc_html_e('Corner Radius', 'logindesignerwp'); ?></th>
+                                <td>
+                                    <input type="hidden" name="logindesignerwp_settings[logo_border_radius]"
+                                        value="<?php echo esc_attr($settings['logo_border_radius']); ?>"
+                                        class="ldwp-corner-value">
+                                    <div class="ldwp-corner-selector" data-setting="logo_border_radius">
+                                        <label
+                                            class="ldwp-corner-option<?php echo ($settings['logo_border_radius'] == 0) ? ' is-active' : ''; ?>"
+                                            data-value="0">
+                                            <div class="ldwp-corner-preview" style="border-radius: 0;"></div>
+                                            <span><?php esc_html_e('Square', 'logindesignerwp'); ?></span>
+                                        </label>
+                                        <label
+                                            class="ldwp-corner-option<?php echo ($settings['logo_border_radius'] > 0 && $settings['logo_border_radius'] < 50) ? ' is-active' : ''; ?>"
+                                            data-value="8">
+                                            <div class="ldwp-corner-preview" style="border-radius: 8px;"></div>
+                                            <span><?php esc_html_e('Rounded', 'logindesignerwp'); ?></span>
+                                        </label>
+                                        <label
+                                            class="ldwp-corner-option<?php echo ($settings['logo_border_radius'] >= 50) ? ' is-active' : ''; ?>"
+                                            data-value="50">
+                                            <div class="ldwp-corner-preview" style="border-radius: 50%;"></div>
+                                            <span><?php esc_html_e('Full', 'logindesignerwp'); ?></span>
+                                        </label>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
 
                         <!-- Logo URL -->
                         <tr>

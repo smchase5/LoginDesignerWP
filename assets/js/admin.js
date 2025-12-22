@@ -629,28 +629,79 @@
     /**
      * Initialize Logo Controls.
      */
+    /**
+     * Initialize logo controls.
+     */
     function initLogoControls() {
-        // Logo Height
-        $('input[name="logindesignerwp_settings[logo_height]"]').on('input change', function () {
-            updatePreview('logo_height', $(this).val());
-        });
+        // --- Custom Height Toggle Logic ---
+        var $heightToggle = $('#ldwp-custom-height-toggle');
+        var $heightSliderDiv = $('.logindesignerwp-height-slider');
+        var $heightInput = $('input[name="logindesignerwp_settings[logo_height]"]');
 
-        // Logo Padding
-        $('input[name="logindesignerwp_settings[logo_padding]"]').on('input change', function () {
-            updatePreview('logo_padding', $(this).val());
-        });
+        function updateHeightVisibility() {
+            if ($heightToggle.is(':checked')) {
+                $heightSliderDiv.slideDown(200);
+                // Ensure there's a valid value if empty
+                if (!$heightInput.val() || $heightInput.val() == '0') {
+                    $heightInput.val(84).trigger('change');
+                    $heightInput.next('output').text('84');
+                }
+            } else {
+                $heightSliderDiv.slideUp(200);
+                // Clear value to allow auto height (0 tells backend it's auto)
+                $heightInput.val(0).trigger('change');
+                // Force triggering width update to recalculate auto height
+                var currentWidth = $('input[name="logindesignerwp_settings[logo_width]"]').val();
+                updatePreview('logo_width', currentWidth);
+            }
+        }
 
-        // Logo Border Radius
-        $('input[name="logindesignerwp_settings[logo_border_radius]"]').on('input change', function () {
-            updatePreview('logo_border_radius', $(this).val());
-        });
+        $heightToggle.on('change', updateHeightVisibility);
+        // Run on init
+        updateHeightVisibility();
 
-        // Logo Bottom Margin
-        $('input[name="logindesignerwp_settings[logo_bottom_margin]"]').on('input change', function () {
-            updatePreview('logo_bottom_margin', $(this).val());
-        });
 
-        // Background color handled by initColorPickers
+        // --- Background Toggle Logic ---
+        var $bgToggle = $('#ldwp-logo-bg-toggle');
+        var $bgSettings = $('#ldwp-logo-bg-settings');
+        // var $bgColorInput = $('input[name="logindesignerwp_settings[logo_background_color]"]');
+
+        function updateBgVisibility() {
+            var isEnabled = $bgToggle.is(':checked');
+            if (isEnabled) {
+                $bgSettings.show();
+            } else {
+                $bgSettings.hide();
+            }
+
+            // Trigger preview update
+            updatePreview('logo_background_enable', isEnabled ? '1' : '0');
+        }
+
+        $bgToggle.on('change', updateBgVisibility);
+        // Run on init
+        if ($bgToggle.length) {
+            if ($bgToggle.is(':checked')) {
+                $bgSettings.show();
+            } else {
+                $bgSettings.hide();
+            }
+        }
+
+        // --- Range Slider Handlers ---
+        // For sliders that have an adjacent <output> element
+        $(document).on('input', '.logindesignerwp-range-wrapper input[type="range"]', function () {
+            var $this = $(this);
+            var val = $this.val();
+            $this.next('output').text(val);
+
+            // Extract setting key
+            var name = $this.attr('name'); // e.g., logindesignerwp_settings[logo_width]
+            var keyMatch = name.match(/\[(.*?)\]/);
+            if (keyMatch && keyMatch[1]) {
+                updatePreview(keyMatch[1], val);
+            }
+        });
     }
 
     /**
@@ -947,27 +998,72 @@
             // Logo
             case 'logo_image':
                 if (!skipRender) {
+                    var $logoLink = $previewLogo.find('a');
                     if (value) {
                         // Show custom logo image
-                        if ($previewLogoImg.length) {
-                            $previewLogoImg.attr('src', value).show();
-                        } else {
-                            $previewLogo.find('a').html('<img src="' + value + '" alt="Logo" id="ldwp-preview-logo-img">');
-                            $previewLogoImg = $('#ldwp-preview-logo-img');
+                        $logoLink.css({
+                            'background-image': 'url("' + value + '")',
+                            'background-size': 'contain',
+                            'box-sizing': 'content-box',
+                            'background-origin': 'content-box'
+                        });
+
+                        // Recalculate height if set to auto
+                        var currentHeight = $('input[name="logindesignerwp_settings[logo_height]"]').val();
+                        if (!currentHeight || currentHeight == 0) {
+                            // Calculate height based on width and image ratio
+                            // We need the natural dimensions of the background image
+                            var bgImage = $logoLink.css('background-image');
+                            // Handle optional quotes in url()
+                            var url = bgImage.replace(/^url\(['"]?([^'"]+)['"]?\)/, '$1');
+
+                            if (url && url !== 'none') {
+                                var img = new Image();
+                                img.onload = function () {
+                                    var w = this.width;
+                                    var h = this.height;
+                                    var ratio = 1; // Default to square if dimensions missing
+
+                                    if (w > 0 && h > 0) {
+                                        ratio = h / w;
+                                    }
+
+                                    var currentWidth = $('input[name="logindesignerwp_settings[logo_width]"]').val() || 84;
+                                    var newHeight = parseInt(currentWidth) * ratio;
+
+                                    if (!isNaN(newHeight) && newHeight > 0) {
+                                        $logoLink.css('height', newHeight + 'px');
+                                    } else {
+                                        // Fallback
+                                        $logoLink.css('height', currentWidth + 'px');
+                                    }
+                                }
+                                // Handle SVGs or data URIs
+                                img.src = url;
+                            } else {
+                                // Default fallback if no URL found (e.g. none)
+                                // Assume square aspect ratio based on width
+                                var currentWidth = $('input[name="logindesignerwp_settings[logo_width]"]').val() || 84;
+                                $logoLink.css('height', currentWidth + 'px');
+                            }
                         }
-                        $('#ldwp-preview-logo-wp').hide();
                     } else {
-                        // Show WordPress logo
-                        if ($previewLogoImg.length) {
-                            $previewLogoImg.hide();
-                        }
-                        var wpLogo = $('#ldwp-preview-logo-wp');
-                        if (wpLogo.length) {
-                            wpLogo.show();
-                        } else {
-                            // Re-add WP logo if it was removed
-                            $previewLogo.find('a').html('<svg id="ldwp-preview-logo-wp" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.52 122.523" width="84" height="84"><path fill="#2271b1" d="M8.708 61.26c0 20.802 12.089 38.779 29.619 47.298L13.258 39.872a52.354 52.354 0 00-4.55 21.388zM96.74 58.608c0-6.495-2.333-10.993-4.334-14.494-2.664-4.329-5.161-7.995-5.161-12.324 0-4.831 3.664-9.328 8.825-9.328.233 0 .454.029.681.042-9.35-8.566-21.807-13.796-35.489-13.796-18.36 0-34.513 9.42-43.91 23.688 1.233.037 2.395.063 3.382.063 5.497 0 14.006-.667 14.006-.667 2.833-.167 3.167 3.994.337 4.329 0 0-2.847.335-6.015.501L48.2 93.547l11.501-34.493-8.188-22.434c-2.83-.166-5.511-.501-5.511-.501-2.832-.166-2.5-4.496.332-4.329 0 0 8.679.667 13.843.667 5.496 0 14.006-.667 14.006-.667 2.835-.167 3.168 3.994.337 4.329 0 0-2.853.335-6.015.501l18.992 56.494 5.242-17.517c2.272-7.269 4.001-12.49 4.001-16.989z"/><path fill="#2271b1" d="M62.184 65.857l-15.768 45.819a52.552 52.552 0 0032.29-.838 4.693 4.693 0 01-.37-.712L62.184 65.857zM107.376 36.046a42.584 42.584 0 01.358 5.708c0 5.651-1.057 12.002-4.229 19.94l-16.973 49.082c16.519-9.627 27.618-27.628 27.618-48.18 0-9.762-2.499-18.929-6.774-26.55z"/><path fill="#2271b1" d="M61.262 0C27.483 0 0 27.481 0 61.26c0 33.783 27.483 61.263 61.262 61.263 33.778 0 61.265-27.48 61.265-61.263C122.526 27.481 95.04 0 61.262 0zm0 119.715c-32.23 0-58.453-26.223-58.453-58.455 0-32.23 26.222-58.451 58.453-58.451 32.229 0 58.45 26.221 58.45 58.451 0 32.232-26.221 58.455-58.45 58.455z"/></svg>');
-                        }
+                        // Show WordPress logo SVG default
+                        // Re-construct default SVG with current label color if possible, or just standard blue/grey
+                        // For simplicity, using the standard blue one or we could grab the one in PHP
+                        // Let's use the standard blue one for now as per default
+                        var defaultSvg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 122.52 122.523'%3E%3Cpath fill='%232271b1' d='M8.708 61.26c0 20.802 12.089 38.779 29.619 47.298L13.258 39.872a52.354 52.354 0 00-4.55 21.388zM96.74 58.608c0-6.495-2.333-10.993-4.334-14.494-2.664-4.329-5.161-7.995-5.161-12.324 0-4.831 3.664-9.328 8.825-9.328.233 0 .454.029.681.042-9.35-8.566-21.807-13.796-35.489-13.796-18.36 0-34.513 9.42-43.91 23.688 1.233.037 2.395.063 3.382.063 5.497 0 14.006-.667 14.006-.667 2.833-.167 3.167 3.994.337 4.329 0 0-2.847.335-6.015.501L48.2 93.547l11.501-34.493-8.188-22.434c-2.83-.166-5.511-.501-5.511-.501-2.832-.166-2.5-4.496.332-4.329 0 0 8.679.667 13.843.667 5.496 0 14.006-.667 14.006-.667 2.835-.167 3.168 3.994.337 4.329 0 0-2.853.335-6.015.501l18.992 56.494 5.242-17.517c2.272-7.269 4.001-12.49 4.001-16.989z'/%3E%3Cpath fill='%232271b1' d='M62.184 65.857l-15.768 45.819a52.552 52.552 0 0032.29-.838 4.693 4.693 0 01-.37-.712L62.184 65.857zM107.376 36.046a42.584 42.584 0 01.358 5.708c0 5.651-1.057 12.002-4.229 19.94l-16.973 49.082c16.519-9.627 27.618-27.628 27.618-48.18 0-9.762-2.499-18.929-6.774-26.55z'/%3E%3Cpath fill='%232271b1' d='M61.262 0C27.483 0 0 27.481 0 61.26c0 33.783 27.483 61.263 61.262 61.263 33.778 0 61.265-27.48 61.265-61.263C122.526 27.481 95.04 0 61.262 0zm0 119.715c-32.23 0-58.453-26.223-58.453-58.455 0-32.23 26.222-58.451 58.453-58.451 32.229 0 58.45 26.221 58.45 58.451 0 32.232-26.221 58.455-58.45 58.455z'/%3E%3C/svg%3E";
+
+                        // We need current width/height for background-size
+                        var w = $('input[name="logindesignerwp_settings[logo_width]"]').val() || 84;
+                        var h = $('input[name="logindesignerwp_settings[logo_height]"]').val() || 84;
+
+                        $logoLink.css({
+                            'background-image': 'url("' + defaultSvg + '")',
+                            'background-size': 'contain',
+                            'box-sizing': 'content-box',
+                            'background-origin': 'content-box'
+                        });
                     }
                 }
                 break;
@@ -975,40 +1071,79 @@
             case 'logo_width':
                 if (!skipRender) {
                     var w = (value == 0 || value == '') ? 'auto' : value + 'px';
-                    // Apply to image/svg directly
-                    $previewLogo.find('img, svg').css('width', w);
-                    $previewLogo.find('a').css('width', 'auto'); // Reset anchor width constraint
+                    var $logoLink = $previewLogo.find('a');
+                    $logoLink.css('width', w);
+
+                    // If no custom image, ensure background size is contain (prevents stretching)
+                    if (!hasCustomImage) {
+                        $logoLink.css('background-size', 'contain');
+                    }
+
+                    // Auto Height Calculation (Width controls Height)
+                    var currentHeight = $('input[name="logindesignerwp_settings[logo_height]"]').val();
+                    if (!currentHeight || currentHeight == 0) {
+                        var bgImage = $logoLink.css('background-image');
+                        var url = bgImage.replace(/^url\(['"]?([^'"]+)['"]?\)/, '$1');
+
+                        if (url && url !== 'none') {
+                            var img = new Image();
+                            img.onload = function () {
+                                var w_img = this.width;
+                                var h_img = this.height;
+                                var ratio = (w_img > 0 && h_img > 0) ? h_img / w_img : 1;
+                                var newHeight = parseInt(value) * ratio;
+                                if (!isNaN(newHeight) && newHeight > 0) {
+                                    $logoLink.css('height', newHeight + 'px');
+                                } else {
+                                    $logoLink.css('height', value + 'px');
+                                }
+                            }
+                            img.src = url;
+                        } else {
+                            // Fallback to square if no URL
+                            $logoLink.css('height', value + 'px');
+                        }
+                    }
                 }
                 break;
 
             case 'logo_height':
+                // User requested 'auto' when custom height is off
                 var h = (value == 0 || value == '') ? 'auto' : value + 'px';
-                // Apply to image/svg directly
-                $previewLogo.find('img, svg').css('height', h);
-                $previewLogo.find('a').css('height', 'auto'); // Reset anchor height constraint
+                var $logoLink = $previewLogo.find('a');
+                $logoLink.css('height', h);
+
+                // If no custom image, ensure background size is contain (prevents stretching)
+                var hasCustomImage = $('input[name="logindesignerwp_settings[logo_image]"]').val();
+                if (!hasCustomImage) {
+                    $logoLink.css('background-size', 'contain');
+                }
                 break;
 
             case 'logo_padding':
-                // Padding applies to the image/svg (which has background color)
-                $previewLogo.find('img, svg').css('padding', value + 'px');
+                $previewLogo.find('a').css('padding', value + 'px');
                 break;
 
             case 'logo_border_radius':
-                $previewLogo.find('img, svg').css('border-radius', value + 'px');
+                $previewLogo.find('a').css('border-radius', value + 'px');
                 break;
 
             case 'logo_bottom_margin':
-                $previewLogo.css('margin-bottom', value + 'px'); // h1 margin
+                $previewLogo.find('h1, a').css('margin-bottom', value + 'px'); // fallback
+                $previewLogo.css('margin-bottom', value + 'px'); // actually applies to container in preview structure
                 break;
 
             case 'logo_background_color':
-                $previewLogo.find('img, svg').css('background-color', value);
+                $previewLogo.find('a').css('background-color', value);
                 break;
 
             case 'logo_background_enable':
                 // When disabled, clear the background color from preview
                 if (!value || value === '0' || value === 0) {
-                    $previewLogo.find('img, svg').css('background-color', 'transparent');
+                    $previewLogo.find('a').css('background-color', 'transparent');
+                } else {
+                    var color = $('input[name="logindesignerwp_settings[logo_background_color]"]').val();
+                    $previewLogo.find('a').css('background-color', color);
                 }
                 break;
 
@@ -2746,5 +2881,274 @@
         // Initial run
         updateCaptchaPreview();
     }
+
+    /**
+     * Initialize Presets UI Handlers.
+     */
+    function initPresetsHandler() {
+        // Preset Card Click
+        $(document).on('click', '.logindesignerwp-preset-card', function (e) {
+            // Check if delete icon was clicked
+            if ($(e.target).hasClass('logindesignerwp-preset-delete-icon')) {
+                return;
+            }
+
+            var $card = $(this);
+            var presetKey = $card.data('preset');
+
+            // locked?
+            if ($card.hasClass('is-locked')) {
+                // If it's locked, we might want to show a tooltip or just return
+                // The lock overlay usually prevents clicking if handled via CSS pointer-events, 
+                // but let's be safe.
+                return;
+            }
+
+            if ($card.hasClass('is-loading')) return;
+
+            // Visual feedback
+            $('.logindesignerwp-preset-card').removeClass('active');
+            $card.addClass('active is-loading');
+            $card.css('opacity', '0.7');
+
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'logindesignerwp_apply_preset',
+                    preset: presetKey,
+                    nonce: window.logindesignerwp_ajax ? window.logindesignerwp_ajax.nonce : ''
+                },
+                success: function (response) {
+                    $card.removeClass('is-loading').css('opacity', '1');
+
+                    if (response.success) {
+                        var settings = response.data.settings;
+
+                        // Iterate and update inputs
+                        $.each(settings, function (key, value) {
+                            var inputName = 'logindesignerwp_settings[' + key + ']';
+                            var $input = $('[name="' + inputName + '"]');
+
+                            if ($input.length) {
+                                if ($input.is(':checkbox')) {
+                                    $input.prop('checked', !!value).trigger('change');
+                                } else if ($input.is(':radio')) {
+                                    $input.filter('[value="' + value + '"]').prop('checked', true).trigger('change');
+                                } else {
+                                    $input.val(value).trigger('change');
+
+                                    // Update color pickers if applicable
+                                    if ($input.hasClass('wp-color-picker')) {
+                                        $input.wpColorPicker('color', value);
+                                    }
+                                }
+                            } else if (key === 'background_mode') {
+                                // Special case for background mode hidden input
+                                $('.ldwp-bg-mode-value').val(value);
+                                // Trigger update manually or find the radio equivalent if any
+                                // Our visual bg selector uses the hidden input
+                                updatePreview('background_mode', value);
+                            }
+                        });
+
+                        // Special handling for Background Image
+                        if (response.data.background_image_url) {
+                            $('.logindesignerwp-image-preview img').attr('src', response.data.background_image_url);
+                            $('.logindesignerwp-image-preview').show();
+                            $('.logindesignerwp-remove-image').show();
+                            updatePreview('background_image', response.data.background_image_url);
+                        } else if (settings.background_image_id == 0 || !settings.background_image_id) {
+                            $('.logindesignerwp-image-preview').hide();
+                            $('.logindesignerwp-remove-image').hide();
+                            updatePreview('background_image', '');
+                        }
+
+                        // Force a full background update
+                        applyBackgroundPreview();
+
+                        // Show success toast
+                        var $notice = $('<div class="notice notice-success is-dismissible" style="position: fixed; top: 40px; right: 20px; z-index: 9999; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"><p>' + (response.data.message || 'Preset Applied') + '</p></div>');
+                        $('body').append($notice);
+                        setTimeout(function () {
+                            $notice.fadeOut(function () { $(this).remove(); });
+                        }, 3000);
+
+                    } else {
+                        alert(response.data || 'Error applying preset.');
+                    }
+                },
+                error: function () {
+                    $card.removeClass('is-loading').css('opacity', '1');
+                    alert('Connection error');
+                }
+            });
+        });
+
+        // Delete Preset Handler
+        $(document).on('click', '.logindesignerwp-preset-delete-icon', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (!confirm('Are you sure you want to delete this custom preset?')) return;
+
+            var $icon = $(this);
+            var $card = $icon.closest('.logindesignerwp-preset-card');
+            var presetKey = $card.data('preset');
+
+            $card.css('opacity', '0.5');
+
+            $.post(ajaxurl, {
+                action: 'logindesignerwp_delete_preset',
+                preset: presetKey,
+                nonce: window.logindesignerwp_ajax ? window.logindesignerwp_ajax.nonce : ''
+            }, function (response) {
+                if (response.success) {
+                    $card.fadeOut(300, function () { $(this).remove(); });
+                } else {
+                    alert(response.data);
+                    $card.css('opacity', '1');
+                }
+            });
+        });
+    }
+
+    // Init Presets
+    $(document).ready(function () {
+        initPresetsHandler();
+    });
+
+    /**
+     * Initialize Presets UI Handlers.
+     */
+    function initPresetsHandler() {
+        // Preset Card Click
+        $(document).on('click', '.logindesignerwp-preset-card', function (e) {
+            // Check if delete icon was clicked
+            if ($(e.target).hasClass('logindesignerwp-preset-delete-icon')) {
+                return;
+            }
+
+            var $card = $(this);
+            var presetKey = $card.data('preset');
+
+            // locked?
+            if ($card.hasClass('is-locked')) {
+                return;
+            }
+
+            if ($card.hasClass('is-loading')) return;
+
+            // Visual feedback
+            $('.logindesignerwp-preset-card').removeClass('active');
+            $card.addClass('active is-loading');
+            $card.css('opacity', '0.7');
+
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'logindesignerwp_apply_preset',
+                    preset: presetKey,
+                    nonce: window.logindesignerwp_ajax ? window.logindesignerwp_ajax.nonce : ''
+                },
+                success: function (response) {
+                    $card.removeClass('is-loading').css('opacity', '1');
+
+                    if (response.success) {
+                        var settings = response.data.settings;
+
+                        // Iterate and update inputs
+                        $.each(settings, function (key, value) {
+                            var inputName = 'logindesignerwp_settings[' + key + ']';
+                            var $input = $('[name="' + inputName + '"]');
+
+                            if ($input.length) {
+                                if ($input.is(':checkbox')) {
+                                    $input.prop('checked', !!value).trigger('change');
+                                } else if ($input.is(':radio')) {
+                                    $input.filter('[value="' + value + '"]').prop('checked', true).trigger('change');
+                                } else {
+                                    $input.val(value).trigger('change');
+
+                                    // Update color pickers if applicable
+                                    if ($input.hasClass('wp-color-picker')) {
+                                        $input.wpColorPicker('color', value);
+                                    }
+                                }
+                            } else if (key === 'background_mode') {
+                                // Special case for background mode hidden input
+                                $('.ldwp-bg-mode-value').val(value);
+                                // Trigger update manually or find the radio equivalent if any
+                                // Our visual bg selector uses the hidden input
+                                updatePreview('background_mode', value);
+                            }
+                        });
+
+                        // Special handling for Background Image
+                        if (response.data.background_image_url) {
+                            $('.logindesignerwp-image-preview img').attr('src', response.data.background_image_url);
+                            $('.logindesignerwp-image-preview').show();
+                            $('.logindesignerwp-remove-image').show();
+                            updatePreview('background_image', response.data.background_image_url);
+                        } else if (settings.background_image_id == 0 || !settings.background_image_id) {
+                            $('.logindesignerwp-image-preview').hide();
+                            $('.logindesignerwp-remove-image').hide();
+                            updatePreview('background_image', '');
+                        }
+
+                        // Force a full background update
+                        applyBackgroundPreview();
+
+                        // Show success toast
+                        var $notice = $('<div class="notice notice-success is-dismissible" style="position: fixed; top: 40px; right: 20px; z-index: 9999; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"><p>' + (response.data.message || 'Preset Applied') + '</p></div>');
+                        $('body').append($notice);
+                        setTimeout(function () {
+                            $notice.fadeOut(function () { $(this).remove(); });
+                        }, 3000);
+
+                    } else {
+                        alert(response.data || 'Error applying preset.');
+                    }
+                },
+                error: function () {
+                    $card.removeClass('is-loading').css('opacity', '1');
+                    alert('Connection error');
+                }
+            });
+        });
+
+        // Delete Preset Handler
+        $(document).on('click', '.logindesignerwp-preset-delete-icon', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (!confirm('Are you sure you want to delete this custom preset?')) return;
+
+            var $icon = $(this);
+            var $card = $icon.closest('.logindesignerwp-preset-card');
+            var presetKey = $card.data('preset');
+
+            $card.css('opacity', '0.5');
+
+            $.post(ajaxurl, {
+                action: 'logindesignerwp_delete_preset',
+                preset: presetKey,
+                nonce: window.logindesignerwp_ajax ? window.logindesignerwp_ajax.nonce : ''
+            }, function (response) {
+                if (response.success) {
+                    $card.fadeOut(300, function () { $(this).remove(); });
+                } else {
+                    alert(response.data);
+                    $card.css('opacity', '1');
+                }
+            });
+        });
+    }
+
+    // Init Presets
+    $(document).ready(function () {
+        initPresetsHandler();
+    });
 
 })(jQuery);

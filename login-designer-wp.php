@@ -61,6 +61,12 @@ function logindesignerwp_init()
     // Initialize Bot Protection.
     LoginDesignerWP_Security::get_instance();
 
+    // Initialize Presets UI (AJAX & Renderer).
+    if (file_exists(LOGINDESIGNERWP_PATH . 'inc/class-presets-ui.php')) {
+        require_once LOGINDESIGNERWP_PATH . 'inc/class-presets-ui.php';
+        Login_Designer_WP_Presets_UI::get_instance();
+    }
+
     // Initialize Pro Features.
     if (class_exists('LoginDesignerWP\Pro\Pro_Manager')) {
         new \LoginDesignerWP\Pro\Pro_Manager();
