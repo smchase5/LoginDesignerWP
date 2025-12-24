@@ -120,20 +120,23 @@ class LoginDesignerWP_Settings
         // Media uploader.
         wp_enqueue_media();
 
+        // Determine if we should load minified assets
+        $suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
+
         // Plugin admin styles.
         wp_enqueue_style(
             'logindesignerwp-admin',
-            LOGINDESIGNERWP_URL . 'assets/css/admin.css',
+            LOGINDESIGNERWP_URL . 'assets/css/admin' . $suffix . '.css',
             array(),
-            time()
+            LOGINDESIGNERWP_VERSION
         );
 
         // Plugin admin scripts.
         wp_enqueue_script(
             'logindesignerwp-admin',
-            LOGINDESIGNERWP_URL . 'assets/js/admin.js',
+            LOGINDESIGNERWP_URL . 'assets/js/admin' . $suffix . '.js',
             array('jquery', 'wp-color-picker', 'jquery-ui-sortable'),
-            time(),
+            LOGINDESIGNERWP_VERSION,
             true
         );
 
@@ -153,7 +156,7 @@ class LoginDesignerWP_Settings
         // Wizard scripts.
         wp_enqueue_script(
             'logindesignerwp-wizard',
-            LOGINDESIGNERWP_URL . 'assets/js/wizard.js',
+            LOGINDESIGNERWP_URL . 'assets/js/wizard' . $suffix . '.js',
             array('jquery', 'wp-color-picker'),
             LOGINDESIGNERWP_VERSION,
             true

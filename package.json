@@ -1,0 +1,19 @@
+{
+    "name": "logindesignerwp",
+    "version": "1.0.0",
+    "description": "Login Designer WP - Custom Login Page Designer for WordPress",
+    "scripts": {
+        "build:js": "terser assets/js/admin.js -o assets/js/admin.min.js --compress --mangle && terser assets/js/wizard.js -o assets/js/wizard.min.js --compress --mangle",
+        "build:css": "csso assets/css/admin.css -o assets/css/admin.min.css && csso assets/css/wizard.css -o assets/css/wizard.min.css",
+        "build": "npm run build:js && npm run build:css",
+        "watch:js": "nodemon --watch assets/js/*.js --ignore '*.min.js' --exec 'npm run build:js'",
+        "watch": "npm run watch:js"
+    },
+    "devDependencies": {
+        "terser": "^5.27.0",
+        "csso-cli": "^4.0.2",
+        "nodemon": "^3.0.2"
+    },
+    "author": "Sterling Chase",
+    "license": "GPL-2.0+"
+}
