@@ -1,0 +1,39 @@
+# Directories
+.git
+.github
+node_modules
+dist-pro
+.gemini
+
+# Development files
+*.md
+!README.md
+.gitignore
+.distignore
+.editorconfig
+.eslintrc*
+.prettierrc*
+package.json
+package-lock.json
+composer.json
+composer.lock
+phpcs.xml*
+phpunit.xml*
+webpack.config.js
+gulpfile.js
+Gruntfile.js
+
+# Test files
+tests/
+spec/
+**/*.test.js
+**/*.spec.js
+
+# IDE
+.idea
+.vscode
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db

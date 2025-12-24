@@ -2019,7 +2019,7 @@
                     try {
                         $field.wpColorPicker('color', value);
                     } catch (e) {
-                        console.log('Color picker update skipped for ' + key);
+                        // Silent fail
                     }
                 }
             }
@@ -2056,7 +2056,7 @@
                 message += '• ' + issue.pair + ': ' + issue.ratio.toFixed(1) + ':1 (needs 4.5:1)\n';
             });
             message += '\nAuto-adjusting text colors for better readability...';
-            console.warn('[LoginDesignerWP AI] ' + message);
+            // Note: Contrast issues detected, auto-adjusting
 
             // Auto-fix contrast issues
             contrastIssues.forEach(function (issue) {
@@ -2124,7 +2124,7 @@
                 try {
                     $bgColorField.wpColorPicker('color', theme.background_color);
                 } catch (e) {
-                    console.log('Color picker update failed, but value was set');
+                    // Silent fail
                 }
             }
         }
@@ -3067,7 +3067,7 @@
                                         // Update only if initialized
                                         try {
                                             $input.wpColorPicker('color', value);
-                                        } catch (e) { console.error('LDWP: Color Picker error', e); }
+                                        } catch (e) { /* Silent */ }
                                     }
                                 }
                             } else if (key === 'background_mode') {

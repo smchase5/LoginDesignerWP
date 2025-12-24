@@ -117,16 +117,11 @@
 
     // Initialize wizard
     function init() {
-        console.log('LDWP Wizard: Initializing...');
-
         // Check if Pro is active
         wizard.isPro = typeof logindesignerwp_wizard !== 'undefined' && logindesignerwp_wizard.isPro;
 
         // Bind events
         bindEvents();
-
-        console.log('LDWP Wizard: Ready. Button found:', $('.ldwp-start-wizard-btn').length);
-        console.log('LDWP Wizard: Modal found:', $('.ldwp-wizard-overlay').length);
     }
 
     // Bind event handlers
@@ -1298,8 +1293,7 @@
                             }
                         },
                         error: function (xhr, status, error) {
-                            console.error('Save Preset Error', xhr.responseText);
-                            alert('Network error while saving preset. Check console.');
+                            alert('Network error while saving preset.');
                             $btn.text(originalText).prop('disabled', false);
                         }
                     });

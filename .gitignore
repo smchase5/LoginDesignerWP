@@ -1,3 +1,19 @@
 # Development files
-plan.md
-freemium-architecture.md
+*.md
+!README.md
+
+# Build output (the Pro plugin is distributed separately)
+dist-pro/
+
+# Node/package files
+node_modules/
+package-lock.json
+
+# IDE
+.idea/
+.vscode/
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
