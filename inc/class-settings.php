@@ -125,7 +125,7 @@ class LoginDesignerWP_Settings
             'logindesignerwp-admin',
             LOGINDESIGNERWP_URL . 'assets/css/admin.css',
             array(),
-            LOGINDESIGNERWP_VERSION
+            time()
         );
 
         // Plugin admin scripts.
@@ -133,7 +133,7 @@ class LoginDesignerWP_Settings
             'logindesignerwp-admin',
             LOGINDESIGNERWP_URL . 'assets/js/admin.js',
             array('jquery', 'wp-color-picker', 'jquery-ui-sortable'),
-            LOGINDESIGNERWP_VERSION,
+            time(),
             true
         );
 

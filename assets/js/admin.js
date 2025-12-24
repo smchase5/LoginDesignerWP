@@ -789,6 +789,12 @@
         // If skipRender is undefined, default to false
         skipRender = skipRender || false;
 
+        // Force skipRender if we are in the middle of a batch update
+        // This prevents recursive event loops (input change -> updatePreview -> render -> input change)
+        if (window.ldwpIsBatchUpdating) {
+            skipRender = true;
+        }
+
         // Ensure preview elements are cached (safety check for early calls)
         if (!$previewBg || !$previewBg.length) {
             $previewBg = $('#ldwp-preview-bg');
@@ -1075,6 +1081,7 @@
                     $logoLink.css('width', w);
 
                     // If no custom image, ensure background size is contain (prevents stretching)
+                    var hasCustomImage = $('input[name="logindesignerwp_settings[logo_image]"]').val();
                     if (!hasCustomImage) {
                         $logoLink.css('background-size', 'contain');
                     }
@@ -1083,22 +1090,31 @@
                     var currentHeight = $('input[name="logindesignerwp_settings[logo_height]"]').val();
                     if (!currentHeight || currentHeight == 0) {
                         var bgImage = $logoLink.css('background-image');
-                        var url = bgImage.replace(/^url\(['"]?([^'"]+)['"]?\)/, '$1');
 
-                        if (url && url !== 'none') {
-                            var img = new Image();
-                            img.onload = function () {
-                                var w_img = this.width;
-                                var h_img = this.height;
-                                var ratio = (w_img > 0 && h_img > 0) ? h_img / w_img : 1;
-                                var newHeight = parseInt(value) * ratio;
-                                if (!isNaN(newHeight) && newHeight > 0) {
-                                    $logoLink.css('height', newHeight + 'px');
-                                } else {
-                                    $logoLink.css('height', value + 'px');
-                                }
+                        // Check if it's a real URL (not data URL or none)
+                        if (bgImage && bgImage !== 'none' && bgImage.indexOf('url(') === 0) {
+                            var urlMatch = bgImage.match(/url\(['"]?([^'"()]+)['"]?\)/);
+                            var url = urlMatch ? urlMatch[1] : null;
+
+                            // Only load real URLs, not data URLs
+                            if (url && url.indexOf('http') === 0) {
+                                var img = new Image();
+                                img.onload = function () {
+                                    var w_img = this.width;
+                                    var h_img = this.height;
+                                    var ratio = (w_img > 0 && h_img > 0) ? h_img / w_img : 1;
+                                    var newHeight = parseInt(value) * ratio;
+                                    if (!isNaN(newHeight) && newHeight > 0) {
+                                        $logoLink.css('height', newHeight + 'px');
+                                    } else {
+                                        $logoLink.css('height', value + 'px');
+                                    }
+                                };
+                                img.src = url;
+                            } else {
+                                // Data URL - use square fallback
+                                $logoLink.css('height', value + 'px');
                             }
-                            img.src = url;
                         } else {
                             // Fallback to square if no URL
                             $logoLink.css('height', value + 'px');
@@ -1108,14 +1124,49 @@
                 break;
 
             case 'logo_height':
-                // User requested 'auto' when custom height is off
-                var h = (value == 0 || value == '') ? 'auto' : value + 'px';
-                var $logoLink = $previewLogo.find('a');
-                $logoLink.css('height', h);
+                if (!skipRender) {
+                    var $logoLink = $previewLogo.find('a');
 
-                // If no custom image, ensure background size is contain (prevents stretching)
-                var hasCustomImage = $('input[name="logindesignerwp_settings[logo_image]"]').val();
-                if (!hasCustomImage) {
+                    if (value == 0 || value == '') {
+                        // Auto height: Calculate from image aspect ratio
+                        var bgImage = $logoLink.css('background-image');
+                        var currentWidth = parseInt($('input[name="logindesignerwp_settings[logo_width]"]').val()) || 84;
+
+                        // Check if it's a real URL (not data URL or none)
+                        if (bgImage && bgImage !== 'none' && bgImage.indexOf('url(') === 0) {
+                            // Extract URL - handle both quoted and unquoted
+                            var urlMatch = bgImage.match(/url\(['"]?([^'"()]+)['"]?\)/);
+                            var url = urlMatch ? urlMatch[1] : null;
+
+                            // Only load real URLs, not data URLs (they can't be measured via Image)
+                            if (url && url.indexOf('http') === 0) {
+                                var img = new Image();
+                                img.onload = function () {
+                                    var w_img = this.width;
+                                    var h_img = this.height;
+                                    var ratio = (w_img > 0 && h_img > 0) ? h_img / w_img : 1;
+                                    var newHeight = currentWidth * ratio;
+                                    if (!isNaN(newHeight) && newHeight > 0) {
+                                        $logoLink.css('height', newHeight + 'px');
+                                    } else {
+                                        $logoLink.css('height', currentWidth + 'px');
+                                    }
+                                };
+                                img.src = url;
+                            } else {
+                                // Data URL or other - use square fallback
+                                $logoLink.css('height', currentWidth + 'px');
+                            }
+                        } else {
+                            // No image, use square fallback
+                            $logoLink.css('height', currentWidth + 'px');
+                        }
+                    } else {
+                        // Explicit height value
+                        $logoLink.css('height', value + 'px');
+                    }
+
+                    // Ensure background size is contain
                     $logoLink.css('background-size', 'contain');
                 }
                 break;
@@ -1301,13 +1352,13 @@
         }
     }
 
-    function applyBackgroundPreview(overrideMode) {
+    function applyBackgroundPreview(overrideMode, externalSettings) {
         // Use override first, then previewCache, then fall back to DOM inputs
-        var mode = overrideMode || previewCache.bgMode || $('input.ldwp-bg-mode-value').val() || $('input[name="logindesignerwp_settings[background_mode]"]').val();
+        var mode = overrideMode || (externalSettings && externalSettings.background_mode) || previewCache.bgMode || $('input.ldwp-bg-mode-value').val() || $('input[name="logindesignerwp_settings[background_mode]"]').val();
 
-        var bgColor = previewCache.bgColor || $('input[name="logindesignerwp_settings[background_color]"]').val();
-        var gradient1 = previewCache.gradient1 || $('input[name="logindesignerwp_settings[background_gradient_1]"]').val();
-        var gradient2 = previewCache.gradient2 || $('input[name="logindesignerwp_settings[background_gradient_2]"]').val();
+        var bgColor = (externalSettings && externalSettings.background_color) || previewCache.bgColor || $('input[name="logindesignerwp_settings[background_color]"]').val();
+        var gradient1 = (externalSettings && externalSettings.background_gradient_1) || previewCache.gradient1 || $('input[name="logindesignerwp_settings[background_gradient_1]"]').val();
+        var gradient2 = (externalSettings && externalSettings.background_gradient_2) || previewCache.gradient2 || $('input[name="logindesignerwp_settings[background_gradient_2]"]').val();
 
         // Safety fallbacks to prevent "Invisible Preview" regression
         if (!mode) mode = 'solid';
@@ -1317,12 +1368,14 @@
         var bgImage = previewCache.bgImage || '';
 
         // Advanced Gradient Settings - use cache first, then DOM, then defaults
-        var gradType = previewCache.gradientType || $('select[name="logindesignerwp_settings[gradient_type]"]').val() || 'linear';
-        var gradAngle = previewCache.gradientAngle || $('input[name="logindesignerwp_settings[gradient_angle]"]').val() || '135';
-        var gradPos = previewCache.gradientPosition || $('select[name="logindesignerwp_settings[gradient_position]"]').val() || 'center center';
+        var gradType = (externalSettings && externalSettings.gradient_type) || previewCache.gradientType || $('select[name="logindesignerwp_settings[gradient_type]"]').val() || 'linear';
+        var gradAngle = (externalSettings && externalSettings.gradient_angle) || previewCache.gradientAngle || $('input[name="logindesignerwp_settings[gradient_angle]"]').val() || '135';
+        var gradPos = (externalSettings && externalSettings.gradient_position) || previewCache.gradientPosition || $('select[name="logindesignerwp_settings[gradient_position]"]').val() || 'center center';
 
-        // Reset background classes
+        // Reset background classes and styles
         $previewBg.removeClass('has-blur is-mode-solid is-mode-gradient is-mode-image');
+        $previewBg.attr('style', ''); // Clean slate to prevent stuck styles
+
         if (mode) {
             $previewBg.addClass('is-mode-' + mode);
         }
@@ -1330,9 +1383,9 @@
         // Apply styles based on mode
         switch (mode) {
             case 'solid':
+
+
                 $previewBg.css({
-                    'background-color': bgColor,
-                    'background-image': 'none',
                     'background-repeat': 'repeat', // Reset
                     'background-size': 'auto',     // Reset
                     'background-position': '0% 0%', // Reset
@@ -1340,32 +1393,55 @@
                     '--bg-image': '',
                     '--bg-blur': ''
                 });
+
+                // Force !important to override any CSS conflicts
+                $previewBg[0].style.setProperty('background-color', bgColor, 'important');
+                $previewBg[0].style.setProperty('background-image', 'none', 'important');
                 break;
 
             case 'gradient':
-                // Validate colors
-                var safeG1 = gradient1 || '#ffffff';
-                var safeG2 = gradient2 || '#000000';
+                // Validate colors and values
+                var safeG1 = (gradient1 || '#ffffff').trim();
+                var safeG2 = (gradient2 || '#000000').trim();
+                var angleVal = parseInt(gradAngle) || 135;
 
                 var gradientCss = '';
                 if (gradType === 'linear') {
-                    gradientCss = 'linear-gradient(' + gradAngle + 'deg, ' + safeG1 + ', ' + safeG2 + ')';
+                    gradientCss = 'linear-gradient(' + angleVal + 'deg, ' + safeG1 + ', ' + safeG2 + ')';
                 } else if (gradType === 'radial') {
                     gradientCss = 'radial-gradient(circle at ' + gradPos + ', ' + safeG1 + ', ' + safeG2 + ')';
                 } else if (gradType === 'mesh') {
                     var gradient3 = $('input[name="logindesignerwp_settings[background_gradient_3]"]').val() || safeG1;
-                    var safeG3 = gradient3 || safeG1;
+                    var safeG3 = (gradient3 || safeG1).trim();
                     gradientCss = generateMeshGradient(safeG1, safeG2, safeG3);
                 }
 
+
+
                 $previewBg.css({
-                    'background-image': gradientCss,
-                    'background-color': safeG1, // Fallback
                     'background-repeat': 'no-repeat',
                     'background-size': 'cover',
                     'background-position': 'center',
                     'filter': 'none'
                 });
+
+                // Apply cleanly to style object first
+                $previewBg[0].style.backgroundImage = gradientCss;
+                $previewBg[0].style.backgroundColor = safeG1;
+
+                // COMBINATOR APPROACH: Use Shorthand to Nuke/Reset, then specific props to Fix
+                // 1. Apply shorthand "background" to force a reset of all sub-properties (clip, origin, attachment, etc.)
+                $previewBg[0].style.setProperty('background', gradientCss, 'important');
+
+                // 2. Re-apply specific properties to ensure they aren't lost to defaults
+                $previewBg[0].style.setProperty('background-image', gradientCss, 'important');
+                $previewBg[0].style.setProperty('background-color', safeG1, 'important');
+                $previewBg[0].style.setProperty('background-size', 'cover', 'important');
+                $previewBg[0].style.setProperty('background-repeat', 'no-repeat', 'important');
+                $previewBg[0].style.setProperty('background-position', 'center', 'important');
+
+                // Force Reflow
+                void $previewBg[0].offsetWidth;
                 break;
 
             case 'image':
@@ -2701,49 +2777,89 @@
          * Fixes race conditions with presets.
          */
         window.ldwpUpdatePreviewBatch = function (settings) {
-            console.log('LDWP: Batch Updating ' + Object.keys(settings).length + ' settings...');
 
-            // 1. Silent Update: Update all Cache and Input values without rendering
-            $.each(settings, function (key, value) {
-                updatePreview(key, value, true); // skipRender = true
-            });
+            window.ldwpIsBatchUpdating = true;
 
-            // 2. Explicitly determine the mode for this batch
-            // Use the setting value if present, otherwise fallback to cache/default
-            var explicitMode = settings['background_mode'] || previewCache.bgMode || 'solid';
+            try {
+                // 1. Silent Update: Update all Cache and Input values without rendering
+                $.each(settings, function (key, value) {
+                    updatePreview(key, value, true); // skipRender = true
+                });
 
-            // 3. Background Render: Trigger ONE heavy background calculation with EXPLICIT mode
-            // Pass the mode directly to avoid cache/DOM race conditions
-            applyBackgroundPreview(explicitMode);
+                // 2. Explicitly determine the mode for this batch
+                var explicitMode = settings['background_mode'] || previewCache.bgMode || 'solid';
 
-            // 4. Fast CSS Render: Apply simple CSS updates for non-background elements
-            // Exclude glass settings - we'll handle them last with full context
-            var backgroundKeys = [
-                'background_mode', 'background_color', 'background_image',
-                'background_gradient_1', 'background_gradient_2', 'background_gradient_3',
-                'gradient_type', 'gradient_angle', 'gradient_position', 'background_blur'
-            ];
-            var glassKeys = ['glass_enabled', 'glass_blur', 'glass_transparency'];
+                // CRITICAL DEBUG: Log exactly what we're sending to the renderer
 
-            $.each(settings, function (key, value) {
-                if (backgroundKeys.indexOf(key) === -1 && glassKeys.indexOf(key) === -1) {
-                    updatePreview(key, value, false);
+
+                // 3. Background Render: Trigger ONE heavy background calculation
+                applyBackgroundPreview(explicitMode, settings);
+
+                // 4. Fast CSS Render: Standard elements
+                var backgroundKeys = [
+                    'background_mode', 'background_color', 'background_image',
+                    'background_gradient_1', 'background_gradient_2', 'background_gradient_3',
+                    'gradient_type', 'gradient_angle', 'gradient_position', 'background_blur'
+                ];
+                var glassKeys = ['glass_enabled', 'glass_blur', 'glass_transparency'];
+
+                // 4. Apply form CSS directly (bypasses skipRender logic)
+                var $form = $('.logindesignerwp-preview-form');
+
+                if (settings.form_border_radius !== undefined) {
+                    $form.css('border-radius', settings.form_border_radius + 'px');
                 }
-            });
+                if (settings.form_border_color !== undefined) {
+                    $form.css('border', '1px solid ' + settings.form_border_color);
+                }
+                if (settings.form_bg_color !== undefined) {
+                    // Will be overridden by glassmorphism handling if enabled
+                    $form.css('background-color', settings.form_bg_color);
+                }
+                if (settings.button_bg !== undefined) {
+                    $('.logindesignerwp-preview-button').css('background-color', settings.button_bg);
+                }
+                if (settings.button_text_color !== undefined) {
+                    $('.logindesignerwp-preview-button').css('color', settings.button_text_color);
+                }
+                if (settings.button_border_radius !== undefined) {
+                    $('.logindesignerwp-preview-button').css('border-radius', settings.button_border_radius + 'px');
+                }
+                if (settings.label_text_color !== undefined) {
+                    $('.logindesignerwp-preview-label').css('color', settings.label_text_color);
+                }
+                if (settings.input_bg_color !== undefined) {
+                    $('.logindesignerwp-preview-input').css('background-color', settings.input_bg_color);
+                }
+                if (settings.input_text_color !== undefined) {
+                    $('.logindesignerwp-preview-input').css('color', settings.input_text_color);
+                }
+                if (settings.input_border_color !== undefined) {
+                    $('.logindesignerwp-preview-input').css('border-color', settings.input_border_color);
+                }
+                if (settings.below_form_link_color !== undefined) {
+                    $('.logindesignerwp-preview-links a, #ldwp-preview-below-link').css('color', settings.below_form_link_color);
+                }
 
-            // 5. Handle Glassmorphism effect with full batch context
-            if (settings.hasOwnProperty('glass_enabled')) {
+                // 5. Handle Glassmorphism - Update BOTH preview AND UI toggle
                 var glassEnabled = settings.glass_enabled == 1 || settings.glass_enabled === '1' || settings.glass_enabled === true;
                 var glassBlur = settings.glass_blur !== undefined ? settings.glass_blur : 10;
                 var glassTransparency = settings.glass_transparency !== undefined ? settings.glass_transparency : 85;
 
+                // Update the UI toggle checkbox
+                var $glassToggle = $('input[name="logindesignerwp_settings[glass_enabled]"]');
+                if ($glassToggle.length) {
+                    $glassToggle.prop('checked', glassEnabled).trigger('change');
+                }
+
+                // Update blur and transparency inputs
+                $('input[name="logindesignerwp_settings[glass_blur]"]').val(glassBlur);
+                $('input[name="logindesignerwp_settings[glass_transparency]"]').val(glassTransparency);
+
                 var $form = $('.logindesignerwp-preview-form');
 
                 if (glassEnabled) {
-                    // Use form_bg_color from settings if it's rgba, otherwise calculate
                     var formBg = settings.form_bg_color || '#ffffff';
-
-                    // If the form_bg_color is already rgba, use it directly
                     if (formBg.indexOf('rgba') === 0) {
                         $form.css({
                             'background-color': formBg,
@@ -2751,12 +2867,9 @@
                             '-webkit-backdrop-filter': 'blur(' + glassBlur + 'px)'
                         });
                     } else {
-                        // Calculate rgba from hex
                         var opacity = 1 - (parseInt(glassTransparency) / 100);
                         var hex = formBg.replace('#', '');
-                        if (hex.length === 3) {
-                            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-                        }
+                        if (hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
                         var r = parseInt(hex.substring(0, 2), 16) || 255;
                         var g = parseInt(hex.substring(2, 4), 16) || 255;
                         var b = parseInt(hex.substring(4, 6), 16) || 255;
@@ -2769,7 +2882,6 @@
                         });
                     }
                 } else {
-                    // Glass disabled - remove glass effects
                     var standardBg = settings.form_bg_color || '#ffffff';
                     $form.css({
                         'background-color': standardBg,
@@ -2777,9 +2889,9 @@
                         '-webkit-backdrop-filter': ''
                     });
                 }
+            } finally {
+                window.ldwpIsBatchUpdating = false;
             }
-
-            console.log('LDWP: Batch Update Complete');
         };
 
         // Initialize Security Preview
@@ -2920,192 +3032,65 @@
                     nonce: window.logindesignerwp_ajax ? window.logindesignerwp_ajax.nonce : ''
                 },
                 success: function (response) {
+
                     $card.removeClass('is-loading').css('opacity', '1');
 
                     if (response.success) {
+
                         var settings = response.data.settings;
 
-                        // Iterate and update inputs
+
+                        // 1. Batch Update Preview FIRST via Cache
+                        // This ensures the preview reflects changes immediately, even if UI updates fail later
+                        if (window.ldwpUpdatePreviewBatch) {
+                            window.ldwpUpdatePreviewBatch(settings);
+                        } else {
+                            applyBackgroundPreview(null, settings);
+                        }
+
+                        // 2. Update UI Elements (Inputs, Color Pickers)
+                        // We do this secondary to the preview.
                         $.each(settings, function (key, value) {
                             var inputName = 'logindesignerwp_settings[' + key + ']';
                             var $input = $('[name="' + inputName + '"]');
 
                             if ($input.length) {
                                 if ($input.is(':checkbox')) {
-                                    $input.prop('checked', !!value).trigger('change');
+                                    $input.prop('checked', !!value);
                                 } else if ($input.is(':radio')) {
-                                    $input.filter('[value="' + value + '"]').prop('checked', true).trigger('change');
+                                    $input.filter('[value="' + value + '"]').prop('checked', true);
                                 } else {
-                                    $input.val(value).trigger('change');
+                                    $input.val(value);
 
-                                    // Update color pickers if applicable
-                                    if ($input.hasClass('wp-color-picker')) {
-                                        $input.wpColorPicker('color', value);
+                                    // Update color pickers visual state safely
+                                    if ($input.hasClass('wp-color-picker') && $input.data('wpWpColorPicker')) {
+                                        // Update only if initialized
+                                        try {
+                                            $input.wpColorPicker('color', value);
+                                        } catch (e) { console.error('LDWP: Color Picker error', e); }
                                     }
                                 }
                             } else if (key === 'background_mode') {
-                                // Special case for background mode hidden input
+                                // Update hidden input for background mode
                                 $('.ldwp-bg-mode-value').val(value);
-                                // Trigger update manually or find the radio equivalent if any
-                                // Our visual bg selector uses the hidden input
-                                updatePreview('background_mode', value);
+                                // Also update the visual selector if present
+                                $('.ldwp-bg-type-option').removeClass('active');
+                                $('.ldwp-bg-type-option[data-value="' + value + '"]').addClass('active');
                             }
                         });
 
-                        // Special handling for Background Image
+                        // 2. Handle Image Preview Thumbnails (UI)
                         if (response.data.background_image_url) {
                             $('.logindesignerwp-image-preview img').attr('src', response.data.background_image_url);
                             $('.logindesignerwp-image-preview').show();
                             $('.logindesignerwp-remove-image').show();
-                            updatePreview('background_image', response.data.background_image_url);
                         } else if (settings.background_image_id == 0 || !settings.background_image_id) {
                             $('.logindesignerwp-image-preview').hide();
                             $('.logindesignerwp-remove-image').hide();
-                            updatePreview('background_image', '');
                         }
 
-                        // Force a full background update
-                        applyBackgroundPreview();
 
-                        // Show success toast
-                        var $notice = $('<div class="notice notice-success is-dismissible" style="position: fixed; top: 40px; right: 20px; z-index: 9999; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"><p>' + (response.data.message || 'Preset Applied') + '</p></div>');
-                        $('body').append($notice);
-                        setTimeout(function () {
-                            $notice.fadeOut(function () { $(this).remove(); });
-                        }, 3000);
 
-                    } else {
-                        alert(response.data || 'Error applying preset.');
-                    }
-                },
-                error: function () {
-                    $card.removeClass('is-loading').css('opacity', '1');
-                    alert('Connection error');
-                }
-            });
-        });
-
-        // Delete Preset Handler
-        $(document).on('click', '.logindesignerwp-preset-delete-icon', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            if (!confirm('Are you sure you want to delete this custom preset?')) return;
-
-            var $icon = $(this);
-            var $card = $icon.closest('.logindesignerwp-preset-card');
-            var presetKey = $card.data('preset');
-
-            $card.css('opacity', '0.5');
-
-            $.post(ajaxurl, {
-                action: 'logindesignerwp_delete_preset',
-                preset: presetKey,
-                nonce: window.logindesignerwp_ajax ? window.logindesignerwp_ajax.nonce : ''
-            }, function (response) {
-                if (response.success) {
-                    $card.fadeOut(300, function () { $(this).remove(); });
-                } else {
-                    alert(response.data);
-                    $card.css('opacity', '1');
-                }
-            });
-        });
-    }
-
-    // Init Presets
-    $(document).ready(function () {
-        initPresetsHandler();
-    });
-
-    /**
-     * Initialize Presets UI Handlers.
-     */
-    function initPresetsHandler() {
-        // Preset Card Click
-        $(document).on('click', '.logindesignerwp-preset-card', function (e) {
-            // Check if delete icon was clicked
-            if ($(e.target).hasClass('logindesignerwp-preset-delete-icon')) {
-                return;
-            }
-
-            var $card = $(this);
-            var presetKey = $card.data('preset');
-
-            // locked?
-            if ($card.hasClass('is-locked')) {
-                return;
-            }
-
-            if ($card.hasClass('is-loading')) return;
-
-            // Visual feedback
-            $('.logindesignerwp-preset-card').removeClass('active');
-            $card.addClass('active is-loading');
-            $card.css('opacity', '0.7');
-
-            $.ajax({
-                url: ajaxurl,
-                type: 'POST',
-                data: {
-                    action: 'logindesignerwp_apply_preset',
-                    preset: presetKey,
-                    nonce: window.logindesignerwp_ajax ? window.logindesignerwp_ajax.nonce : ''
-                },
-                success: function (response) {
-                    $card.removeClass('is-loading').css('opacity', '1');
-
-                    if (response.success) {
-                        var settings = response.data.settings;
-
-                        // Iterate and update inputs
-                        $.each(settings, function (key, value) {
-                            var inputName = 'logindesignerwp_settings[' + key + ']';
-                            var $input = $('[name="' + inputName + '"]');
-
-                            if ($input.length) {
-                                if ($input.is(':checkbox')) {
-                                    $input.prop('checked', !!value).trigger('change');
-                                } else if ($input.is(':radio')) {
-                                    $input.filter('[value="' + value + '"]').prop('checked', true).trigger('change');
-                                } else {
-                                    $input.val(value).trigger('change');
-
-                                    // Update color pickers if applicable
-                                    if ($input.hasClass('wp-color-picker')) {
-                                        $input.wpColorPicker('color', value);
-                                    }
-                                }
-                            } else if (key === 'background_mode') {
-                                // Special case for background mode hidden input
-                                $('.ldwp-bg-mode-value').val(value);
-                                // Trigger update manually or find the radio equivalent if any
-                                // Our visual bg selector uses the hidden input
-                                updatePreview('background_mode', value);
-                            }
-                        });
-
-                        // Special handling for Background Image
-                        if (response.data.background_image_url) {
-                            $('.logindesignerwp-image-preview img').attr('src', response.data.background_image_url);
-                            $('.logindesignerwp-image-preview').show();
-                            $('.logindesignerwp-remove-image').show();
-                            updatePreview('background_image', response.data.background_image_url);
-                        } else if (settings.background_image_id == 0 || !settings.background_image_id) {
-                            $('.logindesignerwp-image-preview').hide();
-                            $('.logindesignerwp-remove-image').hide();
-                            updatePreview('background_image', '');
-                        }
-
-                        // Force a full background update
-                        applyBackgroundPreview();
-
-                        // Show success toast
-                        var $notice = $('<div class="notice notice-success is-dismissible" style="position: fixed; top: 40px; right: 20px; z-index: 9999; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"><p>' + (response.data.message || 'Preset Applied') + '</p></div>');
-                        $('body').append($notice);
-                        setTimeout(function () {
-                            $notice.fadeOut(function () { $(this).remove(); });
-                        }, 3000);
 
                     } else {
                         alert(response.data || 'Error applying preset.');

@@ -300,20 +300,32 @@ class LoginDesignerWP_Login_Style
         $css .= "    box-sizing: content-box !important;\n"; // Fix: ensure width refers to image usage area
         $css .= "}\n";
 
-        // Messages
+        // Messages (Info notices - e.g. "Check your email")
+        // Use solid white background with forced dark text for maximum readability
         $css .= "#login .message, #login .success {\n";
-        $css .= "    border-left-color: " . esc_attr($s['input_border_focus']) . " !important;\n";
-        $css .= "    background: " . esc_attr($s['form_bg_color']) . " !important;\n";
-        $css .= "    color: " . esc_attr($s['label_text_color']) . " !important;\n";
+        $css .= "    background: #ffffff !important;\n";
+        $css .= "    color: #333333 !important;\n";
+        $css .= "    border: 1px solid " . esc_attr($s['input_border_color']) . " !important;\n";
+        $css .= "    border-left: 4px solid " . esc_attr($s['input_border_focus']) . " !important;\n";
+        $css .= "    border-radius: 8px !important;\n";
+        $css .= "    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;\n";
+        $css .= "    padding: 16px 20px !important;\n";
+        $css .= "    margin-bottom: 20px !important;\n";
         $css .= "}\n";
+        $css .= "#login .message a, #login .success a { color: " . esc_attr($s['input_border_focus']) . " !important; }\n";
 
-        // Errors
+        // Errors (e.g. "Invalid password")
         $css .= "#login #login_error {\n";
-        $css .= "    border-left-color: #dc2626 !important;\n";
-        $css .= "    background: " . esc_attr($s['form_bg_color']) . " !important;\n";
-        $css .= "    color: " . esc_attr($s['label_text_color']) . " !important;\n";
+        $css .= "    background: #ffffff !important;\n";
+        $css .= "    color: #333333 !important;\n";
+        $css .= "    border: 1px solid #dc2626 !important;\n";
+        $css .= "    border-left: 4px solid #dc2626 !important;\n";
+        $css .= "    border-radius: 8px !important;\n";
+        $css .= "    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15) !important;\n";
+        $css .= "    padding: 16px 20px !important;\n";
+        $css .= "    margin-bottom: 20px !important;\n";
         $css .= "}\n";
-        $css .= "#login #login_error a { color: " . esc_attr($s['input_border_focus']) . " !important; }\n";
+        $css .= "#login #login_error a { color: #dc2626 !important; text-decoration: underline; }\n";
 
         // Misc
         $css .= ".wp-hide-pw { color: " . esc_attr($s['label_text_color']) . " !important; }\n";

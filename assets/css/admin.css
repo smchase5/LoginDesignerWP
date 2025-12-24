@@ -441,7 +441,7 @@
 }
 
 /* Blur effect using pseudo-element */
-.logindesignerwp-preview-bg.has-blur {
+.logindesignerwp-preview-bg.is-mode-image.has-blur {
     background-image: none !important;
 }
 
@@ -2002,6 +2002,7 @@ cursor: pointer;
     box-shadow: none;
     cursor: default;
 }
+
 /* Toggle Switch Styles */
 .logindesignerwp-toggle-checkbox {
     position: relative;
@@ -2012,7 +2013,8 @@ cursor: pointer;
     font-weight: 500;
     line-height: 24px;
     user-select: none;
-    padding-left: 46px; /* Space for switch */
+    padding-left: 46px;
+    /* Space for switch */
     min-height: 24px;
 }
 
@@ -2047,13 +2049,13 @@ cursor: pointer;
     position: absolute;
     left: 2px;
     top: 50%;
-    margin-top: -8px; 
+    margin-top: -8px;
     width: 16px;
     height: 16px;
     background-color: white;
     border-radius: 50%;
     transition: left 0.2s;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* Checked State using :has() */

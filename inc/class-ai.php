@@ -114,38 +114,86 @@ class LoginDesignerWP_AI
             wp_send_json_error(__('OpenAI API Key is missing. Please configure it in the Settings tab.', 'logindesignerwp'));
         }
 
-        // Call DALL-E 3
-        $image_quality = isset($settings['image_quality']) ? $settings['image_quality'] : 'hd';
-        $response = wp_remote_post('https://api.openai.com/v1/images/generations', array(
-            'headers' => array(
-                'Content-Type' => 'application/json',
-                'Authorization' => 'Bearer ' . $api_key,
-            ),
-            'body' => json_encode(array(
-                'model' => 'dall-e-3',
-                'prompt' => $prompt,
-                'n' => 1,
-                'size' => '1792x1024', // Widescreen for backgrounds
-                'quality' => $image_quality, // 'hd' or 'standard'
-            )),
-            'timeout' => 60,
-        ));
+        // Call OpenAI Images API
+        $image_quality = isset($settings['image_quality']) ? $settings['image_quality'] : 'high';
+        $image_model = isset($settings['image_model']) ? $settings['image_model'] : 'gpt-image-1.5';
 
-        if (is_wp_error($response)) {
-            wp_send_json_error($response->get_error_message());
+        // Helper to perform the request
+        $perform_request = function ($model) use ($api_key, $prompt, $image_quality) {
+            // Determine quality param based on model
+            $request_quality = $image_quality;
+            if ($model === 'dall-e-3') {
+                // DALL-E 3 only supports 'hd' and 'standard'
+                $request_quality = ($image_quality === 'high') ? 'hd' : 'standard';
+            }
+
+            return wp_remote_post('https://api.openai.com/v1/images/generations', array(
+                'headers' => array(
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Bearer ' . $api_key,
+                ),
+                'body' => json_encode(array(
+                    'model' => $model,
+                    'prompt' => $prompt,
+                    'n' => 1,
+                    // DALL-E 3 supports 1792x1024, GPT-Image supports 1536x1024. 
+                    'size' => ($model === 'dall-e-3') ? '1792x1024' : '1536x1024',
+                    'quality' => $request_quality,
+                )),
+                'timeout' => 60,
+            ));
+        };
+
+        // Fallback chain definition
+        $fallback_chain = array('gpt-image-1.5', 'gpt-image-1', 'gpt-image-1-mini', 'dall-e-3');
+
+        // Find start index based on selected model
+        $start_index = array_search($image_model, $fallback_chain);
+        if ($start_index === false) {
+            $start_index = 0; // Default to start if unknown model
         }
 
-        $body = wp_remote_retrieve_body($response);
-        $data = json_decode($body, true);
+        $response = null;
+        $success = false;
+        $last_error_message = '';
+        $data = null; // Initialize $data for later use
 
-        if (isset($data['error'])) {
-            wp_send_json_error($data['error']['message']);
+        // Iterate through models starting from user selection
+        for ($i = $start_index; $i < count($fallback_chain); $i++) {
+            $current_model = $fallback_chain[$i];
+            $response = $perform_request($current_model);
+
+            if (is_wp_error($response)) {
+                $last_error_message = $response->get_error_message();
+                continue; // Network error, maybe try next or just fail? Usually network is fatal, but we'll try next just in case.
+            }
+
+            $body = wp_remote_retrieve_body($response);
+            $data = json_decode($body, true);
+
+            // Check for success
+            if (!empty($data['data'][0]['url'])) {
+                $success = true;
+                break; // We got an image!
+            }
+
+            // Check for specific verification error to trigger fallback
+            if (isset($data['error'])) {
+                $last_error_message = $data['error']['message'];
+                // Only fallback on "verified" errors. If it's a content policy violation, don't retry.
+                if (stripos($data['error']['message'], 'verified') !== false) {
+                    continue; // Try next model in chain
+                } else {
+                    break; // Stop on other errors (like content policy)
+                }
+            }
         }
 
-        if (empty($data['data'][0]['url'])) {
-            wp_send_json_error(__('No image returned from AI.', 'logindesignerwp'));
+        if (!$success) {
+            wp_send_json_error($last_error_message ? $last_error_message : __('No image returned from AI.', 'logindesignerwp'));
         }
 
+        // Processing success (rest of code is unchanged, just need $data populated)
         $image_url = $data['data'][0]['url'];
 
         // Download and attach image
@@ -556,17 +604,39 @@ Return ONLY valid JSON with these exact keys (no markdown, no explanation, just 
                 target="_blank"><?php esc_html_e('Get key', 'logindesignerwp'); ?></a>
         </p>
 
-        <h4 style="margin-top: 20px; margin-bottom: 10px;"><?php esc_html_e('Image Quality', 'logindesignerwp'); ?></h4>
-        <select name="<?php echo esc_attr($this->option_name); ?>[image_quality]">
-            <option value="hd" <?php selected($settings['image_quality'], 'hd'); ?>>
-                <?php esc_html_e('HD (Best quality, recommended)', 'logindesignerwp'); ?>
+        <h4 style="margin-top: 20px; margin-bottom: 10px;"><?php esc_html_e('AI Model', 'logindesignerwp'); ?></h4>
+        <select name="<?php echo esc_attr($this->option_name); ?>[image_model]">
+            <option value="gpt-image-1.5" <?php selected($settings['image_model'], 'gpt-image-1.5'); ?>>
+                <?php esc_html_e('GPT Image 1.5 (Best Quality)', 'logindesignerwp'); ?>
             </option>
-            <option value="standard" <?php selected($settings['image_quality'], 'standard'); ?>>
-                <?php esc_html_e('Standard (Faster, lower cost)', 'logindesignerwp'); ?>
+            <option value="gpt-image-1" <?php selected($settings['image_model'], 'gpt-image-1'); ?>>
+                <?php esc_html_e('GPT Image 1 (Balanced)', 'logindesignerwp'); ?>
+            </option>
+            <option value="gpt-image-1-mini" <?php selected($settings['image_model'], 'gpt-image-1-mini'); ?>>
+                <?php esc_html_e('GPT Image 1 Mini (Fastest)', 'logindesignerwp'); ?>
             </option>
         </select>
         <p class="description">
-            <?php esc_html_e('HD generates more detailed images. Standard is faster and uses less API credits.', 'logindesignerwp'); ?>
+            <?php esc_html_e('Select the AI model for image generation.', 'logindesignerwp'); ?>
+        </p>
+
+        <h4 style="margin-top: 20px; margin-bottom: 10px;"><?php esc_html_e('Image Quality', 'logindesignerwp'); ?></h4>
+        <select name="<?php echo esc_attr($this->option_name); ?>[image_quality]">
+            <option value="high" <?php selected($settings['image_quality'], 'high'); ?>>
+                <?php esc_html_e('High (Best Quality)', 'logindesignerwp'); ?>
+            </option>
+            <option value="medium" <?php selected($settings['image_quality'], 'medium'); ?>>
+                <?php esc_html_e('Medium (Balanced)', 'logindesignerwp'); ?>
+            </option>
+            <option value="low" <?php selected($settings['image_quality'], 'low'); ?>>
+                <?php esc_html_e('Low (Fastest)', 'logindesignerwp'); ?>
+            </option>
+            <option value="auto" <?php selected($settings['image_quality'], 'auto'); ?>>
+                <?php esc_html_e('Auto', 'logindesignerwp'); ?>
+            </option>
+        </select>
+        <p class="description">
+            <?php esc_html_e('Select the quality level for generation. Higher quality may cost more credits.', 'logindesignerwp'); ?>
         </p>
         <?php
     }
@@ -587,9 +657,18 @@ Return ONLY valid JSON with these exact keys (no markdown, no explanation, just 
 
         // Image quality setting
         if (isset($input['image_quality'])) {
-            $clean['image_quality'] = in_array($input['image_quality'], array('standard', 'hd'), true)
+            $allowed_qualities = array('low', 'medium', 'high', 'auto');
+            $clean['image_quality'] = in_array($input['image_quality'], $allowed_qualities, true)
                 ? $input['image_quality']
-                : 'hd';
+                : 'high';
+        }
+
+        // Image model setting
+        if (isset($input['image_model'])) {
+            $valid_models = array('gpt-image-1.5', 'gpt-image-1', 'gpt-image-1-mini');
+            $clean['image_model'] = in_array($input['image_model'], $valid_models, true)
+                ? $input['image_model']
+                : 'gpt-image-1.5';
         }
 
         return $clean;
@@ -604,12 +683,23 @@ Return ONLY valid JSON with these exact keys (no markdown, no explanation, just 
     {
         $defaults = array(
             'openai_key' => '',
-            'image_quality' => 'hd', // 'standard' or 'hd' - only applies to DALL-E 3
+            'image_quality' => 'high',
+            'image_model' => 'gpt-image-1.5',
         );
 
         $settings = get_option($this->option_name, array());
+        $settings = wp_parse_args($settings, $defaults);
 
-        return wp_parse_args($settings, $defaults);
+        // Migrate legacy quality settings on the fly
+        if (isset($settings['image_quality'])) {
+            if ($settings['image_quality'] === 'hd') {
+                $settings['image_quality'] = 'high';
+            } elseif ($settings['image_quality'] === 'standard') {
+                $settings['image_quality'] = 'medium';
+            }
+        }
+
+        return $settings;
     }
 
     /**
