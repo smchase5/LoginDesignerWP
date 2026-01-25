@@ -68,15 +68,11 @@ class Login_Designer_WP_Presets_UI
                     ?>
                 </div>
 
-                <div class="logindesignerwp-preset-actions">
+                <div class="logindesignerwp-preset-actions" style="display: none;">
                     <input type="hidden" id="logindesignerwp-preset-select" value="">
 
-                    <button type="button" class="button button-primary button-large" id="logindesignerwp-apply-preset" disabled>
-                        <?php esc_html_e('Apply Selected Preset', 'logindesignerwp'); ?>
-                    </button>
-
                     <button type="button" class="button button-link button-large" id="logindesignerwp-delete-preset"
-                        style="color: #b32d2e; display: none;">
+                        style="color: #b32d2e;">
                         <?php esc_html_e('Delete Preset', 'logindesignerwp'); ?>
                     </button>
                 </div>

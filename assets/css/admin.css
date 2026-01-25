@@ -716,6 +716,21 @@
     border-radius: 4px;
 }
 
+.logindesignerwp-active-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #22c55e;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-left: 8px;
+}
+
 .logindesignerwp-pro-locked-content {
     padding: 20px;
     position: relative;

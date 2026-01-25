@@ -1,18 +1,60 @@
 /**
- * Inline Design Wizard Styles
+ * Inline Design Wizard Styles (Shadcn-Inspired)
  *
  * Styles for the inline wizard that appears in the settings column.
+ * Updated with Shadcn/UI design tokens for a modern look.
  *
  * @package LoginDesignerWP
  */
 
+/* ========================================
+   Shadcn CSS Variables (Design Tokens)
+   ======================================== */
+:root {
+    /* Colors - Shadcn Default Theme */
+    --ldwp-background: 0 0% 100%;
+    --ldwp-foreground: 222.2 84% 4.9%;
+    --ldwp-card: 0 0% 100%;
+    --ldwp-card-foreground: 222.2 84% 4.9%;
+    --ldwp-primary: 222.2 47.4% 11.2%;
+    --ldwp-primary-foreground: 210 40% 98%;
+    --ldwp-secondary: 210 40% 96.1%;
+    --ldwp-secondary-foreground: 222.2 47.4% 11.2%;
+    --ldwp-muted: 210 40% 96.1%;
+    --ldwp-muted-foreground: 215.4 16.3% 46.9%;
+    --ldwp-accent: 210 40% 96.1%;
+    --ldwp-accent-foreground: 222.2 47.4% 11.2%;
+    --ldwp-destructive: 0 84.2% 60.2%;
+    --ldwp-destructive-foreground: 210 40% 98%;
+    --ldwp-border: 214.3 31.8% 91.4%;
+    --ldwp-input: 214.3 31.8% 91.4%;
+    --ldwp-ring: 222.2 84% 4.9%;
+
+    /* WordPress Primary (keep brand consistency) */
+    --ldwp-wp-primary: 207 74% 42%;
+    --ldwp-wp-primary-dark: 207 74% 32%;
+
+    /* Radius */
+    --ldwp-radius: 0.5rem;
+    --ldwp-radius-sm: 0.375rem;
+    --ldwp-radius-lg: 0.75rem;
+    --ldwp-radius-xl: 1rem;
+
+    /* Shadows */
+    --ldwp-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --ldwp-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --ldwp-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --ldwp-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
 /* Inline Wizard Container */
 .ldwp-wizard-inline {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    background: hsl(var(--ldwp-card));
+    border-radius: var(--ldwp-radius-xl);
+    box-shadow: var(--ldwp-shadow-lg);
     margin-bottom: 20px;
     overflow: hidden;
+    border: 1px solid hsl(var(--ldwp-border));
 }
 
 .ldwp-wizard-inline.is-visible {
@@ -390,45 +432,55 @@
     gap: 8px;
 }
 
-/* Buttons */
+/* Buttons - Shadcn Inspired */
 .ldwp-wizard-btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     padding: 10px 18px;
-    border-radius: 6px;
+    border-radius: var(--ldwp-radius);
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
     border: none;
+    outline: none;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.ldwp-wizard-btn:focus-visible {
+    outline: 2px solid hsl(var(--ldwp-ring));
+    outline-offset: 2px;
 }
 
 .ldwp-wizard-btn-secondary {
-    background: #f0f0f0;
-    color: #444;
+    background: hsl(var(--ldwp-secondary));
+    color: hsl(var(--ldwp-secondary-foreground));
+    border: 1px solid hsl(var(--ldwp-border));
 }
 
 .ldwp-wizard-btn-secondary:hover {
-    background: #e0e0e0;
+    background: hsl(var(--ldwp-accent));
 }
 
 .ldwp-wizard-btn-primary {
-    background: #2271b1;
+    background: hsl(var(--ldwp-wp-primary));
     color: #fff;
 }
 
 .ldwp-wizard-btn-primary:hover {
-    background: #135e96;
+    background: hsl(var(--ldwp-wp-primary-dark));
 }
 
 .ldwp-wizard-btn-success {
-    background: #00a32a;
+    background: hsl(142.1 76.2% 36.3%);
     color: #fff;
 }
 
 .ldwp-wizard-btn-success:hover {
-    background: #008a20;
+    background: hsl(142.1 76.2% 30%);
 }
 
 .ldwp-wizard-btn .dashicons {
@@ -535,9 +587,10 @@
 .ldwp-wizard-bg-panel {
     display: none;
     padding: 16px;
-    background: #f9fafb;
-    border-radius: 8px;
+    background: hsl(var(--ldwp-muted));
+    border-radius: var(--ldwp-radius-lg);
     margin-bottom: 16px;
+    border: 1px solid hsl(var(--ldwp-border));
 }
 
 .ldwp-wizard-bg-panel.is-active {
@@ -549,8 +602,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid #eee;
+    padding: 12px 0;
+    border-bottom: 1px solid hsl(var(--ldwp-border));
 }
 
 .ldwp-wizard-control-row:last-child {
@@ -560,21 +613,29 @@
 .ldwp-wizard-control-row label {
     font-size: 13px;
     font-weight: 500;
-    color: #333;
+    color: hsl(var(--ldwp-foreground));
     flex: 1;
 }
 
 .ldwp-wizard-control-row .ldwp-wizard-hint {
     font-size: 11px;
-    color: #888;
+    color: hsl(var(--ldwp-muted-foreground));
     margin-left: 8px;
 }
 
 .ldwp-wizard-select {
-    padding: 6px 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 8px 12px;
+    border: 1px solid hsl(var(--ldwp-input));
+    border-radius: var(--ldwp-radius-sm);
     font-size: 13px;
+    background: hsl(var(--ldwp-background));
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ldwp-wizard-select:focus {
+    outline: none;
+    border-color: hsl(var(--ldwp-ring));
+    box-shadow: 0 0 0 3px hsl(var(--ldwp-ring) / 0.1);
 }
 
 /* Image Upload in Background */
@@ -965,27 +1026,32 @@
     width: 32px;
     height: 32px;
     padding: 0;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: #fff;
+    border: 1px solid hsl(var(--ldwp-border));
+    border-radius: var(--ldwp-radius-sm);
+    background: hsl(var(--ldwp-background));
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
 }
 
 .ldwp-wizard-randomize-btn:hover {
-    border-color: #2271b1;
-    background: #f8fbfd;
+    border-color: hsl(var(--ldwp-wp-primary));
+    background: hsl(var(--ldwp-accent));
+}
+
+.ldwp-wizard-randomize-btn:focus-visible {
+    outline: 2px solid hsl(var(--ldwp-ring));
+    outline-offset: 2px;
 }
 
 .ldwp-wizard-randomize-btn .dashicons {
     font-size: 16px;
     width: 16px;
     height: 16px;
-    color: #666;
+    color: hsl(var(--ldwp-muted-foreground));
 }
 
 .ldwp-wizard-randomize-btn:hover .dashicons {
-    color: #2271b1;
+    color: hsl(var(--ldwp-wp-primary));
 }
 
 /* ========================================

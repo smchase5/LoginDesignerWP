@@ -33,6 +33,7 @@ class LoginDesignerWP_Login_Style
         add_action('login_enqueue_scripts', array($this, 'output_login_styles'));
         add_filter('login_headerurl', array($this, 'custom_logo_url'));
         add_filter('login_headertext', array($this, 'custom_logo_title'));
+        add_action('login_footer', array($this, 'output_custom_message'));
     }
 
     /**
@@ -45,6 +46,14 @@ class LoginDesignerWP_Login_Style
         if (!get_option('logindesignerwp_settings_saved', false)) {
             return;
         }
+
+        // Enqueue Layout System CSS
+        wp_enqueue_style(
+            'logindesignerwp-layouts',
+            LOGINDESIGNERWP_URL . 'assets/src/layouts.css',
+            array(),
+            LOGINDESIGNERWP_VERSION
+        );
 
         $this->settings = logindesignerwp_get_settings();
         $s = $this->settings;
@@ -75,11 +84,108 @@ class LoginDesignerWP_Login_Style
         // Build CSS as a string to avoid line break issues
         $css = "/* LoginDesignerWP Custom Styles */\n";
 
-        // Background
-        $css .= "body.login {\n";
+        // Determine Layout Mode
+        $layout_mode = isset($s['layout_mode']) ? $s['layout_mode'] : 'centered';
+
+        // Layout types:
+        // - 'simple': Just fields/logo, no form container styling
+        // - 'centered': Background on body, form in styled box
+        // - 'split_left'/'split_right': Two panels, brand gets background, form gets panel styling
+        $is_split_layout = strpos($layout_mode, 'split_') === 0;
+        $is_simple_layout = $layout_mode === 'simple';
+
+        // Form width (for simple layout) and split ratio (for split layouts)
+        $form_width = isset($s['layout_form_width']) ? intval($s['layout_form_width']) : 360;
+        $split_ratio = isset($s['layout_split_ratio']) ? intval($s['layout_split_ratio']) : 50;
+        $css .= ":root { --lp-max-width: " . $form_width . "px; --lp-brand-width: " . $split_ratio . "%; }\n";
+
+        // Simple layout: remove form box styling entirely
+        if ($is_simple_layout) {
+            $css .= "#loginform { background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; }\n";
+
+            // Determine effective background color to calculate contrast
+            $bg_check_color = isset($s['background_color']) ? $s['background_color'] : '#ffffff';
+            if (isset($s['background_mode'])) {
+                if ($s['background_mode'] === 'gradient' && isset($s['background_gradient_1'])) {
+                    $bg_check_color = $s['background_gradient_1'];
+                }
+                // Image mode falls back to background_color which is safe default
+            }
+
+            // Calculate brightness (0-255)
+            $brightness = $this->get_perceived_brightness($bg_check_color);
+
+            // If background is dark (< 128), force white text. If light, force dark text.
+            // Using a slightly higher threshold (140) to err on side of darker text on mid-tones
+            $contrast_text_color = ($brightness < 140) ? '#ffffff' : '#111827';
+
+            // Override settings locally for CSS generation
+            $s['label_text_color'] = $contrast_text_color;
+            $s['below_form_link_color'] = $contrast_text_color;
+        }
+
+        // Selectors based on layout type
+        if ($is_split_layout) {
+            $bg_target = '.lp-brand';
+        } else {
+            // Simple and Centered both use body.login for background
+            $bg_target = 'body.login';
+        }
+
+        // Split layouts: style the form panel (.lp-main)
+        if ($is_split_layout) {
+            // Reset body background for split layouts
+            $css .= "body.login { background: none !important; }\n";
+
+            // Form Panel Background Styling
+            $form_panel_mode = isset($s['form_panel_bg_mode']) ? $s['form_panel_bg_mode'] : 'solid';
+            $form_panel_color = isset($s['form_panel_bg_color']) ? esc_attr($s['form_panel_bg_color']) : '#ffffff';
+            $form_panel_shadow = !empty($s['form_panel_shadow']);
+
+            // Get form panel image URL if set
+            $form_panel_image_url = '';
+            if (!empty($s['form_panel_image_id'])) {
+                $form_panel_image_url = wp_get_attachment_image_url($s['form_panel_image_id'], 'full');
+            }
+
+            $css .= ".lp-main {\n";
+
+            if ('solid' === $form_panel_mode) {
+                $css .= "    background-color: " . $form_panel_color . " !important;\n";
+            } elseif ('image' === $form_panel_mode && !empty($form_panel_image_url)) {
+                $css .= "    background-image: url('" . esc_url($form_panel_image_url) . "') !important;\n";
+                $css .= "    background-size: cover !important;\n";
+                $css .= "    background-position: center !important;\n";
+            } elseif ('image' === $form_panel_mode) {
+                $css .= "    background-color: #ffffff !important;\n";
+            } elseif ('glassmorphism' === $form_panel_mode) {
+                $css .= "    background-color: rgba(255, 255, 255, 0.15) !important;\n";
+                $css .= "    backdrop-filter: blur(10px) !important;\n";
+                $css .= "    -webkit-backdrop-filter: blur(10px) !important;\n";
+                $css .= "    border: 1px solid rgba(255, 255, 255, 0.25) !important;\n";
+            }
+
+            if ($form_panel_shadow) {
+                $css .= "    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15) !important;\n";
+            } else {
+                $css .= "    box-shadow: none !important;\n";
+            }
+
+            $css .= "}\n";
+        }
+
+
+
+        // Open Background Target Block (Brand or Body)
+        $css .= "$bg_target {\n";
+
+        // Background Properties
         if ('solid' === $s['background_mode']) {
-            $css .= "    background: " . esc_attr($s['background_color']) . " !important;\n";
+            $css .= "    background-color: " . esc_attr($s['background_color']) . " !important;\n";
+            $css .= "    background-image: none !important;\n";
         } elseif ('gradient' === $s['background_mode']) {
+            $css .= "    background-color: " . esc_attr($s['background_color']) . " !important;\n"; // Fallback
+
             $gradient_type = isset($s['gradient_type']) ? $s['gradient_type'] : 'linear';
             $gradient_angle = isset($s['gradient_angle']) ? $s['gradient_angle'] : 135;
             $gradient_pos = isset($s['gradient_position']) ? $s['gradient_position'] : 'center center';
@@ -91,53 +197,65 @@ class LoginDesignerWP_Login_Style
             } elseif ('radial' === $gradient_type) {
                 $css .= "    background: radial-gradient(circle at " . esc_attr($gradient_pos) . ", " . $col1 . ", " . $col2 . ") !important;\n";
             } elseif ('mesh' === $gradient_type) {
-                // Pseudo-mesh using multiple radial gradients with 3 colors
                 $col3 = esc_attr(isset($s['background_gradient_3']) ? $s['background_gradient_3'] : $col1);
                 $css .= "    background: radial-gradient(at top left, " . $col1 . ", transparent 70%),\n";
                 $css .= "                radial-gradient(at bottom right, " . $col2 . ", transparent 70%),\n";
                 $css .= "                radial-gradient(at top right, " . $col3 . ", transparent 70%),\n";
                 $css .= "                linear-gradient(135deg, " . $col2 . ", " . $col1 . ") !important;\n";
             } else {
-                // Fallback
                 $css .= "    background: linear-gradient(135deg, " . $col1 . ", " . $col2 . ") !important;\n";
             }
-
-            $css .= "    min-height: 100vh;\n";
         } elseif ('image' === $s['background_mode'] && $bg_image_url) {
+            // For Image Mode, we apply color to target as well
+            $css .= "    background-color: " . esc_attr($s['background_color']) . " !important;\n";
+
             $blur_amount = isset($s['background_blur']) ? intval($s['background_blur']) : 0;
 
             if ($blur_amount > 0) {
-                // Use pseudo-element for blurred background to keep form content sharp
-                $css .= "    position: relative;\n";
-                $css .= "    background-color: " . esc_attr($s['background_color']) . " !important;\n";
-                $css .= "}\n";
-                $css .= "body.login::before {\n";
-                $css .= "    content: '';\n";
-                $css .= "    position: fixed;\n";
-                $css .= "    top: 0; left: 0; right: 0; bottom: 0;\n";
-                $css .= "    z-index: -1;\n";
-                $css .= "    background-image: url('" . esc_url($bg_image_url) . "');\n";
-                $css .= "    background-size: " . esc_attr($s['background_image_size']) . ";\n";
-                $css .= "    background-position: " . esc_attr($s['background_image_pos']) . ";\n";
-                $css .= "    background-repeat: " . esc_attr($s['background_image_repeat']) . ";\n";
-                $css .= "    filter: blur(" . $blur_amount . "px);\n";
-                $css .= "    transform: scale(1.1);\n"; // Prevent blur edges showing
+                // Blur Logic
+                // If it's advanced (Brand panel), we can just filter the panel because content is in Main
+                if ($is_split_layout) {
+                    $css .= "    background-image: url('" . esc_url($bg_image_url) . "') !important;\n";
+                    $css .= "    background-size: " . esc_attr($s['background_image_size']) . " !important;\n";
+                    $css .= "    background-position: " . esc_attr($s['background_image_pos']) . " !important;\n";
+                    $css .= "    background-repeat: " . esc_attr($s['background_image_repeat']) . " !important;\n";
+                    $css .= "    filter: blur(" . $blur_amount . "px);\n";
+                    $css .= "    transform: scale(1.1);\n";
+                } else {
+                    // Centered Mode: Needs pseudo-element to avoid blurring the form
+                    $css .= "    background-image: none !important;\n"; // Clear from body
+                    $css .= "    position: relative;\n";
+                    $css .= "}\n"; // Close body block
+
+                    $css .= "body.login::before {\n";
+                    $css .= "    content: '';\n";
+                    $css .= "    position: fixed;\n";
+                    $css .= "    top: 0; left: 0; right: 0; bottom: 0;\n";
+                    $css .= "    z-index: -1;\n";
+                    $css .= "    background-color: " . esc_attr($s['background_color']) . ";\n";
+                    $css .= "    background-image: url('" . esc_url($bg_image_url) . "');\n";
+                    $css .= "    background-size: " . esc_attr($s['background_image_size']) . ";\n";
+                    $css .= "    background-position: " . esc_attr($s['background_image_pos']) . ";\n";
+                    $css .= "    background-repeat: " . esc_attr($s['background_image_repeat']) . ";\n";
+                    $css .= "    filter: blur(" . $blur_amount . "px);\n";
+                    $css .= "    transform: scale(1.1);\n";
+                }
             } else {
-                // No blur - apply background directly to body
-                $css .= "    background-color: " . esc_attr($s['background_color']) . " !important;\n";
+                // No blur
                 $css .= "    background-image: url('" . esc_url($bg_image_url) . "') !important;\n";
                 $css .= "    background-size: " . esc_attr($s['background_image_size']) . " !important;\n";
                 $css .= "    background-position: " . esc_attr($s['background_image_pos']) . " !important;\n";
                 $css .= "    background-repeat: " . esc_attr($s['background_image_repeat']) . " !important;\n";
-                $css .= "    background-attachment: fixed !important;\n";
+                if (!$is_split_layout) {
+                    $css .= "    background-attachment: fixed !important;\n";
+                }
             }
         } elseif ('image' === $s['background_mode']) {
-            // Image mode but no image found - fallback to background color
-            $css .= "    background: " . esc_attr($s['background_color']) . " !important;\n";
+            $css .= "    background-color: " . esc_attr($s['background_color']) . " !important;\n";
         }
         $css .= "}\n";
 
-        // Background Overlay (for image backgrounds)
+        // Background Overlay
         if ('image' === $s['background_mode'] && !empty($s['background_overlay_enable']) && !empty($bg_image_url)) {
             $overlay_color = isset($s['background_overlay_color']) ? $s['background_overlay_color'] : '#000000';
             $overlay_opacity = isset($s['background_overlay_opacity']) ? intval($s['background_overlay_opacity']) : 50;
@@ -149,33 +267,52 @@ class LoginDesignerWP_Login_Style
             $b = hexdec(substr($hex, 4, 2));
             $alpha = $overlay_opacity / 100;
 
-            $css .= "body.login::after {\n";
-            $css .= "    content: '';\n";
-            $css .= "    position: fixed;\n";
-            $css .= "    top: 0; left: 0; right: 0; bottom: 0;\n";
-            $css .= "    background-color: rgba(" . $r . "," . $g . "," . $b . "," . $alpha . ");\n";
-            $css .= "    z-index: 0;\n";
-            $css .= "    pointer-events: none;\n";
-            $css .= "}\n";
-
-            // Ensure form is above overlay
-            $css .= "#login {\n";
-            $css .= "    position: relative;\n";
-            $css .= "    z-index: 1;\n";
-            $css .= "}\n";
+            if ($is_split_layout) {
+                // Apply overlay to Brand Panel ::after
+                $css .= ".lp-brand::after {\n";
+                $css .= "    content: ''; position: absolute; inset: 0;\n";
+                $css .= "    background-color: rgba(" . $r . "," . $g . "," . $b . "," . $alpha . ");\n";
+                $css .= "    z-index: 1;\n"; // Above bg, below content? Brand usually has no content content.
+                $css .= "}\n";
+            } else {
+                $css .= "body.login::after {\n";
+                $css .= "    content: '';\n";
+                $css .= "    position: fixed;\n";
+                $css .= "    top: 0; left: 0; right: 0; bottom: 0;\n";
+                $css .= "    background-color: rgba(" . $r . "," . $g . "," . $b . "," . $alpha . ");\n";
+                $css .= "    z-index: 0;\n";
+                $css .= "    pointer-events: none;\n";
+                $css .= "}\n";
+            }
         }
 
-        // Form Container
-        $css .= "body.login div#login form#loginform,\n";
-        $css .= "body.login div#login form#registerform,\n";
-        $css .= "body.login div#login form#lostpasswordform,\n";
-        $css .= "#loginform, #registerform, #lostpasswordform {\n";
-        $css .= "    background: " . esc_attr($s['form_bg_color']) . " !important;\n";
-        $css .= "    border-radius: " . intval($s['form_border_radius']) . "px !important;\n";
-        $css .= "    border: 1px solid " . esc_attr($s['form_border_color']) . " !important;\n";
-        $css .= $s['form_shadow_enable'] ? "    box-shadow: 0 4px 24px rgba(0,0,0,0.25) !important;\n" : "    box-shadow: none !important;\n";
-        $css .= "    padding: 26px 24px !important;\n";
-        $css .= "}\n";
+
+        // Form Container Styling (skip for Simple layout which has no form box)
+        if (!$is_simple_layout) {
+            $css .= "body.login div#login form#loginform,\n";
+            $css .= "body.login div#login form#registerform,\n";
+            $css .= "body.login div#login form#lostpasswordform,\n";
+            $css .= "#loginform, #registerform, #lostpasswordform {\n";
+            $css .= "    background: " . esc_attr($s['form_bg_color']) . " !important;\n";
+            $css .= "    border-radius: " . intval($s['form_border_radius']) . "px !important;\n";
+            $css .= "    border: 1px solid " . esc_attr($s['form_border_color']) . " !important;\n";
+            $css .= $s['form_shadow_enable'] ? "    box-shadow: 0 4px 24px rgba(0,0,0,0.25) !important;\n" : "    box-shadow: none !important;\n";
+            $css .= "    padding: 26px 24px !important;\n";
+            $css .= "}\n";
+        } else {
+            // Simple layout: completely transparent form with no styling
+            $css .= "body.login div#login form#loginform,\n";
+            $css .= "body.login div#login form#registerform,\n";
+            $css .= "body.login div#login form#lostpasswordform,\n";
+            $css .= "#loginform, #registerform, #lostpasswordform {\n";
+            $css .= "    background: transparent !important;\n";
+            $css .= "    border: none !important;\n";
+            $css .= "    border-radius: 0 !important;\n";
+            $css .= "    box-shadow: none !important;\n";
+            $css .= "    padding: 0 !important;\n";
+            $css .= "    margin: 0 !important;\n";
+            $css .= "}\n";
+        }
 
         // Labels
         $css .= "body.login div#login label, #login label {\n";
@@ -232,12 +369,17 @@ class LoginDesignerWP_Login_Style
         $css .= "}\n";
 
         // Links below form
-        $css .= "#login #nav a, #login #backtoblog a {\n";
-        $css .= "    color: " . esc_attr($s['below_form_link_color']) . " !important;\n";
-        $css .= "}\n";
-        $css .= "#login #nav a:hover, #login #backtoblog a:hover {\n";
-        $css .= "    color: " . esc_attr($s['input_border_focus']) . " !important;\n";
-        $css .= "}\n";
+        // Links below form
+        if (!empty($s['hide_footer_links'])) {
+            $css .= "#login #nav, #login #backtoblog { display: none !important; }\n";
+        } else {
+            $css .= "#login #nav a, #login #backtoblog a {\n";
+            $css .= "    color: " . esc_attr($s['below_form_link_color']) . " !important;\n";
+            $css .= "}\n";
+            $css .= "#login #nav a:hover, #login #backtoblog a:hover {\n";
+            $css .= "    color: " . esc_attr($s['input_border_focus']) . " !important;\n";
+            $css .= "}\n";
+        }
 
         // Logo
         $logo_color = ltrim(esc_attr($s['label_text_color']), '#');
@@ -282,11 +424,12 @@ class LoginDesignerWP_Login_Style
         $css .= "    max-width: 100% !important;\n";
         $css .= "    padding: " . intval($s['logo_padding']) . "px !important;\n";
         $css .= "    border-radius: " . intval($s['logo_border_radius']) . "px !important;\n";
-        if (!empty($s['logo_background_enable']) && !empty($s['logo_background_color'])) {
-            $css .= "    background-color: " . esc_attr($s['logo_background_color']) . " !important;\n";
-        }
-
         if ($logo_url) {
+            // Apply background color if enabled
+            if (!empty($s['logo_background_enable']) && !empty($s['logo_background_color'])) {
+                $css .= "    background-color: " . esc_attr($s['logo_background_color']) . " !important;\n";
+            }
+
             $css .= "    background-image: url('" . esc_url($logo_url) . "') !important;\n";
             $css .= "    background-size: contain !important;\n";
         } else {
@@ -375,5 +518,65 @@ class LoginDesignerWP_Login_Style
         }
 
         return get_bloginfo('name');
+    }
+    /**
+     * Output custom message.
+     */
+    public function output_custom_message()
+    {
+        $settings = logindesignerwp_get_settings();
+
+        if (!empty($settings['custom_message'])) {
+            $button_color = isset($settings['button_bg']) ? $settings['button_bg'] : '#2271b1';
+
+            // Calculate radius
+            $radius = 0;
+            if (isset($settings['form_border_radius']) && $settings['form_border_radius'] !== '') {
+                $radius = intval($settings['form_border_radius']);
+            } else {
+                $style = isset($settings['form_corner_style']) ? $settings['form_corner_style'] : 'none';
+                $map = ['none' => 0, 'small' => 4, 'medium' => 8, 'large' => 12, 'rounded' => 24];
+                $radius = isset($map[$style]) ? $map[$style] : 0;
+            }
+
+            // Output custom message below the back to blog link
+            echo '<div id="ldwp-custom-message" style="
+                margin-top: 16px;
+                padding: 12px;
+                background-color: #fff;
+                border-left: 4px solid ' . esc_attr($button_color) . ';
+                box-shadow: 0 1px 1px 0 rgba(0,0,0,.1);
+                font-size: 13px;
+                color: #444;
+                text-align: left;
+                width: 320px;
+                margin-left: auto;
+                margin-right: auto;
+                box-sizing: border-box;
+                border-radius: ' . intval($radius / 2) . 'px;
+                position: relative;
+                z-index: 10;
+            ">';
+            echo wp_kses_post($settings['custom_message']);
+            echo '</div>';
+        }
+    }
+    /**
+     * Calculate perceived brightness of a hex color.
+     * Returns a value between 0 (darkest) and 255 (lightest).
+     *
+     * @param string $hex Hex color code.
+     * @return int Brightness value.
+     */
+    private function get_perceived_brightness($hex)
+    {
+        $hex = ltrim($hex, '#');
+        if (strlen($hex) == 3) {
+            $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+        }
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+        return (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
     }
 }

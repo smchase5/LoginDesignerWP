@@ -1,0 +1,163 @@
+/* 
+ * LoginDesignerWP Layout System
+ * 4 Layouts: Simple, Centered, Split Left, Split Right
+ * Note: --lp-max-width and --lp-brand-width are set dynamically by PHP
+ */
+
+/* =========================================
+   Base Shell - Applies to all layouts
+   ========================================= */
+.lp-shell {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.lp-shell * {
+    box-sizing: border-box;
+}
+
+.lp-brand {
+    position: relative;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+}
+
+.lp-main {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.lp-content-wrap {
+    width: 100%;
+    max-width: var(--lp-max-width, 360px);
+    margin: 0 auto;
+    padding: 0 1rem;
+    position: relative;
+    z-index: 10;
+}
+
+/* =========================================
+   Layout 1: Simple
+   Just fields + logo, NO form container
+   ========================================= */
+.lp-shell.layout--simple {
+    justify-content: center;
+    align-items: center;
+}
+
+.lp-shell.layout--simple .lp-brand {
+    display: none;
+}
+
+.lp-shell.layout--simple .lp-main {
+    width: 100%;
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+/* Simple removes all form box styling */
+.lp-shell.layout--simple #loginform {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* =========================================
+   Layout 2: Centered
+   Form in a styled box on background
+   ========================================= */
+.lp-shell.layout--centered {
+    justify-content: center;
+    align-items: center;
+}
+
+.lp-shell.layout--centered .lp-brand {
+    display: none;
+}
+
+.lp-shell.layout--centered .lp-main {
+    width: 100%;
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+/* =========================================
+   Layout 3 & 4: Split Left / Split Right
+   Side-by-side: image on one side, form on other
+   ========================================= */
+.lp-shell.layout--split_left,
+.lp-shell.layout--split_right {
+    flex-direction: row;
+}
+
+.lp-shell.layout--split_right {
+    flex-direction: row-reverse;
+}
+
+.lp-shell.layout--split_left .lp-brand,
+.lp-shell.layout--split_right .lp-brand {
+    flex: 0 0 var(--lp-brand-width, 50%);
+    min-height: 100vh;
+}
+
+.lp-shell.layout--split_left .lp-main,
+.lp-shell.layout--split_right .lp-main {
+    flex: 1 1 auto;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+/* Split - Mobile: Stack vertically */
+@media (max-width: 768px) {
+
+    .lp-shell.layout--split_left,
+    .lp-shell.layout--split_right {
+        flex-direction: column;
+    }
+
+    .lp-shell.layout--split_left .lp-brand,
+    .lp-shell.layout--split_right .lp-brand {
+        flex: 0 0 auto;
+        min-height: 200px;
+        height: 30vh;
+    }
+
+    .lp-shell.layout--split_left .lp-main,
+    .lp-shell.layout--split_right .lp-main {
+        flex: 1 1 auto;
+        min-height: auto;
+    }
+}
+
+/* =========================================
+   Preview Mode Overrides
+   ========================================= */
+.lp-shell.is-preview-mode {
+    min-height: 100%;
+}
+
+.lp-shell.is-preview-mode .lp-main {
+    min-height: 100%;
+}
+
+.lp-shell.layout--split_left.is-preview-mode .lp-brand,
+.lp-shell.layout--split_right.is-preview-mode .lp-brand {
+    min-height: 100%;
+}
+
+.lp-shell.layout--split_left.is-preview-mode .lp-main,
+.lp-shell.layout--split_right.is-preview-mode .lp-main {
+    min-height: 100%;
+}

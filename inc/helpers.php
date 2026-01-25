@@ -54,6 +54,7 @@ function logindesignerwp_get_defaults()
         'form_border_radius' => 0,  // WP default is square corners
         'form_border_color' => '#c3c4c7',
         'form_shadow_enable' => 1,
+        'enable_glassmorphism' => 0,
 
         // Social Login settings.
         'google_login_enable' => 0,
@@ -93,8 +94,26 @@ function logindesignerwp_get_defaults()
         'logo_url' => '',
         'logo_title' => '',
 
+        // General Settings
+        'enable_styles' => 1,
+        'hide_wp_logo' => 0,
+        'hide_footer_links' => 0,
+        'custom_message' => '',
+
         // Active preset tracking.
         'active_preset' => '',
+
+        // Layout Settings
+        'layout_mode' => 'centered', // simple, centered, split_left, split_right
+        'layout_form_width' => '360', // 320, 360, 420, 480 (for simple layout)
+        'layout_split_ratio' => '50', // 40, 50, 60
+        'layout_split_mobile' => 'stack', // stack, hide_brand
+
+        // Form Panel Background (for advanced layouts)
+        'form_panel_bg_mode' => 'solid', // solid, image, glassmorphism
+        'form_panel_bg_color' => '#ffffff',
+        'form_panel_image_id' => 0, // Separate image for form panel
+        'form_panel_shadow' => 1,
     );
 
     // Allow Pro to extend defaults.
@@ -124,6 +143,12 @@ function logindesignerwp_sanitize_settings($input)
 {
     $defaults = logindesignerwp_get_defaults();
     $sanitized = array();
+
+    // General Settings
+    $sanitized['enable_styles'] = !empty($input['enable_styles']) ? 1 : 0;
+    $sanitized['hide_wp_logo'] = !empty($input['hide_wp_logo']) ? 1 : 0;
+    $sanitized['hide_footer_links'] = !empty($input['hide_footer_links']) ? 1 : 0;
+    $sanitized['custom_message'] = wp_kses_post($input['custom_message'] ?? '');
 
     // Background mode.
     $sanitized['background_mode'] = in_array($input['background_mode'] ?? '', array('solid', 'gradient', 'image'), true)
@@ -209,6 +234,9 @@ function logindesignerwp_sanitize_settings($input)
     // Shadow toggle.
     $sanitized['form_shadow_enable'] = !empty($input['form_shadow_enable']);
 
+    // Glassmorphism.
+    $sanitized['enable_glassmorphism'] = !empty($input['enable_glassmorphism']) ? 1 : 0;
+
     // Logo settings.
     $sanitized['logo_id'] = absint($input['logo_id'] ?? 0);
     $sanitized['logo_width'] = max(50, min(500, absint($input['logo_width'] ?? $defaults['logo_width'])));
@@ -224,6 +252,25 @@ function logindesignerwp_sanitize_settings($input)
     $sanitized['logo_background_color'] = sanitize_hex_color($input['logo_background_color'] ?? $defaults['logo_background_color']);
     $sanitized['logo_url'] = esc_url_raw($input['logo_url'] ?? '');
     $sanitized['logo_title'] = sanitize_text_field($input['logo_title'] ?? '');
+
+    $sanitized['logo_url'] = esc_url_raw($input['logo_url'] ?? '');
+    $sanitized['logo_title'] = sanitize_text_field($input['logo_title'] ?? '');
+
+    // Layout Settings
+    $valid_layouts = array('simple', 'centered', 'split_left', 'split_right');
+    $sanitized['layout_mode'] = in_array($input['layout_mode'] ?? '', $valid_layouts, true) ? $input['layout_mode'] : $defaults['layout_mode'];
+
+    $valid_widths = array('320', '360', '420', '480');
+    $sanitized['layout_form_width'] = in_array($input['layout_form_width'] ?? '', $valid_widths, true) ? $input['layout_form_width'] : $defaults['layout_form_width'];
+
+    $sanitized['layout_split_ratio'] = in_array($input['layout_split_ratio'] ?? '', array('40', '50', '60'), true) ? $input['layout_split_ratio'] : $defaults['layout_split_ratio'];
+    $sanitized['layout_split_mobile'] = in_array($input['layout_split_mobile'] ?? '', array('stack', 'hide_brand'), true) ? $input['layout_split_mobile'] : $defaults['layout_split_mobile'];
+
+    // Form Panel Background (for advanced layouts)
+    $sanitized['form_panel_bg_mode'] = in_array($input['form_panel_bg_mode'] ?? '', array('solid', 'image', 'glassmorphism'), true) ? $input['form_panel_bg_mode'] : $defaults['form_panel_bg_mode'];
+    $sanitized['form_panel_bg_color'] = sanitize_hex_color($input['form_panel_bg_color'] ?? '') ?: $defaults['form_panel_bg_color'];
+    $sanitized['form_panel_image_id'] = absint($input['form_panel_image_id'] ?? 0);
+    $sanitized['form_panel_shadow'] = !empty($input['form_panel_shadow']) ? 1 : 0;
 
     return apply_filters('logindesignerwp_sanitize_settings', $sanitized, $input);
 }
