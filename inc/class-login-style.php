@@ -91,7 +91,8 @@ class LoginDesignerWP_Login_Style
         // - 'simple': Just fields/logo, no form container styling
         // - 'centered': Background on body, form in styled box
         // - 'split_left'/'split_right': Two panels, brand gets background, form gets panel styling
-        $is_split_layout = strpos($layout_mode, 'split_') === 0;
+        // - 'card_split': Similar to split but centralized card
+        $is_split_layout = strpos($layout_mode, 'split_') === 0 || $layout_mode === 'card_split';
         $is_simple_layout = $layout_mode === 'simple';
 
         // Form width (for simple layout) and split ratio (for split layouts)
@@ -385,9 +386,50 @@ class LoginDesignerWP_Login_Style
         $logo_color = ltrim(esc_attr($s['label_text_color']), '#');
 
         // Logo Container (h1)
-        $css .= "#login h1 {\n";
-        $css .= "    margin-bottom: " . intval($s['logo_bottom_margin']) . "px !important;\n";
-        $css .= "}\n";
+        if ($is_split_layout && !empty($s['brand_hide_form_logo'])) {
+            $css .= "#login h1 { display: none !important; }\n";
+        } else {
+            $css .= "#login h1 {\n";
+            $css .= "    margin-bottom: " . intval($s['logo_bottom_margin']) . "px !important;\n";
+            $css .= "}\n";
+        }
+
+        // Brand Content (Split Layouts)
+        if ($is_split_layout && ($s['brand_content_enable'] ?? true)) {
+            $brand_text_color = isset($s['brand_text_color']) ? esc_attr($s['brand_text_color']) : '#ffffff';
+
+            $css .= ".lp-brand-col {\n";
+            $css .= "    color: " . $brand_text_color . " !important;\n";
+            $css .= "}\n";
+
+            $css .= ".lp-brand-title {\n";
+            $css .= "    color: " . $brand_text_color . " !important;\n";
+            $css .= "}\n";
+
+            $css .= ".lp-brand-subtitle {\n";
+            $css .= "    color: " . $brand_text_color . " !important;\n";
+            $css .= "}\n";
+        }
+        // Brand Logo Background (Split Layouts)
+        if ($is_split_layout && !empty($s['brand_logo_bg_enable'])) {
+            $brand_bg_color = isset($s['brand_logo_bg_color']) ? esc_attr($s['brand_logo_bg_color']) : '#ffffff';
+
+            $radius_map = array(
+                'square' => 0,
+                'rounded' => 10,
+                'soft' => 25,
+                'full' => 100,
+            );
+            $preset = isset($s['brand_logo_radius_preset']) ? $s['brand_logo_radius_preset'] : 'square';
+            $brand_radius = isset($radius_map[$preset]) ? $radius_map[$preset] : 0;
+
+            $css .= ".lp-brand-logo {\n";
+            $css .= "    background-color: " . $brand_bg_color . " !important;\n";
+            $css .= "    padding: 10px !important;\n";
+            $css .= "    border-radius: " . $brand_radius . "px !important;\n";
+            $css .= "    box-sizing: content-box !important;\n"; // Ensure padding doesn't shrink image excessively if width constrained
+            $css .= "}\n";
+        }
 
         // Logo Link (a)
         $css .= "#login h1 a {\n";

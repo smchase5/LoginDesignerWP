@@ -142,22 +142,128 @@
 }
 
 /* =========================================
+   Layout 5: Card Split
+   Centralized card with split brand/form
+   ========================================= */
+.lp-shell.layout--card_split {
+    width: 100%;
+    max-width: 900px;
+    min-height: 550px;
+    height: auto;
+    margin: 0 auto;
+    
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    display: flex;
+    flex-direction: row;
+    background-color: #fff; /* Card Base */
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+.lp-shell.layout--card_split .lp-brand {
+    flex: 0 0 50%;
+    background-color: #f3f4f6;
+    position: relative;
+    
+    /* Ensure Brand Content Centering */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.lp-shell.layout--card_split .lp-main {
+    flex: 1 1 auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #fff;
+}
+
+/* Brand Content Styling (Applied to all split layouts that use it) */
+.lp-brand-content {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.lp-brand-logo {
+    max-width: 180px;
+    height: auto;
+    object-fit: contain;
+    margin-bottom: 1rem;
+    drop-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.lp-brand-title {
+    font-size: 2rem;
+    line-height: 1.2;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.lp-brand-subtitle {
+    font-size: 1.125rem;
+    line-height: 1.5;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1px 1px rgba(0,0,0,0.05);
+}
+
+/* Ensure branding is visible on split left/right too */
+.lp-shell.layout--split_left .lp-brand,
+.lp-shell.layout--split_right .lp-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Card Split - Mobile */
+@media (max-width: 900px) {
+    .lp-shell.layout--card_split {
+        width: 90%;
+        max-width: 400px;
+        min-height: auto;
+        flex-direction: column;
+        position: relative;
+        top: 2rem;
+        left: auto;
+        transform: none;
+        margin: 0 auto 2rem auto;
+    }
+    
+    .lp-shell.layout--card_split .lp-brand {
+        flex: 0 0 auto;
+        min-height: 200px;
+        padding: 1.5rem;
+    }
+
+    .lp-brand-title {
+        font-size: 1.5rem;
+    }
+}
+
+/* =========================================
    Preview Mode Overrides
    ========================================= */
 .lp-shell.is-preview-mode {
     min-height: 100%;
 }
-
-.lp-shell.is-preview-mode .lp-main {
-    min-height: 100%;
-}
-
-.lp-shell.layout--split_left.is-preview-mode .lp-brand,
-.lp-shell.layout--split_right.is-preview-mode .lp-brand {
-    min-height: 100%;
-}
-
-.lp-shell.layout--split_left.is-preview-mode .lp-main,
-.lp-shell.layout--split_right.is-preview-mode .lp-main {
-    min-height: 100%;
-}
+/* ... existing preview overrides ... */

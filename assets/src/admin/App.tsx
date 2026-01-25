@@ -249,7 +249,7 @@ export default function App() {
                 </div>
 
                 {/* Preview Column (Design Tab Only) - 50% */}
-                {(activeTab === 'design' || activeTab === 'security') && (
+                {(activeTab === 'design' || activeTab === 'security' || activeTab === 'social') && (
                     <div className="w-1/2 flex-shrink-0 pr-4">
                         <LivePreview
                             settings={settings}

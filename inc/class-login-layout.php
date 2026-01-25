@@ -84,9 +84,34 @@ class LoginDesignerWP_Login_Layout
         // Build the Shell Structure
         $shell_start = sprintf('<div class="%s" id="lp-shell">', $class_string);
 
-        // Brand Slot
         $shell_start .= '<div class="lp-brand">';
-        // Optional: Add branded content here later if settings allow
+
+        // Brand Content Injection
+        if (!empty($settings['brand_content_enable']) && ($is_split_layout = strpos($layout_mode, 'split_') === 0 || $layout_mode === 'card_split')) {
+            $shell_start .= '<div class="lp-brand-content">';
+
+            // Brand Logo
+            if (!empty($settings['brand_logo_url'])) {
+                $shell_start .= sprintf(
+                    '<img src="%s" class="lp-brand-logo" alt="%s" />',
+                    esc_url($settings['brand_logo_url']),
+                    esc_attr(isset($settings['brand_title']) ? $settings['brand_title'] : 'Logo')
+                );
+            }
+
+            // Title
+            if (!empty($settings['brand_title'])) {
+                $shell_start .= sprintf('<h2 class="lp-brand-title">%s</h2>', esc_html($settings['brand_title']));
+            }
+
+            // Subtitle
+            if (!empty($settings['brand_subtitle'])) {
+                $shell_start .= sprintf('<p class="lp-brand-subtitle">%s</p>', esc_html($settings['brand_subtitle']));
+            }
+
+            $shell_start .= '</div>';
+        }
+
         $shell_start .= '</div>';
 
         // Main Slot Start
@@ -134,6 +159,39 @@ class LoginDesignerWP_Login_Layout
         $brand = $dom->createElement('div');
         $brand->setAttribute('class', 'lp-brand');
         $shell->appendChild($brand);
+
+        // Inject Brand Content
+        $settings = $this->settings;
+        $layout_mode = isset($settings['layout_mode']) ? $settings['layout_mode'] : 'centered';
+
+        if (!empty($settings['brand_content_enable']) && ($is_split_layout = strpos($layout_mode, 'split_') === 0 || $layout_mode === 'card_split')) {
+            $brand_content = $dom->createElement('div');
+            $brand_content->setAttribute('class', 'lp-brand-content');
+            $brand->appendChild($brand_content);
+
+            // Brand Logo
+            if (!empty($settings['brand_logo_url'])) {
+                $img = $dom->createElement('img');
+                $img->setAttribute('src', esc_url($settings['brand_logo_url']));
+                $img->setAttribute('class', 'lp-brand-logo');
+                $img->setAttribute('alt', isset($settings['brand_title']) ? $settings['brand_title'] : 'Logo');
+                $brand_content->appendChild($img);
+            }
+
+            // Title
+            if (!empty($settings['brand_title'])) {
+                $title = $dom->createElement('h2', esc_html($settings['brand_title']));
+                $title->setAttribute('class', 'lp-brand-title');
+                $brand_content->appendChild($title);
+            }
+
+            // Subtitle
+            if (!empty($settings['brand_subtitle'])) {
+                $subtitle = $dom->createElement('p', esc_html($settings['brand_subtitle']));
+                $subtitle->setAttribute('class', 'lp-brand-subtitle');
+                $brand_content->appendChild($subtitle);
+            }
+        }
 
         $main = $dom->createElement('div');
         $main->setAttribute('class', 'lp-main');

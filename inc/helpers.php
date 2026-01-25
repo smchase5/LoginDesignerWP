@@ -114,6 +114,18 @@ function logindesignerwp_get_defaults()
         'form_panel_bg_color' => '#ffffff',
         'form_panel_image_id' => 0, // Separate image for form panel
         'form_panel_shadow' => 1,
+
+        // Brand Content Settings
+        'brand_content_enable' => 0,
+        'brand_logo_url' => '',
+        'brand_title' => '',
+        'brand_subtitle' => '',
+        'brand_content_align' => 'center',
+        'brand_hide_form_logo' => 0,
+        'brand_logo_bg_enable' => 0,
+        'brand_logo_bg_color' => '#ffffff',
+        'brand_logo_radius_preset' => 'square',
+        'brand_text_color' => '#ffffff',
     );
 
     // Allow Pro to extend defaults.
@@ -257,7 +269,7 @@ function logindesignerwp_sanitize_settings($input)
     $sanitized['logo_title'] = sanitize_text_field($input['logo_title'] ?? '');
 
     // Layout Settings
-    $valid_layouts = array('simple', 'centered', 'split_left', 'split_right');
+    $valid_layouts = array('simple', 'centered', 'split_left', 'split_right', 'card_split');
     $sanitized['layout_mode'] = in_array($input['layout_mode'] ?? '', $valid_layouts, true) ? $input['layout_mode'] : $defaults['layout_mode'];
 
     $valid_widths = array('320', '360', '420', '480');
@@ -271,6 +283,18 @@ function logindesignerwp_sanitize_settings($input)
     $sanitized['form_panel_bg_color'] = sanitize_hex_color($input['form_panel_bg_color'] ?? '') ?: $defaults['form_panel_bg_color'];
     $sanitized['form_panel_image_id'] = absint($input['form_panel_image_id'] ?? 0);
     $sanitized['form_panel_shadow'] = !empty($input['form_panel_shadow']) ? 1 : 0;
+
+    // Brand Content sanitization
+    $sanitized['brand_content_enable'] = !empty($input['brand_content_enable']) ? 1 : 0;
+    $sanitized['brand_logo_url'] = esc_url_raw($input['brand_logo_url'] ?? '');
+    $sanitized['brand_title'] = sanitize_text_field($input['brand_title'] ?? '');
+    $sanitized['brand_subtitle'] = sanitize_textarea_field($input['brand_subtitle'] ?? '');
+    $sanitized['brand_content_align'] = in_array($input['brand_content_align'] ?? '', array('left', 'center', 'right'), true) ? $input['brand_content_align'] : 'center';
+    $sanitized['brand_hide_form_logo'] = !empty($input['brand_hide_form_logo']) ? 1 : 0;
+    $sanitized['brand_logo_bg_enable'] = !empty($input['brand_logo_bg_enable']) ? 1 : 0;
+    $sanitized['brand_logo_bg_color'] = sanitize_hex_color($input['brand_logo_bg_color'] ?? '') ?: '#ffffff';
+    $sanitized['brand_logo_radius_preset'] = in_array($input['brand_logo_radius_preset'] ?? '', array('square', 'rounded', 'soft', 'full'), true) ? $input['brand_logo_radius_preset'] : 'square';
+    $sanitized['brand_text_color'] = sanitize_hex_color($input['brand_text_color'] ?? '') ?: '#ffffff';
 
     return apply_filters('logindesignerwp_sanitize_settings', $sanitized, $input);
 }

@@ -144,7 +144,7 @@ export function LivePreview({
             padding: settings.logo_padding || 0,
             borderRadius: settings.logo_border_radius || 0,
             marginBottom: settings.logo_bottom_margin || 25,
-            display: 'block',
+            display: settings.brand_hide_form_logo ? 'none' : 'block',
             marginLeft: 'auto',
             marginRight: 'auto',
         }
@@ -282,7 +282,7 @@ export function LivePreview({
                             zIndex: 10
                         }}>
                             <div id="login" className="lp-form">
-                                {/* Logo */}
+                                {/* Logo (Show above form if NOT using brand content logo in future) */}
                                 <div style={getLogoStyle()} />
 
                                 {/* Form */}
@@ -383,10 +383,68 @@ export function LivePreview({
                                             Log In
                                         </button>
                                     </div>
+
+                                    {/* Social Login Buttons */}
+                                    {(!!settings.google_login_enable || !!settings.github_login_enable) && (
+                                        <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                            {/* Google */}
+                                            {!!settings.google_login_enable && (
+                                                <button type="button" style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: 10,
+                                                    width: '100%',
+                                                    padding: '10px',
+                                                    backgroundColor: '#ffffff',
+                                                    border: '1px solid #ddd',
+                                                    borderRadius: '4px',
+                                                    color: '#555',
+                                                    fontSize: '14px',
+                                                    fontWeight: 500,
+                                                    cursor: 'pointer',
+                                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                                }}>
+                                                    <svg viewBox="0 0 24 24" style={{ width: 18, height: 18 }}>
+                                                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                                                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                                                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                                                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                                                    </svg>
+                                                    Sign in with Google
+                                                </button>
+                                            )}
+
+                                            {/* GitHub */}
+                                            {!!settings.github_login_enable && (
+                                                <button type="button" style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: 10,
+                                                    width: '100%',
+                                                    padding: '10px',
+                                                    backgroundColor: '#24292e',
+                                                    border: '1px solid #24292e',
+                                                    borderRadius: '4px',
+                                                    color: '#ffffff',
+                                                    fontSize: '14px',
+                                                    fontWeight: 500,
+                                                    cursor: 'pointer',
+                                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                                }}>
+                                                    <svg viewBox="0 0 24 24" style={{ width: 18, height: 18, fill: 'currentColor' }}>
+                                                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                                                    </svg>
+                                                    Sign in with GitHub
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
-                            {/* Footer Links (Lost Password & Back to Site) */}
+                            {/* Footer Links */}
                             {(() => {
                                 let linkColor = settings.below_form_link_color || '#50575e'
 
@@ -453,7 +511,14 @@ export function LivePreview({
                         const isSolid = settings.background_mode === 'solid'
 
                         // Determine effective style
-                        const style: React.CSSProperties = {}
+                        const style: React.CSSProperties = {
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            alignItems: 'center', // Default center, setting.brand_content_align handles text
+                            padding: '2rem',
+                            color: '#ffffff'
+                        }
 
                         if (hasImage) {
                             style.backgroundImage = `url(${settings.background_image_url})`
@@ -471,7 +536,7 @@ export function LivePreview({
                         }
 
                         return (
-                            <div className="w-full h-full relative" style={style}>
+                            <div className="w-full h-full relative flex items-center justify-center" style={style}>
                                 {!!settings.background_blur && settings.background_blur > 0 && (
                                     <div className="absolute inset-0 backdrop-blur-sm"
                                         style={{ backdropFilter: `blur(${settings.background_blur}px)` }}
@@ -484,6 +549,51 @@ export function LivePreview({
                                             opacity: (parseInt(settings.background_overlay_opacity) || 50) / 100
                                         }}
                                     />
+                                )}
+
+                                {/* Brand Content Overlay */}
+                                {!!settings.brand_content_enable && (
+                                    <div className="relative z-10 w-full max-w-md space-y-6 text-center flex flex-col items-center">
+                                        {/* Brand Logo */}
+                                        {settings.brand_logo_url && (
+                                            <img
+                                                src={settings.brand_logo_url}
+                                                alt={settings.brand_title || 'Brand Logo'}
+                                                className="h-auto max-w-[200px] object-contain mb-2 drop-shadow-sm"
+                                                style={settings.brand_logo_bg_enable ? {
+                                                    backgroundColor: settings.brand_logo_bg_color || '#ffffff',
+                                                    padding: 10,
+                                                    borderRadius: (({
+                                                        'square': 0,
+                                                        'rounded': 10,
+                                                        'soft': 25,
+                                                        'full': 100
+                                                    } as Record<string, number>)[settings.brand_logo_radius_preset as string || 'square']) ?? 0,
+                                                    boxSizing: 'content-box'
+                                                } : {}}
+                                            />
+                                        )}
+
+                                        {/* Render Title/Subtitle if enabled */}
+                                        <div className="relative z-10 w-full max-w-sm text-center">
+                                            {!!settings.brand_title && (
+                                                <h2
+                                                    className="text-3xl font-bold tracking-tight mb-4 font-sans drop-shadow-sm"
+                                                    style={{ color: settings.brand_text_color || '#ffffff' }}
+                                                >
+                                                    {settings.brand_title}
+                                                </h2>
+                                            )}
+                                            {!!settings.brand_subtitle && (
+                                                <p
+                                                    className="text-lg opacity-90 leading-relaxed font-sans drop-shadow-sm"
+                                                    style={{ color: settings.brand_text_color || '#ffffff' }}
+                                                >
+                                                    {settings.brand_subtitle}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
                                 )}
                             </div>
                         )
@@ -527,33 +637,58 @@ export function LivePreview({
                         return style
                     }
 
-                    // We remove ScaledWrapper to prevent visual artifacts.
-                    // Instead, we rely on responsive CSS and the .is-preview-mode class.
-
-                    // For our 4 layouts (centered, split_left, split_right, card):
-                    // - Centered & Card: lp-brand is hidden via CSS
-                    // - Split: lp-brand shows the background image
-                    // - Card: lp-content-wrap gets card styling via CSS
-
+                    // Layout Logic
                     const isSplitLayout = layoutMode.startsWith('split_')
+                    const isCardSplit = layoutMode === 'card_split'
+                    const showBrand = isSplitLayout || isCardSplit
 
+                    // CARD SPLIT LAYOUT SPECIFIC STRUCTURE
+                    if (isCardSplit) {
+                        return (
+                            <div
+                                className="w-full h-full min-h-[550px] relative transition-all duration-300 flex items-center justify-center p-8 overflow-hidden"
+                            >
+                                {/* Background for the whole screen (using brand background logic or separate?)
+                                    Usually card split implies a neutral background behind the card,
+                                    and the CARD itself is split.
+                                */}
+                                <div className="absolute inset-0 -z-10 bg-gray-100"></div>
+
+                                <div className="flex w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden h-[600px]">
+                                    {/* Left Side (Brand) */}
+                                    <div className="w-1/2 relative bg-blue-600">
+                                        {getBrandContent()}
+                                    </div>
+
+                                    {/* Right Side (Form) */}
+                                    <div className="w-1/2 p-8 flex items-center justify-center bg-white">
+                                        {FormContent}
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    }
+
+                    // STANDARD LAYOUTS (Centered, Split Left, Split Right, Simple)
                     return (
                         <div
                             className={`${shellClasses} is-preview-mode w-full h-full min-h-[550px] relative transition-all duration-300`}
                             style={cssVariables}
                         >
                             {/* Brand Slot - Only visible in split layouts */}
-                            <div className="lp-brand">
-                                {getBrandContent()}
-                            </div>
+                            {showBrand && (
+                                <div className="lp-brand">
+                                    {getBrandContent()}
+                                </div>
+                            )}
 
                             {/* Main Slot (Form) */}
                             <div
                                 className="lp-main relative z-10 transition-all duration-300"
-                                style={isSplitLayout ? getFormPanelStyle() : undefined}
+                                style={(isSplitLayout && !isCardSplit) ? getFormPanelStyle() : undefined}
                             >
                                 {/* Centered/Card layout: show background behind form */}
-                                {!isSplitLayout && (
+                                {!showBrand && (
                                     <div className="absolute inset-0 -z-10" style={getBackgroundStyle()}></div>
                                 )}
 
