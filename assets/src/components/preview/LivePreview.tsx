@@ -677,8 +677,6 @@ export function LivePreview({
 
                     // Helper to get brand content (backgrounds)
                     const getBrandContent = () => {
-                        const hasImage = settings.background_mode === 'image' && settings.background_image_url
-
                         // Determine effective style
                         const style: React.CSSProperties = {
                             display: 'flex',
@@ -689,18 +687,18 @@ export function LivePreview({
                             color: '#ffffff'
                         }
 
-                        if (hasImage) {
-                            style.backgroundImage = `url(${settings.background_image_url})`
-                            style.backgroundSize = 'cover'
-                            style.backgroundPosition = 'center'
-                            // Apply solid or gradient background
-                            const bgStyle = getBackgroundStyle()
-                            if (bgStyle.background) style.background = bgStyle.background
-                            if (bgStyle.backgroundColor) style.backgroundColor = bgStyle.backgroundColor
-                            if (bgStyle.backgroundImage) style.backgroundImage = bgStyle.backgroundImage
-                        } else {
-                            // Default fallback pattern for "Dual Background" requirement
-                            // Only if absolutely no background setting is active
+                        // Use centralized background logic for Brand Column (Supports Mesh, Gradient, Image, Solid)
+                        const bgStyle = getBackgroundStyle()
+                        if (bgStyle.background) style.background = bgStyle.background
+                        if (bgStyle.backgroundColor) style.backgroundColor = bgStyle.backgroundColor
+                        if (bgStyle.backgroundImage) style.backgroundImage = bgStyle.backgroundImage
+                        if (bgStyle.backgroundSize) style.backgroundSize = bgStyle.backgroundSize
+                        if (bgStyle.backgroundPosition) style.backgroundPosition = bgStyle.backgroundPosition
+                        if (bgStyle.backgroundRepeat) style.backgroundRepeat = bgStyle.backgroundRepeat
+                        if (bgStyle.backgroundAttachment) style.backgroundAttachment = bgStyle.backgroundAttachment
+
+                        // Fallback only if absolutely no background is present
+                        if (!style.background && !style.backgroundImage && !style.backgroundColor) {
                             style.backgroundImage = `linear-gradient(135deg, #667eea 0%, #764ba2 100%)`
                         }
 
