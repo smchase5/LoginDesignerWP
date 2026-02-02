@@ -3,6 +3,8 @@ import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 import { LayoutTemplate, PanelLeft, Minus, Lock, X } from 'lucide-react'
 import { ColorPicker } from '@/components/ui/color-picker'
+import { Slider } from '@/components/ui/slider'
+import { Switch } from '@/components/ui/switch'
 
 interface LayoutSectionProps {
     settings: Record<string, any>
@@ -46,7 +48,6 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
     ]
 
     // Layout-specific options
-    const splitRatioOptions = ['40', '50', '60']
     const formWidthOptions = [
         { value: '320', label: 'Narrow (320px)' },
         { value: '360', label: 'Default (360px)' },
@@ -84,6 +85,10 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
                                 const isBrandLayout = layout.id.startsWith('split_') || layout.id === 'card_split'
                                 if (!isBrandLayout) {
                                     onChange('brand_hide_form_logo', 0)
+                                } else {
+                                    // Disable glassmorphism on form container by default for split layouts
+                                    // as it often looks bad with the default white form panel
+                                    onChange('enable_glassmorphism', 0)
                                 }
                             }}
                         >
@@ -144,19 +149,40 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
                         </p>
                     </div>
 
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <Label className="text-sm">Split Ratio</Label>
+                            <span className="text-xs text-muted-foreground font-mono">
+                                {settings.layout_split_ratio || '50'}%
+                            </span>
+                        </div>
+                        <Slider
+                            value={[parseInt(settings.layout_split_ratio || '50')]}
+                            min={20}
+                            max={80}
+                            step={5}
+                            onValueChange={(vals) => onChange('layout_split_ratio', vals[0].toString())}
+                        />
+                    </div>
+
                     <div className="flex items-center justify-between">
-                        <Label className="text-sm">Split Ratio</Label>
-                        <select
-                            className="h-9 px-3 rounded-md border border-input bg-background text-sm"
-                            value={settings.layout_split_ratio || '50'}
-                            onChange={(e) => onChange('layout_split_ratio', e.target.value)}
-                        >
-                            {splitRatioOptions.map((ratio) => (
-                                <option key={ratio} value={ratio}>
-                                    {ratio}% / {100 - parseInt(ratio)}%
-                                </option>
+                        <Label className="text-sm">Form Style</Label>
+                        <div className="flex bg-secondary/50 p-1 rounded-md">
+                            {['boxed', 'simple'].map((style) => (
+                                <button
+                                    key={style}
+                                    className={cn(
+                                        "px-3 py-1 text-xs font-medium rounded-sm transition-all",
+                                        (settings.layout_form_style || 'boxed') === style
+                                            ? "bg-background shadow-sm text-foreground"
+                                            : "text-muted-foreground hover:text-foreground"
+                                    )}
+                                    onClick={() => onChange('layout_form_style', style)}
+                                >
+                                    {style.charAt(0).toUpperCase() + style.slice(1)}
+                                </button>
                             ))}
-                        </select>
+                        </div>
                     </div>
 
                     {/* Brand Content Controls */}
@@ -169,11 +195,9 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
                                 </p>
                             </div>
                             <div className="flex items-center h-6">
-                                <input
-                                    type="checkbox"
-                                    className="scale-125 accent-primary cursor-pointer"
+                                <Switch
                                     checked={!!settings.brand_content_enable}
-                                    onChange={(e) => onChange('brand_content_enable', e.target.checked ? 1 : 0)}
+                                    onCheckedChange={(checked) => onChange('brand_content_enable', checked ? 1 : 0)}
                                 />
                             </div>
                         </div>
@@ -183,11 +207,9 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
                                 {/* Hide Login Form Logo */}
                                 <div className="flex items-center justify-between">
                                     <Label className="text-xs">Hide Login Form Logo</Label>
-                                    <input
-                                        type="checkbox"
-                                        className="accent-primary cursor-pointer"
+                                    <Switch
                                         checked={!!settings.brand_hide_form_logo}
-                                        onChange={(e) => onChange('brand_hide_form_logo', e.target.checked ? 1 : 0)}
+                                        onCheckedChange={(checked) => onChange('brand_hide_form_logo', checked ? 1 : 0)}
                                     />
                                 </div>
 
@@ -244,11 +266,9 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
                                 <div className="space-y-3 pt-2 pb-1 border-b border-border/50">
                                     <div className="flex items-center justify-between">
                                         <Label className="text-xs">Enable Logo Background</Label>
-                                        <input
-                                            type="checkbox"
-                                            className="accent-primary cursor-pointer"
+                                        <Switch
                                             checked={!!settings.brand_logo_bg_enable}
-                                            onChange={(e) => onChange('brand_logo_bg_enable', e.target.checked ? 1 : 0)}
+                                            onCheckedChange={(checked) => onChange('brand_logo_bg_enable', checked ? 1 : 0)}
                                         />
                                     </div>
 

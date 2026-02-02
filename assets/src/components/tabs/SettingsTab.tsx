@@ -1,9 +1,10 @@
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { Save, ExternalLink, Check, X } from 'lucide-react'
+import { Save, ExternalLink, Check, X, Loader2 } from 'lucide-react'
 
 interface SettingsTabProps {
     settings: Record<string, any>
@@ -14,7 +15,49 @@ interface SettingsTabProps {
 }
 
 export function SettingsTab({ settings, onChange, onSave, isSaving, isPro = false }: SettingsTabProps) {
-    const version = '1.0.0' // This would come from PHP data
+    const version = '1.0.0'
+    const isProPluginActive = window.logindesignerwpData.isProPluginActive
+    const [licenseKey, setLicenseKey] = useState(window.logindesignerwpData.license?.key || '')
+    const [licenseStatus, setLicenseStatus] = useState(window.logindesignerwpData.license?.status || 'invalid')
+    const [isLicenseLoading, setIsLicenseLoading] = useState(false)
+    const [licenseMessage, setLicenseMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null)
+
+    const handleLicenseAction = async (action: 'activate' | 'deactivate') => {
+        setIsLicenseLoading(true)
+        setLicenseMessage(null)
+
+        try {
+            const formData = new FormData()
+            formData.append('action', `logindesignerwp_${action}_license`)
+            formData.append('nonce', window.logindesignerwpData.licenseNonce || '')
+            if (action === 'activate') {
+                formData.append('license_key', licenseKey)
+            }
+
+            const response = await fetch(window.ajaxurl, {
+                method: 'POST',
+                body: formData,
+            })
+
+            const data = await response.json()
+
+            if (data.success) {
+                setLicenseStatus(action === 'activate' ? 'valid' : 'invalid')
+                setLicenseMessage({
+                    text: action === 'activate' ? 'License activated successfully!' : 'License deactivated.',
+                    type: 'success'
+                })
+                // Reload to refresh pro status across the app
+                setTimeout(() => window.location.reload(), 1500)
+            } else {
+                setLicenseMessage({ text: data.data.message || 'An error occurred.', type: 'error' })
+            }
+        } catch (error) {
+            setLicenseMessage({ text: 'Network error. Please try again.', type: 'error' })
+        } finally {
+            setIsLicenseLoading(false)
+        }
+    }
 
     return (
         <div className="space-y-6">
@@ -26,17 +69,56 @@ export function SettingsTab({ settings, onChange, onSave, isSaving, isPro = fals
                         Pro License
                     </CardTitle>
                     <CardDescription>
-                        {isPro
-                            ? 'Your Pro license is active. Thank you for your support!'
+                        {isProPluginActive
+                            ? 'Manage your Login Designer WP Pro license.'
                             : 'Activate LoginDesignerWP Pro to unlock additional design presets, glassmorphism effects, custom CSS, and more.'
                         }
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {isPro ? (
-                        <div className="flex items-center gap-2 text-green-600">
-                            <Check className="h-5 w-5" />
-                            <span className="font-semibold">License Active</span>
+                    {isProPluginActive ? (
+                        <div className="space-y-4">
+                            <div className="flex gap-3 items-end">
+                                <div className="flex-1 space-y-2">
+                                    <Label>License Key</Label>
+                                    <Input
+                                        type="password"
+                                        value={licenseKey}
+                                        onChange={(e) => setLicenseKey(e.target.value)}
+                                        placeholder="Enter your license key..."
+                                        disabled={licenseStatus === 'valid' || isLicenseLoading}
+                                    />
+                                </div>
+                                {licenseStatus === 'valid' ? (
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => handleLicenseAction('deactivate')}
+                                        disabled={isLicenseLoading}
+                                    >
+                                        {isLicenseLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Deactivate'}
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        onClick={() => handleLicenseAction('activate')}
+                                        disabled={isLicenseLoading || !licenseKey}
+                                    >
+                                        {isLicenseLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Activate'}
+                                    </Button>
+                                )}
+                            </div>
+
+                            {licenseStatus === 'valid' && (
+                                <div className="flex items-center gap-2 text-green-600 text-sm">
+                                    <Check className="h-4 w-4" />
+                                    <span className="font-semibold">License Active</span>
+                                </div>
+                            )}
+
+                            {licenseMessage && (
+                                <p className={`text-sm ${licenseMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                                    {licenseMessage.text}
+                                </p>
+                            )}
                         </div>
                     ) : (
                         <Button asChild variant="wp">

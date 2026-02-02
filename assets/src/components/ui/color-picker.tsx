@@ -60,7 +60,7 @@ export function ColorPicker({
                         aria-label="Pick a color"
                     />
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-3" align="end">
+                <PopoverContent className="w-auto p-3" align="start">
                     <div className="space-y-3">
                         <HexColorPicker color={value} onChange={onChange} />
                         <div className="flex items-center gap-2">

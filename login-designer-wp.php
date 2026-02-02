@@ -33,6 +33,18 @@ require_once LOGINDESIGNERWP_PATH . 'inc/class-social-login.php';
 require_once LOGINDESIGNERWP_PATH . 'inc/class-presets-core.php';
 require_once LOGINDESIGNERWP_PATH . 'inc/security/class-security.php';
 
+// Plugin Update Checker (GitHub)
+if (file_exists(LOGINDESIGNERWP_PATH . 'inc/lib/plugin-update-checker/plugin-update-checker.php')) {
+    require_once LOGINDESIGNERWP_PATH . 'inc/lib/plugin-update-checker/plugin-update-checker.php';
+    $myUpdateChecker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+        'https://github.com/smchase5/LoginDesignerWP',
+        __FILE__,
+        'logindesignerwp'
+    );
+    // Enable release assets (zip downloads from tags)
+    $myUpdateChecker->getVcsApi()->enableReleaseAssets();
+}
+
 // Load Pro module (Development Mode / Integrated).
 if (file_exists(LOGINDESIGNERWP_PATH . 'inc/pro/class-pro-manager.php')) {
     require_once LOGINDESIGNERWP_PATH . 'inc/pro/class-pro-manager.php';

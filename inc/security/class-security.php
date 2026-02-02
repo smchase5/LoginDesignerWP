@@ -370,11 +370,10 @@ class LoginDesignerWP_Security
                 $num1 = rand( 1, 9 );
                 $num2 = rand( 1, 9 );
                 $sum = $num1 + $num2;
-                echo '<p class="ldwp-math-challenge">
-                    <label for="ldwp_math_answer">' . sprintf( __( 'Math: %d + %d = ?', 'logindesignerwp' ), $num1, $num2 ) . '</label>
-                    <input type="number" name="ldwp_math_answer" id="ldwp_math_answer" class="input" size="20" required>
+                echo '<p class="ldwp-math-challenge" style="margin-bottom: 20px;">
+                    <label for="ldwp_math_answer" style="margin-bottom: 5px; display: block; font-weight: 600;">' . sprintf( __( '%d + %d = ?', 'logindesignerwp' ), $num1, $num2 ) . '</label>
+                    <input type="text" name="ldwp_math_answer" id="ldwp_math_answer" class="input" size="5" style="width: 80px !important; min-width: 80px !important;" required autocomplete="off">
                     <input type="hidden" name="ldwp_math_hash" value="' . wp_hash( $sum ) . '">
-                    <style>.ldwp-math-challenge { margin-top: 15px; font-weight: bold; }</style>
                 </p>';
             }
         }

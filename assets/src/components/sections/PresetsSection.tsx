@@ -31,6 +31,10 @@ export function PresetsSection({ settings, onBulkChange, presets, isPro }: Prese
             background_image_url: '',
             background_gradient_1: '',
             background_gradient_2: '',
+            // Reset brand props to prevent leakage from previous Smart Themes
+            brand_text_color: '',
+            brand_logo_bg_color: '',
+            brand_logo_bg_enable: 0,
         }
 
         // Apply preset settings AFTER resets
@@ -42,9 +46,7 @@ export function PresetsSection({ settings, onBulkChange, presets, isPro }: Prese
             updates.glass_enabled = false
         }
 
-        // ALWAYS preserve "Hide Footer Links" - never let presets change it
-        // This setting should only be changed manually by the user
-        updates.hide_footer_links = settings.hide_footer_links || 0
+
 
         // Atomic update
         onBulkChange(updates)

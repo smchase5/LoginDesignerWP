@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { ColorPicker } from '@/components/ui/color-picker'
+import { Slider } from '@/components/ui/slider'
 import { Image, X } from 'lucide-react'
 
 interface LogoSectionProps {
@@ -69,13 +70,13 @@ export function LogoSection({ settings, onChange }: LogoSectionProps) {
                     <div className="flex items-center justify-between">
                         <Label>Size (Width)</Label>
                         <div className="flex items-center gap-2">
-                            <input
-                                type="range"
+                            <Slider
+                                min={20}
+                                max={500}
+                                step={1}
+                                value={[settings.logo_width || 84]}
+                                onValueChange={([val]) => onChange('logo_width', val)}
                                 className="w-24"
-                                min="20"
-                                max="500"
-                                value={settings.logo_width || 84}
-                                onChange={(e) => onChange('logo_width', parseInt(e.target.value))}
                             />
                             <span className="text-sm font-medium text-primary w-12 text-right">
                                 {settings.logo_width || 84}px
@@ -86,13 +87,13 @@ export function LogoSection({ settings, onChange }: LogoSectionProps) {
                     <div className="flex items-center justify-between">
                         <Label>Height</Label>
                         <div className="flex items-center gap-2">
-                            <input
-                                type="range"
+                            <Slider
+                                min={20}
+                                max={500}
+                                step={1}
+                                value={[settings.logo_height || 84]}
+                                onValueChange={([val]) => onChange('logo_height', val)}
                                 className="w-24"
-                                min="20"
-                                max="500"
-                                value={settings.logo_height || 84}
-                                onChange={(e) => onChange('logo_height', parseInt(e.target.value))}
                             />
                             <span className="text-sm font-medium text-primary w-12 text-right">
                                 {settings.logo_height || 84}px
@@ -105,13 +106,13 @@ export function LogoSection({ settings, onChange }: LogoSectionProps) {
                 <div className="flex items-center justify-between">
                     <Label>Padding</Label>
                     <div className="flex items-center gap-2">
-                        <input
-                            type="range"
+                        <Slider
+                            min={0}
+                            max={100}
+                            step={1}
+                            value={[settings.logo_padding || 0]}
+                            onValueChange={([val]) => onChange('logo_padding', val)}
                             className="w-24"
-                            min="0"
-                            max="100"
-                            value={settings.logo_padding || 0}
-                            onChange={(e) => onChange('logo_padding', parseInt(e.target.value))}
                         />
                         <span className="text-sm font-medium text-primary w-12">
                             {settings.logo_padding || 0}px
@@ -123,13 +124,13 @@ export function LogoSection({ settings, onChange }: LogoSectionProps) {
                 <div className="flex items-center justify-between">
                     <Label>Bottom Margin</Label>
                     <div className="flex items-center gap-2">
-                        <input
-                            type="range"
+                        <Slider
+                            min={0}
+                            max={100}
+                            step={1}
+                            value={[settings.logo_bottom_margin || 25]}
+                            onValueChange={([val]) => onChange('logo_bottom_margin', val)}
                             className="w-24"
-                            min="0"
-                            max="100"
-                            value={settings.logo_bottom_margin || 25}
-                            onChange={(e) => onChange('logo_bottom_margin', parseInt(e.target.value))}
                         />
                         <span className="text-sm font-medium text-primary w-12">
                             {settings.logo_bottom_margin || 25}px
@@ -159,13 +160,13 @@ export function LogoSection({ settings, onChange }: LogoSectionProps) {
                             <div className="flex items-center justify-between">
                                 <Label>Corner Radius</Label>
                                 <div className="flex items-center gap-2">
-                                    <input
-                                        type="range"
+                                    <Slider
+                                        min={0}
+                                        max={50}
+                                        step={1}
+                                        value={[settings.logo_border_radius || 0]}
+                                        onValueChange={([val]) => onChange('logo_border_radius', val)}
                                         className="w-20"
-                                        min="0"
-                                        max="50"
-                                        value={settings.logo_border_radius || 0}
-                                        onChange={(e) => onChange('logo_border_radius', parseInt(e.target.value))}
                                     />
                                     <span className="text-xs w-8 text-right">{settings.logo_border_radius || 0}px</span>
                                 </div>

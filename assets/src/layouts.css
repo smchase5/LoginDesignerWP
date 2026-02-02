@@ -44,6 +44,8 @@
     padding: 0 1rem;
     position: relative;
     z-index: 10;
+    overflow: visible;
+    /* Prevent focus ring clipping */
 }
 
 /* =========================================
@@ -151,25 +153,26 @@
     min-height: 550px;
     height: auto;
     margin: 0 auto;
-    
+
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    
+
     display: flex;
     flex-direction: row;
-    background-color: #fff; /* Card Base */
+    background-color: #fff;
+    /* Card Base */
     border-radius: 16px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     overflow: hidden;
 }
 
 .lp-shell.layout--card_split .lp-brand {
-    flex: 0 0 50%;
+    flex: 0 0 var(--lp-brand-width, 50%);
     background-color: #f3f4f6;
     position: relative;
-    
+
     /* Ensure Brand Content Centering */
     display: flex;
     align-items: center;
@@ -207,7 +210,7 @@
     height: auto;
     object-fit: contain;
     margin-bottom: 1rem;
-    drop-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
 .lp-brand-title {
@@ -216,7 +219,7 @@
     font-weight: 700;
     margin: 0 0 0.5rem 0;
     color: #ffffff;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .lp-brand-subtitle {
@@ -224,7 +227,7 @@
     line-height: 1.5;
     margin: 0;
     color: rgba(255, 255, 255, 0.9);
-    text-shadow: 0 1px 1px rgba(0,0,0,0.05);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
 }
 
 /* Ensure branding is visible on split left/right too */
@@ -248,7 +251,7 @@
         transform: none;
         margin: 0 auto 2rem auto;
     }
-    
+
     .lp-shell.layout--card_split .lp-brand {
         flex: 0 0 auto;
         min-height: 200px;
@@ -266,4 +269,11 @@
 .lp-shell.is-preview-mode {
     min-height: 100%;
 }
+
+.lp-shell.is-preview-mode .lp-brand,
+.lp-shell.is-preview-mode .lp-main {
+    min-height: 100% !important;
+    height: 100%;
+}
+
 /* ... existing preview overrides ... */

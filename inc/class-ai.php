@@ -114,84 +114,48 @@ class LoginDesignerWP_AI
             wp_send_json_error(__('OpenAI API Key is missing. Please configure it in the Settings tab.', 'logindesignerwp'));
         }
 
-        // Call OpenAI Images API
-        $image_quality = isset($settings['image_quality']) ? $settings['image_quality'] : 'high';
-        $image_model = isset($settings['image_model']) ? $settings['image_model'] : 'gpt-image-1.5';
+        // Call OpenAI Images API - Enforcing DALL-E 3 for best results
+        $image_quality = isset($settings['image_quality']) ? $settings['image_quality'] : 'hd';
 
-        // Helper to perform the request
-        $perform_request = function ($model) use ($api_key, $prompt, $image_quality) {
-            // Determine quality param based on model
-            $request_quality = $image_quality;
-            if ($model === 'dall-e-3') {
-                // DALL-E 3 only supports 'hd' and 'standard'
-                $request_quality = ($image_quality === 'high') ? 'hd' : 'standard';
-            }
+        // Prepare arguments for DALL-E 3
+        $body_args = array(
+            'model' => 'dall-e-3',
+            'prompt' => $prompt,
+            'n' => 1,
+            'size' => '1792x1024', // Landscape high-res for login pages
+            'quality' => ($image_quality === 'standard') ? 'standard' : 'hd',
+            'style' => 'vivid' // Use vivid style for "better" (more impressive) results
+        );
 
-            return wp_remote_post('https://api.openai.com/v1/images/generations', array(
-                'headers' => array(
-                    'Content-Type' => 'application/json',
-                    'Authorization' => 'Bearer ' . $api_key,
-                ),
-                'body' => json_encode(array(
-                    'model' => $model,
-                    'prompt' => $prompt,
-                    'n' => 1,
-                    // DALL-E 3 supports 1792x1024, GPT-Image supports 1536x1024. 
-                    'size' => ($model === 'dall-e-3') ? '1792x1024' : '1536x1024',
-                    'quality' => $request_quality,
-                )),
-                'timeout' => 60,
-            ));
-        };
+        $response = wp_remote_post('https://api.openai.com/v1/images/generations', array(
+            'headers' => array(
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $api_key,
+            ),
+            'body' => json_encode($body_args),
+            'timeout' => 60,
+        ));
 
-        // Fallback chain definition
-        $fallback_chain = array('gpt-image-1.5', 'gpt-image-1', 'gpt-image-1-mini', 'dall-e-3');
-
-        // Find start index based on selected model
-        $start_index = array_search($image_model, $fallback_chain);
-        if ($start_index === false) {
-            $start_index = 0; // Default to start if unknown model
+        if (is_wp_error($response)) {
+            wp_send_json_error($response->get_error_message());
         }
 
-        $response = null;
-        $success = false;
-        $last_error_message = '';
-        $data = null; // Initialize $data for later use
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
 
-        // Iterate through models starting from user selection
-        for ($i = $start_index; $i < count($fallback_chain); $i++) {
-            $current_model = $fallback_chain[$i];
-            $response = $perform_request($current_model);
-
-            if (is_wp_error($response)) {
-                $last_error_message = $response->get_error_message();
-                continue; // Network error, maybe try next or just fail? Usually network is fatal, but we'll try next just in case.
-            }
-
-            $body = wp_remote_retrieve_body($response);
-            $data = json_decode($body, true);
-
-            // Check for success
-            if (!empty($data['data'][0]['url'])) {
-                $success = true;
-                break; // We got an image!
-            }
-
-            // Check for specific verification error to trigger fallback
-            if (isset($data['error'])) {
-                $last_error_message = $data['error']['message'];
-                // Only fallback on "verified" errors. If it's a content policy violation, don't retry.
-                if (stripos($data['error']['message'], 'verified') !== false) {
-                    continue; // Try next model in chain
-                } else {
-                    break; // Stop on other errors (like content policy)
-                }
-            }
+        // Check for specific API error
+        if (isset($data['error'])) {
+            wp_send_json_error($data['error']['message']);
         }
 
-        if (!$success) {
-            wp_send_json_error($last_error_message ? $last_error_message : __('No image returned from AI.', 'logindesignerwp'));
+        // Check for success
+        if (empty($data['data'][0]['url'])) {
+            wp_send_json_error(__('No image returned from AI.', 'logindesignerwp'));
         }
+
+        // Success - $data is ready for processing below
+
+
 
         // Processing success (rest of code is unchanged, just need $data populated)
         $image_url = $data['data'][0]['url'];
@@ -251,6 +215,9 @@ class LoginDesignerWP_AI
     /**
      * AJAX: Generate theme from text description.
      */
+    /**
+     * AJAX: Generate theme from text description.
+     */
     public function ajax_generate_theme()
     {
         check_ajax_referer('logindesignerwp_save_nonce', 'nonce');
@@ -272,43 +239,60 @@ class LoginDesignerWP_AI
         }
 
         // System prompt for theme generation
-        $system_prompt = 'You are a professional UI designer. Generate a login page theme based on the user\'s description. 
+        $system_prompt = 'You are a professional UI/UX designer. Generate a COMPLETE login page theme based on the user\'s description.
 
-IMPORTANT: The "link_color" is for links that appear OUTSIDE the form, directly on the page background (like "Lost your password?" and "Back to site"). It MUST contrast with the "background_color", NOT the form_background. For dark backgrounds use light link colors, for light backgrounds use dark link colors.
+CRITICAL REQUIREMENTS:
+1. **STRICT Accessibility (WCAG AAA)**: You MUST ensure proper contrast.
+   - If the background is DARK, the text MUST be LIGHT (e.g., #ffffff or #f0f0f0).
+   - If the background is LIGHT, the text MUST be DARK (e.g., #333333 or #000000).
+   - Do NOT use dark text on dark backgrounds or light text on light backgrounds.
+   - For "Glassmorphism" on dark backgrounds, use a semi-transparent WHITE or LIGHT background for the form (e.g., #ffffff10) and WHITE text.
+2. **Link Contrast**: The "link_color" appears directly on the PAGE BACKGROUND. If page background is dark, link_color MUST be light/white.
+3. **Visual Hierarchy**: Use shadows, borders, and spacing to create depth.
+4. **Layout**: Choose the best layout (centered, split) for the mood.
+5. **Aesthetics**: If requested, use modern effects like Glassmorphism (blur) or Gradients.
 
-Return ONLY valid JSON with these exact keys (no explanation, just JSON):
+Return ONLY valid JSON with these keys (no markdown/explanation):
 {
-  "background_color": "#hexcolor",
-  "background_mode": "color",
-  "form_background": "#hexcolor",
+  "background_mode": "color" OR "gradient",
+  "background_color": "#hex",
+  "background_gradient_1": "#hex (required if gradient)",
+  "background_gradient_2": "#hex (required if gradient)",
+  "gradient_type": "linear" OR "radial",
+  "form_background": "#hex (Ensure contrast with label_color)",
+  "form_padding": number (20-60),
   "form_border_radius": number (0-50),
-  "form_shadow": true or false,
-  "label_color": "#hexcolor",
-  "input_background": "#hexcolor",
-  "input_border_color": "#hexcolor",
+  "form_shadow": true/false,
+  "enable_glassmorphism": true/false,
+  "glass_blur": number (0-40),
+  "glass_transparency": number (0-100),
+  "layout_mode": "centered" OR "split_left" OR "split_right",
+  "label_color": "#hex (MUST contrast with form_background)",
+  "input_background": "#hex",
+  "input_border_color": "#hex",
   "input_border_radius": number (0-20),
-  "input_text_color": "#hexcolor",
-  "button_color": "#hexcolor",
-  "button_text_color": "#hexcolor",
-  "button_border_radius": number (0-30),
-  "link_color": "#hexcolor (MUST contrast with background_color)"
-}
-Choose colors that work well together and match the mood/theme described. Ensure good contrast for accessibility.';
+  "input_text_color": "#hex (MUST contrast with input_background)",
+  "button_bg": "#hex",
+  "button_text_color": "#hex (MUST contrast with button_bg)",
+  "button_border_radius": number (0-50),
+  "link_color": "#hex (MUST contrast with page bg)",
+  "explanation": "Brief 1 sentence why this design fits the request."
+}';
 
-        // Call GPT-4
+        // Call GPT-4o for better reasoning and strict instruction following
         $response = wp_remote_post('https://api.openai.com/v1/chat/completions', array(
             'headers' => array(
                 'Content-Type' => 'application/json',
                 'Authorization' => 'Bearer ' . $api_key,
             ),
             'body' => json_encode(array(
-                'model' => 'gpt-4o-mini',
+                'model' => 'gpt-4o', // Upgraded from mini for better logic and accessibility compliance
                 'messages' => array(
                     array('role' => 'system', 'content' => $system_prompt),
                     array('role' => 'user', 'content' => 'Create a theme for: ' . $prompt),
                 ),
                 'temperature' => 0.7,
-                'max_tokens' => 500,
+                'max_tokens' => 800,
             )),
             'timeout' => 30,
         ));
@@ -343,46 +327,83 @@ Choose colors that work well together and match the mood/theme described. Ensure
 
         // Validate and sanitize theme values
         $valid_theme = array();
+
+        // Colors
         $color_keys = array(
             'background_color',
+            'background_gradient_1',
+            'background_gradient_2',
+            'background_gradient_3',
+            'background_gradient_4',
             'form_background',
             'label_color',
             'input_background',
             'input_border_color',
             'input_text_color',
-            'button_color',
+            'button_bg',
             'button_text_color',
             'link_color'
         );
 
         foreach ($color_keys as $key) {
-            if (isset($theme[$key]) && preg_match('/^#[a-fA-F0-9]{6}$/', $theme[$key])) {
+            if (isset($theme[$key]) && preg_match('/^#[a-fA-F0-9]{3,6}$/', $theme[$key])) {
                 $valid_theme[$key] = $theme[$key];
             }
         }
 
-        // Number values
-        if (isset($theme['form_border_radius'])) {
-            $valid_theme['form_border_radius'] = max(0, min(50, intval($theme['form_border_radius'])));
+        // Background Mode
+        if (isset($theme['background_mode']) && in_array($theme['background_mode'], ['color', 'gradient'])) {
+            $valid_theme['background_mode'] = $theme['background_mode'];
         }
-        if (isset($theme['input_border_radius'])) {
-            $valid_theme['input_border_radius'] = max(0, min(20, intval($theme['input_border_radius'])));
+
+        // Gradient Type
+        if (isset($theme['gradient_type']) && in_array($theme['gradient_type'], ['linear', 'radial'])) {
+            $valid_theme['gradient_type'] = $theme['gradient_type'];
         }
-        if (isset($theme['button_border_radius'])) {
-            $valid_theme['button_border_radius'] = max(0, min(30, intval($theme['button_border_radius'])));
+
+        // Layout Mode
+        if (isset($theme['layout_mode']) && in_array($theme['layout_mode'], ['centered', 'split_left', 'split_right'])) {
+            $valid_theme['layout_mode'] = $theme['layout_mode'];
+        }
+
+        // Number values - validation ranges
+        $number_keys = [
+            'form_border_radius' => [0, 50],
+            'input_border_radius' => [0, 20],
+            'button_border_radius' => [0, 50],
+            'form_padding' => [0, 100],
+            'glass_blur' => [0, 40],
+            'glass_transparency' => [0, 100]
+        ];
+
+        foreach ($number_keys as $key => $range) {
+            if (isset($theme[$key])) {
+                $valid_theme[$key] = max($range[0], min($range[1], intval($theme[$key])));
+            }
         }
 
         // Boolean values
-        if (isset($theme['form_shadow'])) {
-            $valid_theme['form_shadow'] = (bool) $theme['form_shadow'];
+        $bool_keys = ['form_shadow', 'enable_glassmorphism'];
+        foreach ($bool_keys as $key) {
+            if (isset($theme[$key])) {
+                $valid_theme[$key] = filter_var($theme[$key], FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
+            }
         }
 
-        // Background mode
-        $valid_theme['background_mode'] = 'color';
+        // Handle Button Color backwards compatibility (prompt uses button_bg)
+        if (isset($theme['button_color']) && !isset($valid_theme['button_bg'])) {
+            // If AI returned legacy key, map it
+            if (preg_match('/^#[a-fA-F0-9]{3,6}$/', $theme['button_color'])) {
+                $valid_theme['button_bg'] = $theme['button_color'];
+            }
+        }
+
+        // Explanation
+        $explanation = isset($theme['explanation']) ? sanitize_text_field($theme['explanation']) : '';
 
         wp_send_json_success(array(
             'theme' => $valid_theme,
-            'message' => __('Theme generated successfully! Preview updated.', 'logindesignerwp'),
+            'message' => __('Theme generated successfully! ' . $explanation, 'logindesignerwp'),
         ));
     }
 

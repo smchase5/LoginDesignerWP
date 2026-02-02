@@ -17,6 +17,7 @@ interface LoginDesignerWPData {
     securityNonce: string
     settings: Record<string, any>
     isPro: boolean
+    isProPluginActive?: boolean
     presets: Record<string, Preset>
     assetsUrl: string
     loginUrl: string
@@ -34,6 +35,11 @@ interface LoginDesignerWPData {
         turnstile_secret: string
         recaptcha_site_key: string
         recaptcha_secret: string
+    }
+    licenseNonce?: string
+    license?: {
+        status: string
+        key: string
     }
 }
 

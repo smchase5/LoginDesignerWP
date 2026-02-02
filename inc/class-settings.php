@@ -169,6 +169,16 @@ class LoginDesignerWP_Settings
 
         // Localize data for React app
         $settings = logindesignerwp_get_settings();
+
+        // Inject AI settings (mapping backend keys to frontend keys)
+        $ai_settings = get_option('logindesignerwp_ai', array()); // Default to empty array if not set
+        if (!empty($ai_settings['openai_key'])) {
+            $settings['openai_api_key'] = $ai_settings['openai_key'];
+        }
+        if (!empty($ai_settings['image_model'])) {
+            $settings['ai_model'] = $ai_settings['image_model'];
+        }
+
         $is_pro = function_exists('logindesignerwp_is_pro_active') && logindesignerwp_is_pro_active();
 
         // Resolve attachment URLs for React
@@ -190,12 +200,35 @@ class LoginDesignerWP_Settings
             $security_settings = LoginDesignerWP_Security::get_instance()->get_settings();
         }
 
+        $is_pro_plugin_active = function_exists('logindesignerwp_is_pro_active');
+        $license_data = [];
+        $license_nonce = '';
+
+        if ($is_pro_plugin_active) {
+            $license = get_option('logindesignerwp_pro_license');
+            $key = isset($license['key']) ? $license['key'] : '';
+            // Simple masking: Show first 4, mask middle, show last 4
+            $masked_key = '';
+            if (!empty($key)) {
+                $masked_key = substr($key, 0, 4) . str_repeat('*', max(0, strlen($key) - 8)) . substr($key, -4);
+            }
+
+            $license_data = [
+                'status' => isset($license['status']) ? $license['status'] : 'invalid',
+                'key' => $masked_key,
+            ];
+            $license_nonce = wp_create_nonce('logindesignerwp_license_nonce');
+        }
+
         wp_localize_script('logindesignerwp-admin', 'logindesignerwpData', array(
             'nonce' => wp_create_nonce('logindesignerwp_save_nonce'),
             'securityNonce' => wp_create_nonce('logindesignerwp_security_nonce'),
+            'licenseNonce' => $license_nonce,
             'settings' => $settings,
             'security' => $security_settings,
             'isPro' => $is_pro,
+            'isProPluginActive' => $is_pro_plugin_active,
+            'license' => $license_data,
             'presets' => $presets,
             'assetsUrl' => LOGINDESIGNERWP_URL . 'assets/',
             'loginUrl' => wp_login_url(),
@@ -224,6 +257,40 @@ class LoginDesignerWP_Settings
 
         // Update option
         update_option($this->option_name, $settings);
+
+        // Intercept and save AI settings (mapping frontend keys to backend keys)
+        if (isset($input['openai_api_key']) || isset($input['ai_model'])) {
+            $ai_settings = get_option('logindesignerwp_ai', array());
+
+            if (isset($input['openai_api_key'])) {
+                $ai_settings['openai_key'] = sanitize_text_field($input['openai_api_key']);
+            }
+
+            if (isset($input['ai_model'])) {
+                $valid_models = array('gpt-image-1.5', 'gpt-image-1', 'gpt-image-1-mini', 'gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo');
+                // Note: The frontend sends 'gpt-4o-mini' etc for text gen, but class-ai handles image gen models too.
+                // We'll trust the input for now but sanitize it as text. 
+                // Ideally class-ai should handle this, but here we just store what the frontend sends if it's for the AI settings.
+                // However, the frontend sends `ai_model` which corresponds to image generation model in class-ai context?
+                // Let's check class-ai.php again. It uses `image_model`.
+                // The frontend React uses `ai_model` selector for 'gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo'.
+                // Wait, class-ai.php `render_api_key_field` has a selector for `image_model` (gpt-image-1.5 etc).
+                // The React `SettingsTab` has a selector for `ai_model` (gpt-4o-mini etc).
+                // It seems like there might be TWO different model settings?
+                // One for image generation (backend UI) and one for text generation (frontend UI)?
+                // Let's just save what the frontend sends. passing it to image_model might be wrong if values don't match.
+                // React: gpt-4o-mini
+                // PHP: gpt-image-1.5
+                // They seem to be different things. 
+                // But the user issue is "API key keeps getting removed".
+                // I will map `ai_model` to `text_model` in the backend to avoid checking `image_model`.
+                // For the API key, that is definitely shared.
+
+                $ai_settings['text_model'] = sanitize_text_field($input['ai_model']);
+            }
+
+            update_option('logindesignerwp_ai', $ai_settings);
+        }
 
         // Mark that settings have been saved at least once (enables frontend styles)
         update_option('logindesignerwp_settings_saved', true);
@@ -1578,11 +1645,7 @@ class LoginDesignerWP_Settings
                             </select>
                         </td>
                     </tr>
-                    <tr>
-                        <th scope="row"><?php esc_html_e('Hide Footer Links', 'logindesignerwp'); ?></th>
-                        <td><input type="checkbox" disabled>
-                            <?php esc_html_e('Hide "Back to site" and privacy links', 'logindesignerwp'); ?></td>
-                    </tr>
+
                 </table>
             </div>
             <div class="logindesignerwp-pro-locked-footer">

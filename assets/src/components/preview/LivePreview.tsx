@@ -28,6 +28,15 @@ export function LivePreview({
     // Build background styles
     const getBackgroundStyle = (): React.CSSProperties => {
         const mode = settings.background_mode || 'solid'
+        const isGlassmorphismPreset = settings.active_preset === 'glassmorphism'
+
+        // Helper to get asset URL
+        const getAssetUrl = (path: string) => {
+            if (typeof window !== 'undefined' && (window as any).logindesignerwpData?.assetsUrl) {
+                return (window as any).logindesignerwpData.assetsUrl + path
+            }
+            return ''
+        }
 
         switch (mode) {
             case 'gradient': {
@@ -35,22 +44,51 @@ export function LivePreview({
                 const color1 = settings.background_gradient_1 || '#667eea'
                 const color2 = settings.background_gradient_2 || '#764ba2'
                 const angle = settings.gradient_angle || 135
+                const position = settings.gradient_position || 'center center'
 
                 if (type === 'radial') {
-                    return { background: `radial-gradient(circle, ${color1}, ${color2})` }
+                    return { background: `radial-gradient(circle at ${position}, ${color1}, ${color2})` }
                 }
+
+                if (type === 'mesh') {
+                    const color3 = settings.background_gradient_3 || color1
+                    const color4 = settings.background_gradient_4 || color2
+                    const base = settings.background_color || '#1a1a2e'
+                    return {
+                        backgroundColor: base,
+                        backgroundImage: `radial-gradient(at 15% 15%, ${color1}, transparent 60%), radial-gradient(at 85% 15%, ${color2}, transparent 60%), radial-gradient(at 15% 85%, ${color3}, transparent 60%), radial-gradient(at 85% 85%, ${color4}, transparent 60%)`,
+                        backgroundAttachment: 'fixed',
+                        backgroundSize: 'cover',
+                        backgroundRepeat: 'no-repeat'
+                    }
+                }
+
                 return { background: `linear-gradient(${angle}deg, ${color1}, ${color2})` }
             }
             case 'image':
+                // Special handling for Glassmorphism preset default image
+                if (isGlassmorphismPreset && !settings.background_image_url) {
+                    const glassBgUrl = getAssetUrl('images/glassmorphism-bg.png')
+                    if (glassBgUrl) {
+                        return {
+                            backgroundImage: `url(${glassBgUrl})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                        }
+                    }
+                }
+
                 if (settings.background_image_url) {
                     return {
                         backgroundImage: `url(${settings.background_image_url})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
+                        backgroundSize: settings.background_image_size || 'cover',
+                        backgroundPosition: settings.background_image_pos || 'center',
+                        backgroundRepeat: settings.background_image_repeat || 'no-repeat',
                     }
                 }
                 return { backgroundColor: settings.background_color || '#f0f0f1' }
             default:
+                // Solid
                 return { backgroundColor: settings.background_color || '#f0f0f1' }
         }
     }
@@ -65,9 +103,12 @@ export function LivePreview({
     // Form container styles
     const getFormStyle = (): React.CSSProperties => {
         const layoutMode = settings.layout_mode || 'centered'
+        const isSplitLayout = layoutMode.startsWith('split_')
+        const isCardSplit = layoutMode === 'card_split'
+        const isBrandLayout = isSplitLayout || isCardSplit
 
-        // Simple layout: no form box styling at all
-        if (layoutMode === 'simple') {
+        // Simple layout OR Split layouts with 'simple' form style
+        if (layoutMode === 'simple' || (isBrandLayout && settings.layout_form_style === 'simple')) {
             return {
                 width: '100%',
                 maxWidth: '100%',
@@ -112,12 +153,30 @@ export function LivePreview({
         }
 
         if (settings.enable_glassmorphism || settings.glass_enabled) {
+            // Split Layout Override: Glass looks bad on the default white background of split layouts
+            // Force a solid clean card style for better UX
+            if (isSplitLayout) {
+                return {
+                    ...baseStyle,
+                    backgroundColor: '#ffffff',
+                    backdropFilter: 'none',
+                    WebkitBackdropFilter: 'none',
+                    border: 'none',
+                    boxShadow: settings.form_shadow_enable ? '0 10px 25px rgba(0,0,0,0.1)' : 'none',
+                }
+            }
+
+            const blur = parseRadius(settings.glass_blur, 10)
+            const transparency = parseRadius(settings.glass_transparency, 80)
+            const opacity = Math.max(0, Math.min(1, (100 - transparency) / 100))
+            const hasBorder = settings.glass_border !== undefined ? !!settings.glass_border : true
+
             return {
                 ...baseStyle,
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(10px)',
-                WebkitBackdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
+                backgroundColor: `rgba(255, 255, 255, ${opacity})`,
+                backdropFilter: `blur(${blur}px)`,
+                WebkitBackdropFilter: `blur(${blur}px)`,
+                border: hasBorder ? '1px solid rgba(255, 255, 255, 0.2)' : 'none',
                 boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
             }
         }
@@ -157,17 +216,45 @@ export function LivePreview({
     }
 
     // Input styles
-    const getInputStyle = (): React.CSSProperties => ({
-        backgroundColor: settings.input_bg_color || '#ffffff',
-        border: `1px solid ${settings.input_border_color || '#8c8f94'}`,
-        color: settings.input_text_color || '#1e1e1e',
-        borderRadius: 4,
-        padding: '3px 5px',
-        fontSize: 24,
-        lineHeight: 1.3,
-        width: '100%',
-        boxSizing: 'border-box',
-    })
+    const getInputStyle = (): React.CSSProperties => {
+        // Override for Split + Glass -> Force standardized inputs
+        const isSplitMode = settings.layout_mode?.startsWith('split_') || settings.layout_mode === 'card_split'
+        const isGlassActive = settings.enable_glassmorphism || settings.glass_enabled
+
+        if (isSplitMode && isGlassActive) {
+            return {
+                backgroundColor: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                color: '#1e293b',
+                borderRadius: 4,
+                padding: '3px 5px',
+                fontSize: 24,
+                lineHeight: 1.3,
+                width: '100%',
+                boxSizing: 'border-box',
+            }
+        }
+
+        const baseStyle: React.CSSProperties = {
+            backgroundColor: settings.input_bg_color || '#ffffff',
+            border: `1px solid ${settings.input_border_color || '#8c8f94'}`,
+            color: settings.input_text_color || '#1e1e1e',
+            borderRadius: parseRadius(settings.input_border_radius, 6),
+            padding: '3px 5px',
+            fontSize: 24,
+            lineHeight: 1.3,
+            width: '100%',
+            boxSizing: 'border-box',
+        }
+
+        // Fix for specific Glassmorphism preset issue where borders might be hidden in preview
+        // If glassmorphism (global or form panel) is active, ensure we can see inputs
+        if (settings.enable_glassmorphism || settings.form_panel_bg_mode === 'glassmorphism') {
+            // If manual border color isn't explicitly transparent, ensure it shows
+        }
+
+        return baseStyle
+    }
 
     // Button styles
     const getButtonStyle = (): React.CSSProperties => ({
@@ -198,14 +285,38 @@ export function LivePreview({
 
     // Helper to determine label color based on layout and contrast
     const getLabelColor = (): string => {
+        // Override for Split + Glass -> Force dark labels
+        const isSplitMode = settings.layout_mode?.startsWith('split_') || settings.layout_mode === 'card_split'
+        const isGlassActive = settings.enable_glassmorphism || settings.glass_enabled
+
+        if (isSplitMode && isGlassActive) {
+            return '#334155'
+        }
+
         let color = settings.label_text_color || '#1e1e1e'
 
         // Simple layout contrast fix
-        if (settings.layout_mode === 'simple') {
-            let bgCheckColor = settings.background_color || '#ffffff'
+        const layoutMode = settings.layout_mode || 'centered'
+        const isSplitLayout = layoutMode.startsWith('split_') || layoutMode === 'card_split'
+        const isSimpleForm = layoutMode === 'simple' || (isSplitLayout && settings.layout_form_style === 'simple')
 
-            if (settings.background_mode === 'gradient' && settings.background_gradient_1) {
-                bgCheckColor = settings.background_gradient_1
+        if (isSimpleForm) {
+            let bgCheckColor = '#ffffff'
+
+            if (isSplitLayout) {
+                // Check Form Panel background
+                const panelMode = settings.form_panel_bg_mode || 'solid'
+                if (panelMode === 'solid') {
+                    bgCheckColor = settings.form_panel_bg_color || '#ffffff'
+                } else if (panelMode === 'gradient') {
+                    bgCheckColor = settings.form_panel_gradient_1 || settings.background_gradient_1 || '#ffffff'
+                }
+            } else {
+                // Standard Simple Layout
+                bgCheckColor = settings.background_color || '#ffffff'
+                if (settings.background_mode === 'gradient' && settings.background_gradient_1) {
+                    bgCheckColor = settings.background_gradient_1
+                }
             }
 
             const brightness = getPerceivedBrightness(bgCheckColor)
@@ -238,7 +349,7 @@ export function LivePreview({
                 style={{ minHeight: 550 }}
             >
                 {/* Preview Badge - Inside at Top Left */}
-                <div className="absolute top-3 left-3 z-10">
+                <div className="absolute top-3 left-3 z-50">
                     <span className="inline-flex items-center gap-2 text-xs font-medium bg-white/90 backdrop-blur-sm text-gray-700 px-3 py-1.5 rounded-full shadow-sm border border-gray-200">
                         <span className={`w-2 h-2 rounded-full ${hasUnsavedChanges ? 'bg-amber-500' : 'bg-green-500'}`}></span>
                         Preview
@@ -276,7 +387,7 @@ export function LivePreview({
                     const FormContent = (
                         <div className="lp-content-wrap" style={{
                             width: '100%',
-                            maxWidth: settings.layout_max_width ? `${settings.layout_max_width}px` : '320px',
+                            maxWidth: settings.layout_form_width ? `${settings.layout_form_width}px` : '360px',
                             margin: '0 auto',
                             position: 'relative',
                             zIndex: 10
@@ -446,37 +557,97 @@ export function LivePreview({
 
                             {/* Footer Links */}
                             {(() => {
-                                let linkColor = settings.below_form_link_color || '#50575e'
+                                let linkColor = settings.below_form_link_color
 
-                                // Simple layout contrast fix
-                                if (settings.layout_mode === 'simple') {
-                                    let bgCheckColor = settings.background_color || '#ffffff'
-                                    if (settings.background_mode === 'gradient' && settings.background_gradient_1) {
-                                        bgCheckColor = settings.background_gradient_1
+                                // Contrast analysis
+                                const layoutMode = settings.layout_mode || 'centered'
+                                const isCardSplit = layoutMode === 'card_split'
+                                const isSplit = layoutMode.startsWith('split_')
+
+                                let bgCheckColor = '#ffffff'
+                                let isImageBackground = false
+
+                                if (isCardSplit) {
+                                    bgCheckColor = '#ffffff'
+                                } else if (isSplit) {
+                                    const panelMode = settings.form_panel_bg_mode || 'solid'
+                                    if (panelMode === 'solid') {
+                                        bgCheckColor = settings.form_panel_bg_color || '#ffffff'
+                                    } else if (panelMode === 'gradient') {
+                                        bgCheckColor = settings.form_panel_gradient_1 || '#ffffff'
+                                    } else if (panelMode === 'image') {
+                                        isImageBackground = true
                                     }
-
-                                    const brightness = getPerceivedBrightness(bgCheckColor)
-                                    if (brightness < 140) {
-                                        linkColor = '#ffffff'
-                                    } else {
-                                        linkColor = '#111827'
+                                } else {
+                                    const bgMode = settings.background_mode || 'solid'
+                                    if (bgMode === 'solid') {
+                                        bgCheckColor = settings.background_color || '#f0f0f1'
+                                    } else if (bgMode === 'gradient') {
+                                        bgCheckColor = settings.background_gradient_1 || settings.background_color || '#f0f0f1'
+                                    } else if (bgMode === 'image') {
+                                        isImageBackground = true
                                     }
                                 }
+
+                                // Helper to check if color is light
+                                const isLight = (hex: string) => {
+                                    try {
+                                        return getPerceivedBrightness(hex.includes('rgb') ? '#ffffff' : hex) > 130
+                                    } catch (e) { return true }
+                                }
+
+                                const bgIsDark = !isLight(bgCheckColor)
+
+                                // Determine final link color
+                                if (isImageBackground) {
+                                    // For images, we can't easily adhere to a specific color unless it has a strong shadow,
+                                    // but white is generally safest with a shadow.
+                                    // If the user deliberately picked a color, we try to honor it but ADD a shadow.
+                                    // However, if it's dark text on a dark image, it fails. 
+                                    // Safety fallback: If user set a DARK color, but we don't know the image, potentially risky.
+                                    // Best UX: Default to white for AI/Images unless explicitly overridden by user manually (hard to detect manual vs AI).
+                                    // We'll enforce white if the provided color is seemingly dark or default.
+                                    if (!linkColor || !isLight(linkColor)) {
+                                        linkColor = '#ffffff'
+                                    }
+                                } else {
+                                    // Solid/Gradient Backgrounds
+                                    if (bgIsDark) {
+                                        // Background is Dark. Link MUST be Light.
+                                        if (linkColor && !isLight(linkColor)) {
+                                            linkColor = '#ffffff' // Override bad contrast
+                                        } else if (!linkColor) {
+                                            linkColor = '#ffffff' // Default to white
+                                        }
+                                    } else {
+                                        // Background is Light. Link MUST be Dark.
+                                        if (linkColor && isLight(linkColor)) {
+                                            linkColor = '#444444' // Override bad contrast (light on light)
+                                        } else if (!linkColor) {
+                                            linkColor = '#444444' // Default to dark
+                                        }
+                                    }
+                                }
+
+                                const textShadow = isImageBackground ? '0 1px 4px rgba(0,0,0,0.9)' : 'none'
 
                                 return (
                                     <div className="logindesignerwp-preview-links" style={{
                                         textAlign: 'center',
                                         marginTop: 16,
                                         fontSize: 13,
-                                        display: settings.hide_footer_links ? 'none' : 'block'
+                                        display: 'block',
+                                        position: 'relative',
+                                        zIndex: 20,
+                                        textShadow: textShadow
                                     }}>
                                         <div style={{ marginBottom: 10 }}>
-                                            <a href="#" style={{ color: linkColor, textDecoration: 'none' }}>
+                                            <a href="#" style={{ color: linkColor, textDecoration: 'underline', opacity: 0.9 }}>
                                                 Lost your password?
                                             </a>
                                         </div>
                                         <div>
-                                            <a href="#" style={{ color: linkColor, textDecoration: 'none' }}>
+                                            <a href="#" style={{ color: linkColor, textDecoration: 'none', opacity: 0.9 }}>
                                                 &larr; Go to Site
                                             </a>
                                         </div>
@@ -507,8 +678,6 @@ export function LivePreview({
                     // Helper to get brand content (backgrounds)
                     const getBrandContent = () => {
                         const hasImage = settings.background_mode === 'image' && settings.background_image_url
-                        const isGradient = settings.background_mode === 'gradient'
-                        const isSolid = settings.background_mode === 'solid'
 
                         // Determine effective style
                         const style: React.CSSProperties = {
@@ -524,11 +693,11 @@ export function LivePreview({
                             style.backgroundImage = `url(${settings.background_image_url})`
                             style.backgroundSize = 'cover'
                             style.backgroundPosition = 'center'
-                        } else if (isGradient || isSolid) {
                             // Apply solid or gradient background
                             const bgStyle = getBackgroundStyle()
                             if (bgStyle.background) style.background = bgStyle.background
                             if (bgStyle.backgroundColor) style.backgroundColor = bgStyle.backgroundColor
+                            if (bgStyle.backgroundImage) style.backgroundImage = bgStyle.backgroundImage
                         } else {
                             // Default fallback pattern for "Dual Background" requirement
                             // Only if absolutely no background setting is active
@@ -538,12 +707,12 @@ export function LivePreview({
                         return (
                             <div className="w-full h-full relative flex items-center justify-center" style={style}>
                                 {!!settings.background_blur && settings.background_blur > 0 && (
-                                    <div className="absolute inset-0 backdrop-blur-sm"
+                                    <div className="absolute inset-0 z-0 backdrop-blur-sm"
                                         style={{ backdropFilter: `blur(${settings.background_blur}px)` }}
                                     />
                                 )}
                                 {!!settings.background_overlay_enable && (
-                                    <div className="absolute inset-0"
+                                    <div className="absolute inset-0 z-10"
                                         style={{
                                             backgroundColor: settings.background_overlay_color || '#000000',
                                             opacity: (parseInt(settings.background_overlay_opacity) || 50) / 100
@@ -553,7 +722,7 @@ export function LivePreview({
 
                                 {/* Brand Content Overlay */}
                                 {!!settings.brand_content_enable && (
-                                    <div className="relative z-10 w-full max-w-md space-y-6 text-center flex flex-col items-center">
+                                    <div className="relative z-20 w-full max-w-md space-y-6 text-center flex flex-col items-center">
                                         {/* Brand Logo */}
                                         {settings.brand_logo_url && (
                                             <img
@@ -576,22 +745,18 @@ export function LivePreview({
 
                                         {/* Render Title/Subtitle if enabled */}
                                         <div className="relative z-10 w-full max-w-sm text-center">
-                                            {!!settings.brand_title && (
-                                                <h2
-                                                    className="text-3xl font-bold tracking-tight mb-4 font-sans drop-shadow-sm"
-                                                    style={{ color: settings.brand_text_color || '#ffffff' }}
-                                                >
-                                                    {settings.brand_title}
-                                                </h2>
-                                            )}
-                                            {!!settings.brand_subtitle && (
-                                                <p
-                                                    className="text-lg opacity-90 leading-relaxed font-sans drop-shadow-sm"
-                                                    style={{ color: settings.brand_text_color || '#ffffff' }}
-                                                >
-                                                    {settings.brand_subtitle}
-                                                </p>
-                                            )}
+                                            <h2
+                                                className="text-3xl font-bold tracking-tight mb-4 font-sans drop-shadow-sm"
+                                                style={{ color: settings.brand_text_color || '#ffffff' }}
+                                            >
+                                                {settings.brand_title || 'Welcome Back'}
+                                            </h2>
+                                            <p
+                                                className="text-lg opacity-90 leading-relaxed font-sans drop-shadow-sm"
+                                                style={{ color: settings.brand_text_color || '#ffffff' }}
+                                            >
+                                                {settings.brand_subtitle || 'Log in to access your account.'}
+                                            </p>
                                         </div>
                                     </div>
                                 )}
@@ -621,8 +786,19 @@ export function LivePreview({
                                 // Fallback to white if no image selected
                                 style.backgroundColor = '#ffffff'
                             }
+                        } else if (mode === 'gradient') {
+                            const type = settings.form_panel_gradient_type || 'linear'
+                            const color1 = settings.form_panel_gradient_1 || '#ffffff'
+                            const color2 = settings.form_panel_gradient_2 || '#f0f0f1'
+                            const angle = settings.form_panel_gradient_angle || 135
+
+                            if (type === 'radial') {
+                                style.background = `radial-gradient(circle, ${color1}, ${color2})`
+                            } else {
+                                style.background = `linear-gradient(${angle}deg, ${color1}, ${color2})`
+                            }
                         } else if (mode === 'glassmorphism') {
-                            // Frosted glass effect
+                            // Frosted glass effect (Code kept for fallback but option removed from UI)
                             style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
                             style.backdropFilter = 'blur(10px)'
                             style.WebkitBackdropFilter = 'blur(10px)'
@@ -656,12 +832,12 @@ export function LivePreview({
 
                                 <div className="flex w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden h-[600px]">
                                     {/* Left Side (Brand) */}
-                                    <div className="w-1/2 relative bg-blue-600">
+                                    <div className="relative bg-blue-600" style={{ width: `${splitRatio}%` }}>
                                         {getBrandContent()}
                                     </div>
 
                                     {/* Right Side (Form) */}
-                                    <div className="w-1/2 p-8 flex items-center justify-center bg-white">
+                                    <div className="p-8 flex items-center justify-center bg-white" style={{ width: `${100 - Number(splitRatio)}%` }}>
                                         {FormContent}
                                     </div>
                                 </div>
@@ -689,7 +865,23 @@ export function LivePreview({
                             >
                                 {/* Centered/Card layout: show background behind form */}
                                 {!showBrand && (
-                                    <div className="absolute inset-0 -z-10" style={getBackgroundStyle()}></div>
+                                    <div className="absolute inset-0 -z-10" style={getBackgroundStyle()}>
+                                        {/* Background Blur */}
+                                        {!!settings.background_blur && settings.background_blur > 0 && (
+                                            <div className="absolute inset-0 z-0 backdrop-blur-sm"
+                                                style={{ backdropFilter: `blur(${settings.background_blur}px)` }}
+                                            />
+                                        )}
+                                        {/* Background Overlay */}
+                                        {!!settings.background_overlay_enable && (
+                                            <div className="absolute inset-0 z-10"
+                                                style={{
+                                                    backgroundColor: settings.background_overlay_color || '#000000',
+                                                    opacity: (parseInt(settings.background_overlay_opacity) || 50) / 100
+                                                }}
+                                            />
+                                        )}
+                                    </div>
                                 )}
 
                                 {FormContent}

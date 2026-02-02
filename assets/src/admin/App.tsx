@@ -201,50 +201,67 @@ export default function App() {
             </nav>
 
             {/* Tab Content */}
-            <div className="flex gap-6">
+            <div className={cn("flex gap-6 transition-all duration-300", showWizard ? "relative z-[50]" : "")}>
                 {/* Settings Column - 50% */}
                 <div className="w-1/2 flex-shrink-0">
-                    {activeTab === 'design' && (
-                        <DesignTab
+                    {showWizard ? (
+                        <Wizard
                             settings={settings}
                             onChange={handleSettingChange}
-                            onBulkChange={handleBulkChange}
-                            onSave={handleSave}
-                            onReset={handleReset}
-                            isSaving={isSaving}
-                            isResetting={isResetting}
-                            showWizard={showWizard}
-                            setShowWizard={setShowWizard}
+                            onClose={() => setShowWizard(false)}
+                            onApply={() => {
+                                setShowWizard(false)
+                                handleSave()
+                            }}
                             presets={data.presets || {}}
                             isPro={isPro}
                         />
-                    )}
-                    {activeTab === 'settings' && (
-                        <SettingsTab
-                            settings={settings}
-                            onChange={handleSettingChange}
-                            onSave={handleSave}
-                            isSaving={isSaving}
-                            isPro={isPro}
-                        />
-                    )}
-                    {activeTab === 'social' && (
-                        <SocialTab
-                            settings={settings}
-                            onChange={handleSettingChange}
-                            onSave={handleSave}
-                            isSaving={isSaving}
-                        />
-                    )}
-                    {activeTab === 'security' && (
-                        <SecurityTab
-                            settings={settings}
-                            onChange={handleSettingChange}
-                            onSave={handleSave}
-                            isSaving={isSaving}
-                            securitySettings={securitySettings}
-                            onSecurityChange={(key, value) => setSecuritySettings((prev: any) => ({ ...prev, [key]: value }))}
-                        />
+                    ) : (
+                        <>
+                            {activeTab === 'design' && (
+                                <DesignTab
+                                    settings={settings}
+                                    onChange={handleSettingChange}
+                                    onBulkChange={handleBulkChange}
+                                    onSave={handleSave}
+                                    onReset={handleReset}
+                                    isSaving={isSaving}
+                                    isResetting={isResetting}
+                                    showWizard={showWizard}
+                                    setShowWizard={setShowWizard}
+                                    presets={data.presets || {}}
+                                    isPro={isPro}
+                                />
+                            )}
+                            {activeTab === 'settings' && (
+                                <SettingsTab
+                                    settings={settings}
+                                    onChange={handleSettingChange}
+                                    onSave={handleSave}
+                                    isSaving={isSaving}
+                                    isPro={isPro}
+                                />
+                            )}
+                            {activeTab === 'social' && (
+                                <SocialTab
+                                    settings={settings}
+                                    onChange={handleSettingChange}
+                                    onSave={handleSave}
+                                    isSaving={isSaving}
+                                    isPro={isPro}
+                                />
+                            )}
+                            {activeTab === 'security' && (
+                                <SecurityTab
+                                    settings={settings}
+                                    onChange={handleSettingChange}
+                                    onSave={handleSave}
+                                    isSaving={isSaving}
+                                    securitySettings={securitySettings}
+                                    onSecurityChange={(key, value) => setSecuritySettings((prev: any) => ({ ...prev, [key]: value }))}
+                                />
+                            )}
+                        </>
                     )}
                 </div>
 
@@ -264,19 +281,9 @@ export default function App() {
                 )}
             </div>
 
-            {/* Wizard Dialog */}
+            {/* Wizard Focus Mode Backdrop */}
             {showWizard && (
-                <Wizard
-                    settings={settings}
-                    onChange={handleSettingChange}
-                    onClose={() => setShowWizard(false)}
-                    onApply={() => {
-                        setShowWizard(false)
-                        handleSave()
-                    }}
-                    presets={data.presets || {}}
-                    isPro={isPro}
-                />
+                <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[45] animate-in fade-in duration-300" />
             )}
         </div>
     )

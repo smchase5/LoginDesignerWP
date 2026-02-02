@@ -43,6 +43,12 @@ class LoginDesignerWP_Login_Layout
 
         $this->settings = logindesignerwp_get_settings();
 
+        // Check if Custom Styles are Enabled
+        // Defaults to 1 (true) in helpers.php, but check explicitly for 0/false.
+        if (isset($this->settings['enable_styles']) && ($this->settings['enable_styles'] === 0 || $this->settings['enable_styles'] === '0')) {
+            return;
+        }
+
         // Start buffering with our modifier callback
         ob_start(array($this, 'modify_login_output'));
     }
@@ -100,14 +106,12 @@ class LoginDesignerWP_Login_Layout
             }
 
             // Title
-            if (!empty($settings['brand_title'])) {
-                $shell_start .= sprintf('<h2 class="lp-brand-title">%s</h2>', esc_html($settings['brand_title']));
-            }
+            $brand_title = !empty($settings['brand_title']) ? $settings['brand_title'] : 'Welcome Back';
+            $shell_start .= sprintf('<h2 class="lp-brand-title">%s</h2>', esc_html($brand_title));
 
             // Subtitle
-            if (!empty($settings['brand_subtitle'])) {
-                $shell_start .= sprintf('<p class="lp-brand-subtitle">%s</p>', esc_html($settings['brand_subtitle']));
-            }
+            $brand_subtitle = !empty($settings['brand_subtitle']) ? $settings['brand_subtitle'] : 'Log in to access your account.';
+            $shell_start .= sprintf('<p class="lp-brand-subtitle">%s</p>', esc_html($brand_subtitle));
 
             $shell_start .= '</div>';
         }
@@ -179,18 +183,16 @@ class LoginDesignerWP_Login_Layout
             }
 
             // Title
-            if (!empty($settings['brand_title'])) {
-                $title = $dom->createElement('h2', esc_html($settings['brand_title']));
-                $title->setAttribute('class', 'lp-brand-title');
-                $brand_content->appendChild($title);
-            }
+            $brand_title = !empty($settings['brand_title']) ? $settings['brand_title'] : 'Welcome Back';
+            $title = $dom->createElement('h2', esc_html($brand_title));
+            $title->setAttribute('class', 'lp-brand-title');
+            $brand_content->appendChild($title);
 
             // Subtitle
-            if (!empty($settings['brand_subtitle'])) {
-                $subtitle = $dom->createElement('p', esc_html($settings['brand_subtitle']));
-                $subtitle->setAttribute('class', 'lp-brand-subtitle');
-                $brand_content->appendChild($subtitle);
-            }
+            $brand_subtitle = !empty($settings['brand_subtitle']) ? $settings['brand_subtitle'] : 'Log in to access your account.';
+            $subtitle = $dom->createElement('p', esc_html($brand_subtitle));
+            $subtitle->setAttribute('class', 'lp-brand-subtitle');
+            $brand_content->appendChild($subtitle);
         }
 
         $main = $dom->createElement('div');

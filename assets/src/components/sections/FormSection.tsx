@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { ColorPicker } from '@/components/ui/color-picker'
+import { Slider } from '@/components/ui/slider'
 import { cn } from '@/lib/utils'
 
 // Added Star icon for Pro badge
@@ -51,39 +52,44 @@ export function FormSection({ settings, onChange, isPro = false }: FormSectionPr
 
                     {/* Glassmorphism Controls (Conditional) */}
                     {!!settings.enable_glassmorphism && (
-                        <div className="pl-4 border-l-2 border-primary/20 space-y-3">
-                            <div className="flex items-center justify-between">
-                                <Label className="text-xs">Blur Strength</Label>
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="range"
-                                        min="0"
-                                        max="20"
-                                        value={settings.glass_blur || 8}
-                                        onChange={(e) => onChange('glass_blur', parseInt(e.target.value))}
-                                        className="w-20 h-1.5"
-                                    />
-                                    <span className="text-xs w-8 text-right">{settings.glass_blur || 8}px</span>
+                        <div className="pl-4 border-l-2 border-primary/20 space-y-4 pt-1">
+                            {/* Blur Strength */}
+                            <div className="space-y-1">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-xs font-normal text-muted-foreground">Blur Amount</Label>
+                                    <span className="text-xs w-8 text-right font-medium">{settings.glass_blur || 10}px</span>
                                 </div>
+                                <Slider
+                                    min={0}
+                                    max={40}
+                                    step={1}
+                                    value={[settings.glass_blur || 10]}
+                                    onValueChange={([val]) => onChange('glass_blur', val)}
+                                    className="w-full"
+                                />
                             </div>
-                            <div className="flex items-center justify-between">
-                                <Label className="text-xs">Transparency</Label>
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="range"
-                                        min="0"
-                                        max="100"
-                                        value={settings.glass_transparency || 80}
-                                        onChange={(e) => onChange('glass_transparency', parseInt(e.target.value))}
-                                        className="w-20 h-1.5"
-                                    />
-                                    <span className="text-xs w-8 text-right">{settings.glass_transparency || 80}%</span>
+
+                            {/* Transparency */}
+                            <div className="space-y-1">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-xs font-normal text-muted-foreground">Transparency</Label>
+                                    <span className="text-xs w-8 text-right font-medium">{settings.glass_transparency || 80}%</span>
                                 </div>
+                                <Slider
+                                    min={0}
+                                    max={100}
+                                    step={1}
+                                    value={[settings.glass_transparency || 80]}
+                                    onValueChange={([val]) => onChange('glass_transparency', val)}
+                                    className="w-full"
+                                />
                             </div>
-                            <div className="flex items-center justify-between">
-                                <Label className="text-xs">Glass Border</Label>
+
+                            {/* Border Toggle */}
+                            <div className="flex items-center justify-between pt-1">
+                                <Label className="text-xs font-normal text-muted-foreground">Glass Border</Label>
                                 <Switch
-                                    checked={!!settings.glass_border}
+                                    checked={settings.glass_border !== undefined ? !!settings.glass_border : true}
                                     onCheckedChange={(checked) => onChange('glass_border', checked ? 1 : 0)}
                                     className="scale-75 origin-right"
                                 />
@@ -148,13 +154,13 @@ export function FormSection({ settings, onChange, isPro = false }: FormSectionPr
                     <div className="flex items-center justify-between">
                         <Label>Form Padding</Label>
                         <div className="flex items-center gap-2">
-                            <input
-                                type="range"
+                            <Slider
+                                min={0}
+                                max={60}
+                                step={1}
+                                value={[settings.form_padding || 26]}
+                                onValueChange={([val]) => onChange('form_padding', val)}
                                 className="w-24"
-                                min="0"
-                                max="60"
-                                value={settings.form_padding || 26}
-                                onChange={(e) => onChange('form_padding', parseInt(e.target.value))}
                             />
                             <span className="text-sm font-medium text-primary w-12">
                                 {settings.form_padding || 26}px
@@ -273,14 +279,7 @@ export function FormSection({ settings, onChange, isPro = false }: FormSectionPr
                     {/* Below Form Link Color */}
                     <div className="space-y-4 pt-4 border-t border-border">
                         <h4 className="text-sm font-semibold text-foreground">Footer Links</h4>
-                        <div className="flex items-center justify-between">
-                            <Label>Hide Links</Label>
-                            <Switch
-                                checked={!!settings.hide_footer_links}
-                                onCheckedChange={(checked) => onChange('hide_footer_links', checked ? 1 : 0)}
-                                disabled={!isPro}
-                            />
-                        </div>
+
                         <div className="flex items-center justify-between">
                             <Label>Link Color</Label>
                             <ColorPicker

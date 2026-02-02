@@ -54,7 +54,11 @@ function logindesignerwp_get_defaults()
         'form_border_radius' => 0,  // WP default is square corners
         'form_border_color' => '#c3c4c7',
         'form_shadow_enable' => 1,
+        'form_shadow_enable' => 1,
+        'form_padding' => 26,
         'enable_glassmorphism' => 0,
+        'glass_blur' => 10,
+        'glass_transparency' => 80,
 
         // Social Login settings.
         'google_login_enable' => 0,
@@ -71,7 +75,9 @@ function logindesignerwp_get_defaults()
         'label_text_color' => '#1e1e1e',  // Dark text on white
         'input_bg_color' => '#ffffff',
         'input_text_color' => '#1e1e1e',
+        'input_text_color' => '#1e1e1e',
         'input_border_color' => '#8c8f94',
+        'input_border_radius' => 6,
         'input_border_focus' => '#2271b1',  // WP blue
 
         'button_bg' => '#2271b1',  // WP blue
@@ -97,7 +103,7 @@ function logindesignerwp_get_defaults()
         // General Settings
         'enable_styles' => 1,
         'hide_wp_logo' => 0,
-        'hide_footer_links' => 0,
+        'hide_wp_logo' => 0,
         'custom_message' => '',
 
         // Active preset tracking.
@@ -108,10 +114,16 @@ function logindesignerwp_get_defaults()
         'layout_form_width' => '360', // 320, 360, 420, 480 (for simple layout)
         'layout_split_ratio' => '50', // 40, 50, 60
         'layout_split_mobile' => 'stack', // stack, hide_brand
+        'layout_form_style' => 'boxed', // boxed, simple
 
         // Form Panel Background (for advanced layouts)
-        'form_panel_bg_mode' => 'solid', // solid, image, glassmorphism
+        'form_panel_bg_mode' => 'solid', // solid, image, gradient
         'form_panel_bg_color' => '#ffffff',
+        'form_panel_gradient_1' => '#ffffff',
+        'form_panel_gradient_2' => '#f0f0f1',
+        'form_panel_gradient_type' => 'linear',
+        'form_panel_gradient_angle' => 135,
+        'form_panel_gradient_position' => 'center center',
         'form_panel_image_id' => 0, // Separate image for form panel
         'form_panel_shadow' => 1,
 
@@ -159,7 +171,7 @@ function logindesignerwp_sanitize_settings($input)
     // General Settings
     $sanitized['enable_styles'] = !empty($input['enable_styles']) ? 1 : 0;
     $sanitized['hide_wp_logo'] = !empty($input['hide_wp_logo']) ? 1 : 0;
-    $sanitized['hide_footer_links'] = !empty($input['hide_footer_links']) ? 1 : 0;
+    $sanitized['hide_wp_logo'] = !empty($input['hide_wp_logo']) ? 1 : 0;
     $sanitized['custom_message'] = wp_kses_post($input['custom_message'] ?? '');
 
     // Background mode.
@@ -240,7 +252,9 @@ function logindesignerwp_sanitize_settings($input)
     $sanitized['gradient_position'] = sanitize_text_field($input['gradient_position'] ?? $defaults['gradient_position']);
 
     // Border radius - integers with bounds.
+    // Border radius - integers with bounds.
     $sanitized['form_border_radius'] = max(0, min(50, absint($input['form_border_radius'] ?? $defaults['form_border_radius'])));
+    $sanitized['input_border_radius'] = max(0, min(50, absint($input['input_border_radius'] ?? $defaults['input_border_radius'])));
     $sanitized['button_border_radius'] = max(0, min(999, absint($input['button_border_radius'] ?? $defaults['button_border_radius'])));
 
     // Shadow toggle.
@@ -248,6 +262,11 @@ function logindesignerwp_sanitize_settings($input)
 
     // Glassmorphism.
     $sanitized['enable_glassmorphism'] = !empty($input['enable_glassmorphism']) ? 1 : 0;
+    $sanitized['glass_blur'] = max(0, min(100, absint($input['glass_blur'] ?? $defaults['glass_blur'])));
+    $sanitized['glass_transparency'] = max(0, min(100, absint($input['glass_transparency'] ?? $defaults['glass_transparency'])));
+
+    // Form Padding
+    $sanitized['form_padding'] = max(0, min(100, absint($input['form_padding'] ?? $defaults['form_padding'])));
 
     // Logo settings.
     $sanitized['logo_id'] = absint($input['logo_id'] ?? 0);
@@ -277,10 +296,16 @@ function logindesignerwp_sanitize_settings($input)
 
     $sanitized['layout_split_ratio'] = in_array($input['layout_split_ratio'] ?? '', array('40', '50', '60'), true) ? $input['layout_split_ratio'] : $defaults['layout_split_ratio'];
     $sanitized['layout_split_mobile'] = in_array($input['layout_split_mobile'] ?? '', array('stack', 'hide_brand'), true) ? $input['layout_split_mobile'] : $defaults['layout_split_mobile'];
+    $sanitized['layout_form_style'] = in_array($input['layout_form_style'] ?? '', array('boxed', 'simple'), true) ? $input['layout_form_style'] : 'boxed';
 
     // Form Panel Background (for advanced layouts)
-    $sanitized['form_panel_bg_mode'] = in_array($input['form_panel_bg_mode'] ?? '', array('solid', 'image', 'glassmorphism'), true) ? $input['form_panel_bg_mode'] : $defaults['form_panel_bg_mode'];
+    $sanitized['form_panel_bg_mode'] = in_array($input['form_panel_bg_mode'] ?? '', array('solid', 'image', 'gradient'), true) ? $input['form_panel_bg_mode'] : $defaults['form_panel_bg_mode'];
     $sanitized['form_panel_bg_color'] = sanitize_hex_color($input['form_panel_bg_color'] ?? '') ?: $defaults['form_panel_bg_color'];
+    $sanitized['form_panel_gradient_1'] = sanitize_hex_color($input['form_panel_gradient_1'] ?? '') ?: $defaults['form_panel_gradient_1'];
+    $sanitized['form_panel_gradient_2'] = sanitize_hex_color($input['form_panel_gradient_2'] ?? '') ?: $defaults['form_panel_gradient_2'];
+    $sanitized['form_panel_gradient_type'] = in_array($input['form_panel_gradient_type'] ?? '', array('linear', 'radial'), true) ? $input['form_panel_gradient_type'] : $defaults['form_panel_gradient_type'];
+    $sanitized['form_panel_gradient_angle'] = absint($input['form_panel_gradient_angle'] ?? $defaults['form_panel_gradient_angle']);
+    $sanitized['form_panel_gradient_position'] = sanitize_text_field($input['form_panel_gradient_position'] ?? $defaults['form_panel_gradient_position']);
     $sanitized['form_panel_image_id'] = absint($input['form_panel_image_id'] ?? 0);
     $sanitized['form_panel_shadow'] = !empty($input['form_panel_shadow']) ? 1 : 0;
 
