@@ -182,8 +182,14 @@ class LoginDesignerWP_Login_Style
             if ($layout_mode === 'card_split') {
                 // Card Split: Adaptive Background based on form contrast
                 $form_bg = isset($s['form_bg_color']) ? $s['form_bg_color'] : '#ffffff';
-                $form_brightness = $this->get_perceived_brightness($form_bg);
-                $page_bg_color = ($form_brightness < 130) ? '#0f172a' : '#f3f4f6';
+                // 1. Manual Override
+                $page_bg_color = !empty($s['card_page_background_color']) ? esc_attr($s['card_page_background_color']) : '';
+
+                // 2. Smart Derivation (if no manual override)
+                if (empty($page_bg_color)) {
+                    $form_brightness = $this->get_perceived_brightness($form_bg);
+                    $page_bg_color = ($form_brightness < 130) ? '#0f172a' : '#f3f4f6';
+                }
 
                 $css .= "body.login { background-color: " . $page_bg_color . " !important; }\n";
             } else {
