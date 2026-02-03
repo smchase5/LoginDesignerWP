@@ -61,6 +61,23 @@ const BrandControls = ({ settings, onChange, isPro = false }: { settings: Record
 
     return (
         <div className="space-y-4">
+            {/* Card Split: Page Background Override */}
+            {settings.layout_mode === 'card_split' && (
+                <div className="p-3 border rounded-md bg-muted/20">
+                    <div className="flex items-center justify-between mb-1">
+                        <Label className="text-sm font-semibold">Page Background</Label>
+                        <ColorPicker
+                            value={settings.card_page_background_color || ''}
+                            onChange={(color) => onChange('card_page_background_color', color)}
+                            showInput
+                        />
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                        Leave empty to auto-adapt to Form Color.
+                    </p>
+                </div>
+            )}
+
             {/* Background Type Selector */}
             <div>
                 <Label className="mb-2 block">Background Type</Label>

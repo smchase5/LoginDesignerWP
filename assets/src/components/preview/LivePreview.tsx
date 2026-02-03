@@ -818,30 +818,37 @@ export function LivePreview({
 
                     // CARD SPLIT LAYOUT SPECIFIC STRUCTURE
                     if (isCardSplit) {
-                        // Determine smart page background based on form contrast
+                        // Determine smart page background based on form contrast or manual override
                         const getPageBackgroundStyle = (): React.CSSProperties => {
-                            let formBg = settings.form_bg_color || '#ffffff'
+                            // 1. Manual Override
+                            if (settings.card_page_background_color) {
+                                return { backgroundColor: settings.card_page_background_color }
+                            }
+
+                            // 2. Smart Derivation
+                            const formBg = settings.form_bg_color || '#ffffff'
                             let isDark = false
                             try {
                                 isDark = getPerceivedBrightness(formBg) < 130
                             } catch (e) { }
 
-                            // If Glassmorphism enabled, we default to a rich gradient or image if provided,
-                            // but for this specific "Card Split" without settings, we adapt to Light/Dark.
                             if (isDark) {
-                                return { backgroundColor: '#0f172a' } // Dark Slate (Premium Dark)
+                                // If form is dark, we want a Page Background that complements it.
+                                // Ideal: A very dark version of the same hue, or just Dark Slate if neutral.
+                                // For MVP safety without heavy color libs, we default to Dark Slate #0f172a (222 47% 11%)
+                                // which looks good with almost any dark color (Navy, Black, Dark Red).
+                                return { backgroundColor: '#0f172a' }
                             }
-                            return { backgroundColor: '#f3f4f6' } // Gray 100 (Clean Light)
+
+                            // If form is light, use standard light grey
+                            return { backgroundColor: '#f3f4f6' }
                         }
 
                         return (
                             <div
                                 className="w-full h-full min-h-[550px] relative transition-all duration-300 flex items-center justify-center p-8 overflow-hidden"
                             >
-                                {/* Background for the whole screen (using brand background logic or separate?)
-                                    Usually card split implies a neutral background behind the card,
-                                    and the CARD itself is split.
-                                */}
+                                {/* Background for the whole screen */}
                                 <div className="absolute inset-0 -z-10" style={getPageBackgroundStyle()}></div>
 
                                 <div className="flex w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden h-[600px]">
