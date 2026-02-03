@@ -49,6 +49,9 @@ function logindesignerwp_get_defaults()
         'background_overlay_opacity' => 50,
         'preset_background_url' => '',
 
+        // Card Split Specific
+        'card_page_background_color' => '',
+
         // Form container settings - WP default is white with shadow
         'form_bg_color' => '#ffffff',
         'form_border_radius' => 0,  // WP default is square corners
