@@ -200,6 +200,7 @@ function logindesignerwp_sanitize_settings($input)
         'button_text_color',
         'below_form_link_color',
         'background_overlay_color',
+        'card_page_background_color',
     );
 
     foreach ($color_fields as $field) {
