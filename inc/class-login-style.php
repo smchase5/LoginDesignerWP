@@ -179,7 +179,16 @@ class LoginDesignerWP_Login_Style
         // Split layouts: style the form panel (.lp-main)
         if ($is_split_layout) {
             // Reset body background for split layouts
-            $css .= "body.login { background: none !important; }\n";
+            if ($layout_mode === 'card_split') {
+                // Card Split: Adaptive Background based on form contrast
+                $form_bg = isset($s['form_bg_color']) ? $s['form_bg_color'] : '#ffffff';
+                $form_brightness = $this->get_perceived_brightness($form_bg);
+                $page_bg_color = ($form_brightness < 130) ? '#0f172a' : '#f3f4f6';
+
+                $css .= "body.login { background-color: " . $page_bg_color . " !important; }\n";
+            } else {
+                $css .= "body.login { background: none !important; }\n";
+            }
 
             // Form Panel Background Styling
             $form_panel_mode = isset($s['form_panel_bg_mode']) ? $s['form_panel_bg_mode'] : 'solid';

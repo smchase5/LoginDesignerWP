@@ -818,6 +818,22 @@ export function LivePreview({
 
                     // CARD SPLIT LAYOUT SPECIFIC STRUCTURE
                     if (isCardSplit) {
+                        // Determine smart page background based on form contrast
+                        const getPageBackgroundStyle = (): React.CSSProperties => {
+                            let formBg = settings.form_bg_color || '#ffffff'
+                            let isDark = false
+                            try {
+                                isDark = getPerceivedBrightness(formBg) < 130
+                            } catch (e) { }
+
+                            // If Glassmorphism enabled, we default to a rich gradient or image if provided,
+                            // but for this specific "Card Split" without settings, we adapt to Light/Dark.
+                            if (isDark) {
+                                return { backgroundColor: '#0f172a' } // Dark Slate (Premium Dark)
+                            }
+                            return { backgroundColor: '#f3f4f6' } // Gray 100 (Clean Light)
+                        }
+
                         return (
                             <div
                                 className="w-full h-full min-h-[550px] relative transition-all duration-300 flex items-center justify-center p-8 overflow-hidden"
@@ -826,7 +842,7 @@ export function LivePreview({
                                     Usually card split implies a neutral background behind the card,
                                     and the CARD itself is split.
                                 */}
-                                <div className="absolute inset-0 -z-10 bg-gray-100"></div>
+                                <div className="absolute inset-0 -z-10" style={getPageBackgroundStyle()}></div>
 
                                 <div className="flex w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden h-[600px]">
                                     {/* Left Side (Brand) */}
@@ -835,7 +851,7 @@ export function LivePreview({
                                     </div>
 
                                     {/* Right Side (Form) */}
-                                    <div className="p-8 flex items-center justify-center bg-white" style={{ width: `${100 - Number(splitRatio)}%` }}>
+                                    <div className="p-8 flex items-center justify-center bg-white" style={{ width: `${100 - Number(splitRatio)}%`, backgroundColor: settings.form_bg_color || '#ffffff' }}>
                                         {FormContent}
                                     </div>
                                 </div>
