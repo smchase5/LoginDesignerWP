@@ -820,9 +820,12 @@ export function LivePreview({
                     if (isCardSplit) {
                         // Determine smart page background based on form contrast or manual override
                         const getPageBackgroundStyle = (): React.CSSProperties => {
+                            const manualBg = settings.card_page_background_color;
+                            console.log('LoginDesignerWP Debug: Card Background', { manualBg, formBg: settings.form_bg_color });
+
                             // 1. Manual Override
-                            if (settings.card_page_background_color) {
-                                return { backgroundColor: settings.card_page_background_color }
+                            if (manualBg) {
+                                return { backgroundColor: manualBg }
                             }
 
                             // 2. Smart Derivation
