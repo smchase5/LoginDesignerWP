@@ -41,6 +41,18 @@
   background: hsl(var(--background));
 }
 
+/* Neutralize WordPress .wrap container styles */
+.wrap:has(#ldwp-admin-root) {
+  margin: 0;
+  padding: 10px 20px 20px;
+  background: hsl(var(--background));
+}
+
+/* Hide the default WP admin page title */
+.wrap:has(#ldwp-admin-root)>h1:first-of-type {
+  display: none;
+}
+
 /* Reset WordPress admin styles within our scope */
 .ldwp-admin * {
   box-sizing: border-box;

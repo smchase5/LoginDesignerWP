@@ -174,9 +174,9 @@ export default function App() {
     }
 
     return (
-        <div className="ldwp-admin">
+        <div className="ldwp-admin -mx-[10px] -mt-[10px]">
             {/* Header */}
-            <div className="flex items-start justify-between mb-6">
+            <div className="flex items-start justify-between mb-8 px-2">
                 <div>
                     <h1 className="text-2xl font-bold text-foreground">LoginDesignerWP</h1>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -190,16 +190,16 @@ export default function App() {
             </div>
 
             {/* Tab Navigation */}
-            <nav className="flex gap-1 mb-6 border-b border-border">
+            <nav className="flex gap-0.5 mb-8 border-b border-border/60 px-2">
                 {tabs.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={cn(
-                            "flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px",
+                            "flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all duration-200 -mb-px rounded-t-md",
                             activeTab === tab.id
-                                ? "border-[hsl(207,74%,42%)] text-[hsl(207,74%,42%)]"
-                                : "border-transparent text-muted-foreground hover:text-foreground"
+                                ? "border-b-[2.5px] border-[hsl(207,74%,42%)] text-[hsl(207,74%,42%)] bg-background"
+                                : "border-b-[2.5px] border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50"
                         )}
                     >
                         {tab.icon}
@@ -209,7 +209,7 @@ export default function App() {
             </nav>
 
             {/* Tab Content */}
-            <div className={cn("flex gap-6 transition-all duration-300", showWizard ? "relative z-[50]" : "")}>
+            <div className={cn("flex gap-6 transition-all duration-300 px-2", showWizard ? "relative z-[50]" : "")}>
                 {/* Settings Column - 50% */}
                 <div className="w-1/2 flex-shrink-0">
                     {showWizard ? (
