@@ -149,7 +149,7 @@ export function DesignTab({
                         ? 'Showing essential controls. Switch to Advanced for full control.'
                         : 'Showing all controls.'}
                 </p>
-                <div className="inline-flex rounded-full border border-border p-0.5 bg-muted">
+                <div className="inline-flex rounded-full p-1 bg-muted">
                     {[
                         { value: 'simple' as const, label: 'Simple', icon: <Sparkles className="h-3.5 w-3.5" /> },
                         { value: 'advanced' as const, label: 'Advanced', icon: <SlidersHorizontal className="h-3.5 w-3.5" /> },

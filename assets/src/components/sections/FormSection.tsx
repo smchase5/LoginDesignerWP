@@ -112,7 +112,7 @@ export function FormSection({ settings, onChange, isPro = false, designMode = 'a
                 {/* Form Corners */}
                 <div>
                     <Label className="mb-2 block">Form Corners</Label>
-                    <div className="flex gap-2">
+                    <div className="flex p-1 bg-muted rounded-full">
                         {[
                             { value: 'square', label: 'Square', radius: 0 },
                             { value: 'soft', label: 'Soft', radius: 4 },
@@ -122,10 +122,10 @@ export function FormSection({ settings, onChange, isPro = false, designMode = 'a
                                 key={style.value}
                                 onClick={() => onChange('form_border_radius', style.radius)}
                                 className={cn(
-                                    "flex-1 py-2 px-3 text-sm font-medium rounded-full border transition-colors",
+                                    "flex-1 py-1.5 px-3 text-sm font-medium rounded-full transition-all",
                                     formRadius === style.radius
-                                        ? "bg-primary text-primary-foreground border-primary"
-                                        : "bg-background text-foreground border-border hover:bg-accent"
+                                        ? "bg-background text-foreground shadow-sm"
+                                        : "text-muted-foreground hover:text-foreground"
                                 )}
                             >
                                 {style.label}
@@ -265,7 +265,7 @@ export function FormSection({ settings, onChange, isPro = false, designMode = 'a
                     {designMode === 'advanced' && (
                         <div>
                             <Label className="mb-2 block">Button Corners</Label>
-                            <div className="flex gap-2">
+                            <div className="flex p-1 bg-muted rounded-full">
                                 {[
                                     { value: 0, label: 'Square' },
                                     { value: 4, label: 'Soft' },
@@ -276,10 +276,10 @@ export function FormSection({ settings, onChange, isPro = false, designMode = 'a
                                         key={style.value}
                                         onClick={() => onChange('button_border_radius', style.value)}
                                         className={cn(
-                                            "flex-1 py-2 px-3 text-sm font-medium rounded-full border transition-colors",
+                                            "flex-1 py-1.5 px-3 text-sm font-medium rounded-full transition-all",
                                             buttonCorners === style.value
-                                                ? "bg-primary text-primary-foreground border-primary"
-                                                : "bg-background text-foreground border-border hover:bg-accent"
+                                                ? "bg-background text-foreground shadow-sm"
+                                                : "text-muted-foreground hover:text-foreground"
                                         )}
                                     >
                                         {style.label}

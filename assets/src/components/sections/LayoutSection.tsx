@@ -167,7 +167,7 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
 
                     <div className="flex items-center justify-between">
                         <Label className="text-sm">Form Style</Label>
-                        <div className="flex bg-secondary/50 p-1 rounded-full">
+                        <div className="flex bg-muted p-1 rounded-full">
                             {['boxed', 'simple'].map((style) => (
                                 <button
                                     key={style}
@@ -288,7 +288,7 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
                                     {!!settings.brand_logo_bg_enable && (
                                         <div className="pt-2">
                                             <Label className="text-xs text-muted-foreground block mb-1.5">Corner Style</Label>
-                                            <div className="flex bg-secondary/50 p-1 rounded-full">
+                                            <div className="flex bg-muted p-1 rounded-full">
                                                 {['square', 'rounded', 'soft', 'full'].map((preset) => (
                                                     <button
                                                         key={preset}

@@ -82,7 +82,7 @@ const BrandControls = ({ settings, onChange, isPro = false, designMode = 'advanc
             {/* Background Type Selector */}
             <div>
                 <Label className="mb-2 block">Background Type</Label>
-                <div className="flex gap-2">
+                <div className="flex p-1 bg-muted rounded-full">
                     {[
                         { value: 'solid', label: 'Solid' },
                         { value: 'gradient', label: 'Gradient' },
@@ -92,10 +92,10 @@ const BrandControls = ({ settings, onChange, isPro = false, designMode = 'advanc
                             key={type.value}
                             onClick={() => onChange('background_mode', type.value)}
                             className={cn(
-                                "flex-1 py-2 px-3 text-sm font-medium rounded-full border transition-colors",
+                                "flex-1 py-1.5 px-3 text-sm font-medium rounded-full transition-all",
                                 bgMode === type.value
-                                    ? "bg-primary text-primary-foreground border-primary"
-                                    : "bg-background text-foreground border-border hover:bg-accent"
+                                    ? "bg-background text-foreground shadow-sm"
+                                    : "text-muted-foreground hover:text-foreground"
                             )}
                         >
                             {type.label}
@@ -421,17 +421,17 @@ const FormPanelControls = ({ settings, onChange }: { settings: Record<string, an
     return (
         <div className="space-y-4">
             {/* Mode Selector */}
-            <div className="flex gap-2">
+            <div className="flex p-1 bg-muted rounded-full">
                 {formPanelModes.map((mode) => (
                     <button
                         key={mode.id}
                         type="button"
                         onClick={() => onChange('form_panel_bg_mode', mode.id)}
                         className={cn(
-                            "flex-1 py-2 px-3 text-xs rounded-full border transition-all",
+                            "flex-1 py-1.5 px-3 text-xs font-medium rounded-full transition-all",
                             formPanelMode === mode.id
-                                ? "border-primary bg-primary/10 text-primary font-medium"
-                                : "border-border bg-background hover:bg-muted"
+                                ? "bg-background text-foreground shadow-sm"
+                                : "text-muted-foreground hover:text-foreground"
                         )}
                     >
                         {mode.label}
