@@ -52,7 +52,7 @@ export function ColorPicker({
                 <PopoverTrigger asChild disabled={disabled}>
                     <button
                         className={cn(
-                            "h-9 w-14 rounded-md border border-input cursor-pointer transition-colors",
+                            "h-9 w-14 rounded-md border border-slate-300 shadow-sm cursor-pointer transition-all",
                             "hover:border-primary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
                             disabled && "opacity-50 cursor-not-allowed"
                         )}
