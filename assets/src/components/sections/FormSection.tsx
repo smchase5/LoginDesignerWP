@@ -122,7 +122,7 @@ export function FormSection({ settings, onChange, isPro = false, designMode = 'a
                                 key={style.value}
                                 onClick={() => onChange('form_border_radius', style.radius)}
                                 className={cn(
-                                    "flex-1 py-2 px-3 text-sm font-medium rounded-md border transition-colors",
+                                    "flex-1 py-2 px-3 text-sm font-medium rounded-full border transition-colors",
                                     formRadius === style.radius
                                         ? "bg-primary text-primary-foreground border-primary"
                                         : "bg-background text-foreground border-border hover:bg-accent"
@@ -276,7 +276,7 @@ export function FormSection({ settings, onChange, isPro = false, designMode = 'a
                                         key={style.value}
                                         onClick={() => onChange('button_border_radius', style.value)}
                                         className={cn(
-                                            "flex-1 py-2 px-3 text-sm font-medium rounded-md border transition-colors",
+                                            "flex-1 py-2 px-3 text-sm font-medium rounded-full border transition-colors",
                                             buttonCorners === style.value
                                                 ? "bg-primary text-primary-foreground border-primary"
                                                 : "bg-background text-foreground border-border hover:bg-accent"

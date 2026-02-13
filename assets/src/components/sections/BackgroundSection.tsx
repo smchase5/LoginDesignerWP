@@ -92,7 +92,7 @@ const BrandControls = ({ settings, onChange, isPro = false, designMode = 'advanc
                             key={type.value}
                             onClick={() => onChange('background_mode', type.value)}
                             className={cn(
-                                "flex-1 py-2 px-3 text-sm font-medium rounded-md border transition-colors",
+                                "flex-1 py-2 px-3 text-sm font-medium rounded-full border transition-colors",
                                 bgMode === type.value
                                     ? "bg-primary text-primary-foreground border-primary"
                                     : "bg-background text-foreground border-border hover:bg-accent"
@@ -428,7 +428,7 @@ const FormPanelControls = ({ settings, onChange }: { settings: Record<string, an
                         type="button"
                         onClick={() => onChange('form_panel_bg_mode', mode.id)}
                         className={cn(
-                            "flex-1 py-2 px-3 text-xs rounded-md border transition-all",
+                            "flex-1 py-2 px-3 text-xs rounded-full border transition-all",
                             formPanelMode === mode.id
                                 ? "border-primary bg-primary/10 text-primary font-medium"
                                 : "border-border bg-background hover:bg-muted"

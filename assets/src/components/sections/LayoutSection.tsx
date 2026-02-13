@@ -167,12 +167,12 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
 
                     <div className="flex items-center justify-between">
                         <Label className="text-sm">Form Style</Label>
-                        <div className="flex bg-secondary/50 p-1 rounded-md">
+                        <div className="flex bg-secondary/50 p-1 rounded-full">
                             {['boxed', 'simple'].map((style) => (
                                 <button
                                     key={style}
                                     className={cn(
-                                        "px-3 py-1 text-xs font-medium rounded-sm transition-all",
+                                        "px-3 py-1 text-xs font-medium rounded-full transition-all",
                                         (settings.layout_form_style || 'boxed') === style
                                             ? "bg-background shadow-sm text-foreground"
                                             : "text-muted-foreground hover:text-foreground"
@@ -288,11 +288,11 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
                                     {!!settings.brand_logo_bg_enable && (
                                         <div className="pt-2">
                                             <Label className="text-xs text-muted-foreground block mb-1.5">Corner Style</Label>
-                                            <div className="flex bg-secondary/50 p-1 rounded-md">
+                                            <div className="flex bg-secondary/50 p-1 rounded-full">
                                                 {['square', 'rounded', 'soft', 'full'].map((preset) => (
                                                     <button
                                                         key={preset}
-                                                        className={`flex-1 text-[10px] font-medium py-1 rounded-sm transition-all ${(settings.brand_logo_radius_preset || 'square') === preset
+                                                        className={`flex-1 text-[10px] font-medium py-1 rounded-full transition-all ${(settings.brand_logo_radius_preset || 'square') === preset
                                                             ? 'bg-background shadow-sm text-foreground'
                                                             : 'text-muted-foreground hover:text-foreground'
                                                             }`}

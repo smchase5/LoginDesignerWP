@@ -149,7 +149,7 @@ export function DesignTab({
                         ? 'Showing essential controls. Switch to Advanced for full control.'
                         : 'Showing all controls.'}
                 </p>
-                <div className="inline-flex rounded-lg border border-border p-0.5 bg-muted">
+                <div className="inline-flex rounded-full border border-border p-0.5 bg-muted">
                     {[
                         { value: 'simple' as const, label: 'Simple', icon: <Sparkles className="h-3.5 w-3.5" /> },
                         { value: 'advanced' as const, label: 'Advanced', icon: <SlidersHorizontal className="h-3.5 w-3.5" /> },
@@ -158,7 +158,7 @@ export function DesignTab({
                             key={mode.value}
                             onClick={() => onDesignModeChange(mode.value)}
                             className={cn(
-                                "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
+                                "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-all",
                                 designMode === mode.value
                                     ? "bg-background text-foreground shadow-sm"
                                     : "text-muted-foreground hover:text-foreground"
