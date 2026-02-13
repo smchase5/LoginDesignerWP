@@ -174,9 +174,9 @@ export default function App() {
     }
 
     return (
-        <div className="ldwp-admin -mx-[10px] -mt-[10px]">
+        <div className="ldwp-admin">
             {/* Header */}
-            <div className="flex items-start justify-between mb-8 px-2">
+            <div className="flex items-start justify-between mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-foreground">LoginDesignerWP</h1>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -189,27 +189,36 @@ export default function App() {
                 </Button>
             </div>
 
-            {/* Tab Navigation */}
-            <nav className="flex gap-0.5 mb-8 border-b border-border/60 px-2">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={cn(
-                            "flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all duration-200 -mb-px rounded-t-md",
-                            activeTab === tab.id
-                                ? "border-b-[2.5px] border-[hsl(207,74%,42%)] text-[hsl(207,74%,42%)] bg-background"
-                                : "border-b-[2.5px] border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                        )}
-                    >
-                        {tab.icon}
-                        {tab.label}
-                    </button>
-                ))}
-            </nav>
+            {/* Tab Navigation — shadcn Line style */}
+            <div className="relative mb-8">
+                <div className="flex">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={cn(
+                                "relative flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors",
+                                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                                activeTab === tab.id
+                                    ? "text-foreground"
+                                    : "text-muted-foreground hover:text-foreground"
+                            )}
+                        >
+                            {tab.icon}
+                            {tab.label}
+                            {/* Active indicator line */}
+                            {activeTab === tab.id && (
+                                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground rounded-full" />
+                            )}
+                        </button>
+                    ))}
+                </div>
+                {/* Full-width bottom border */}
+                <div className="absolute bottom-0 left-0 right-0 h-px bg-border" />
+            </div>
 
             {/* Tab Content */}
-            <div className={cn("flex gap-6 transition-all duration-300 px-2", showWizard ? "relative z-[50]" : "")}>
+            <div className={cn("flex gap-6 transition-all duration-300", showWizard ? "relative z-[50]" : "")}>
                 {/* Settings Column - 50% */}
                 <div className="w-1/2 flex-shrink-0">
                     {showWizard ? (

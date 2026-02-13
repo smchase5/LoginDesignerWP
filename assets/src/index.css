@@ -41,14 +41,21 @@
   background: hsl(var(--background));
 }
 
-/* Neutralize WordPress .wrap container styles */
-.wrap:has(#ldwp-admin-root) {
-  margin: 0;
-  padding: 10px 20px 20px;
-  background: hsl(var(--background));
+/* Neutralize WordPress admin layout when our plugin is active */
+#wpcontent:has(#ldwp-admin-root) {
+  padding-left: 0;
 }
 
-/* Hide the default WP admin page title */
+.wrap:has(#ldwp-admin-root) {
+  margin: 0;
+  padding: 20px 20px 0;
+  background: hsl(var(--background));
+  min-height: calc(100vh - 32px);
+  /* fill below WP admin bar */
+}
+
+/* Hide WP footer and default page title */
+body:has(#ldwp-admin-root) #wpfooter,
 .wrap:has(#ldwp-admin-root)>h1:first-of-type {
   display: none;
 }
