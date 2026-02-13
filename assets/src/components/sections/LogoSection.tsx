@@ -10,9 +10,10 @@ import { Image, X } from 'lucide-react'
 interface LogoSectionProps {
     settings: Record<string, any>
     onChange: (key: string, value: any) => void
+    designMode?: 'simple' | 'advanced'
 }
 
-export function LogoSection({ settings, onChange }: LogoSectionProps) {
+export function LogoSection({ settings, onChange, designMode = 'advanced' }: LogoSectionProps) {
     const openMediaLibrary = () => {
         if (typeof window.wp !== 'undefined' && window.wp.media) {
             const frame = window.wp.media({
@@ -65,114 +66,124 @@ export function LogoSection({ settings, onChange }: LogoSectionProps) {
                     </Button>
                 </div>
 
-                {/* Logo Dimensions */}
-                <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                        <Label>Size (Width)</Label>
-                        <div className="flex items-center gap-2">
-                            <Slider
-                                min={20}
-                                max={500}
-                                step={1}
-                                value={[settings.logo_width || 84]}
-                                onValueChange={([val]) => onChange('logo_width', val)}
-                                className="w-24"
-                            />
-                            <span className="text-sm font-medium text-primary w-12 text-right">
-                                {settings.logo_width || 84}px
-                            </span>
+                {/* Logo Dimensions - Advanced only */}
+                {designMode === 'advanced' && (
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <Label>Size (Width)</Label>
+                            <div className="flex items-center gap-2">
+                                <Slider
+                                    min={20}
+                                    max={500}
+                                    step={1}
+                                    value={[settings.logo_width || 84]}
+                                    onValueChange={([val]) => onChange('logo_width', val)}
+                                    className="w-24"
+                                />
+                                <span className="text-sm font-medium text-primary w-12 text-right">
+                                    {settings.logo_width || 84}px
+                                </span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="flex items-center justify-between">
-                        <Label>Height</Label>
-                        <div className="flex items-center gap-2">
-                            <Slider
-                                min={20}
-                                max={500}
-                                step={1}
-                                value={[settings.logo_height || 84]}
-                                onValueChange={([val]) => onChange('logo_height', val)}
-                                className="w-24"
-                            />
-                            <span className="text-sm font-medium text-primary w-12 text-right">
-                                {settings.logo_height || 84}px
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Padding */}
-                <div className="flex items-center justify-between">
-                    <Label>Padding</Label>
-                    <div className="flex items-center gap-2">
-                        <Slider
-                            min={0}
-                            max={100}
-                            step={1}
-                            value={[settings.logo_padding || 0]}
-                            onValueChange={([val]) => onChange('logo_padding', val)}
-                            className="w-24"
-                        />
-                        <span className="text-sm font-medium text-primary w-12">
-                            {settings.logo_padding || 0}px
-                        </span>
-                    </div>
-                </div>
-
-                {/* Bottom Margin */}
-                <div className="flex items-center justify-between">
-                    <Label>Bottom Margin</Label>
-                    <div className="flex items-center gap-2">
-                        <Slider
-                            min={0}
-                            max={100}
-                            step={1}
-                            value={[settings.logo_bottom_margin || 25]}
-                            onValueChange={([val]) => onChange('logo_bottom_margin', val)}
-                            className="w-24"
-                        />
-                        <span className="text-sm font-medium text-primary w-12">
-                            {settings.logo_bottom_margin || 25}px
-                        </span>
-                    </div>
-                </div>
-
-                {/* Logo Background */}
-                <div className="flex items-center justify-between">
-                    <Label>Logo Background</Label>
-                    <Switch
-                        checked={!!settings.logo_background_enable}
-                        onCheckedChange={(checked) => onChange('logo_background_enable', checked ? 1 : 0)}
-                    />
-                </div>
-
-                {!!settings.logo_background_enable && (
-                    <div className="grid grid-cols-2 gap-4 pl-4 border-l-2 border-border">
-                        <div className="space-y-2">
-                            <Label>Background Color</Label>
-                            <ColorPicker
-                                value={settings.logo_background_color || '#ffffff'}
-                                onChange={(color) => onChange('logo_background_color', color)}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                                <Label>Corner Radius</Label>
-                                <div className="flex items-center gap-2">
-                                    <Slider
-                                        min={0}
-                                        max={50}
-                                        step={1}
-                                        value={[settings.logo_border_radius || 0]}
-                                        onValueChange={([val]) => onChange('logo_border_radius', val)}
-                                        className="w-20"
-                                    />
-                                    <span className="text-xs w-8 text-right">{settings.logo_border_radius || 0}px</span>
-                                </div>
+                        <div className="flex items-center justify-between">
+                            <Label>Height</Label>
+                            <div className="flex items-center gap-2">
+                                <Slider
+                                    min={20}
+                                    max={500}
+                                    step={1}
+                                    value={[settings.logo_height || 84]}
+                                    onValueChange={([val]) => onChange('logo_height', val)}
+                                    className="w-24"
+                                />
+                                <span className="text-sm font-medium text-primary w-12 text-right">
+                                    {settings.logo_height || 84}px
+                                </span>
                             </div>
                         </div>
                     </div>
+                )}
+
+                {/* Padding - Advanced only */}
+                {designMode === 'advanced' && (
+                    <div className="flex items-center justify-between">
+                        <Label>Padding</Label>
+                        <div className="flex items-center gap-2">
+                            <Slider
+                                min={0}
+                                max={100}
+                                step={1}
+                                value={[settings.logo_padding || 0]}
+                                onValueChange={([val]) => onChange('logo_padding', val)}
+                                className="w-24"
+                            />
+                            <span className="text-sm font-medium text-primary w-12">
+                                {settings.logo_padding || 0}px
+                            </span>
+                        </div>
+                    </div>
+                )}
+
+                {/* Bottom Margin - Advanced only */}
+                {designMode === 'advanced' && (
+                    <div className="flex items-center justify-between">
+                        <Label>Bottom Margin</Label>
+                        <div className="flex items-center gap-2">
+                            <Slider
+                                min={0}
+                                max={100}
+                                step={1}
+                                value={[settings.logo_bottom_margin || 25]}
+                                onValueChange={([val]) => onChange('logo_bottom_margin', val)}
+                                className="w-24"
+                            />
+                            <span className="text-sm font-medium text-primary w-12">
+                                {settings.logo_bottom_margin || 25}px
+                            </span>
+                        </div>
+                    </div>
+                )}
+
+                {/* Logo Background - Advanced only */}
+                {designMode === 'advanced' && (
+                    <>
+                        <div className="flex items-center justify-between">
+                            <Label>Logo Background</Label>
+                            <Switch
+                                checked={!!settings.logo_background_enable}
+                                onCheckedChange={(checked) => onChange('logo_background_enable', checked ? 1 : 0)}
+                            />
+                        </div>
+
+                        {!!settings.logo_background_enable && (
+                            <div className="grid grid-cols-2 gap-4 pl-4 border-l-2 border-border">
+                                <div className="space-y-2">
+                                    <Label>Background Color</Label>
+                                    <ColorPicker
+                                        value={settings.logo_background_color || '#ffffff'}
+                                        onChange={(color) => onChange('logo_background_color', color)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <Label>Corner Radius</Label>
+                                        <div className="flex items-center gap-2">
+                                            <Slider
+                                                min={0}
+                                                max={50}
+                                                step={1}
+                                                value={[settings.logo_border_radius || 0]}
+                                                onValueChange={([val]) => onChange('logo_border_radius', val)}
+                                                className="w-20"
+                                            />
+                                            <span className="text-xs w-8 text-right">{settings.logo_border_radius || 0}px</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </>
                 )}
 
                 {/* Logo URL */}
@@ -187,17 +198,19 @@ export function LogoSection({ settings, onChange }: LogoSectionProps) {
                     <p className="text-xs text-muted-foreground">Link when clicking the logo. Default: Homepage.</p>
                 </div>
 
-                {/* Logo Title */}
-                <div className="space-y-2">
-                    <Label>Logo Title</Label>
-                    <Input
-                        type="text"
-                        placeholder="Your Site Name"
-                        value={settings.logo_title || ''}
-                        onChange={(e) => onChange('logo_title', e.target.value)}
-                    />
-                    <p className="text-xs text-muted-foreground">Title attribute for the logo link. Default: Site Title.</p>
-                </div>
+                {/* Logo Title - Advanced only */}
+                {designMode === 'advanced' && (
+                    <div className="space-y-2">
+                        <Label>Logo Title</Label>
+                        <Input
+                            type="text"
+                            placeholder="Your Site Name"
+                            value={settings.logo_title || ''}
+                            onChange={(e) => onChange('logo_title', e.target.value)}
+                        />
+                        <p className="text-xs text-muted-foreground">Title attribute for the logo link. Default: Site Title.</p>
+                    </div>
+                )}
             </CardContent>
         </Card>
     )

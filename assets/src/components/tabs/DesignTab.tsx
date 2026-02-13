@@ -8,7 +8,8 @@ import { LogoSection } from '@/components/sections/LogoSection'
 import { PresetsSection } from '@/components/sections/PresetsSection'
 import { LayoutSection } from '@/components/sections/LayoutSection'
 import { Wizard } from '@/components/wizard/Wizard'
-import { Save, ExternalLink, RotateCcw, Lock, Star, Unlock } from 'lucide-react'
+import { Save, ExternalLink, RotateCcw, Lock, Star, Unlock, Sparkles, SlidersHorizontal } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { AIToolsSection } from '@/components/sections/AIToolsSection'
 import { SmartThemeGenerator } from '@/components/generator/SmartThemeGenerator'
 
@@ -92,6 +93,8 @@ interface DesignTabProps {
     setShowWizard: (show: boolean) => void
     presets: Record<string, any>
     isPro: boolean
+    designMode: 'simple' | 'advanced'
+    onDesignModeChange: (mode: 'simple' | 'advanced') => void
 }
 
 export function DesignTab({
@@ -105,7 +108,9 @@ export function DesignTab({
     showWizard,
     setShowWizard,
     presets,
-    isPro
+    isPro,
+    designMode,
+    onDesignModeChange
 }: DesignTabProps) {
     const loginUrl = window.logindesignerwpData?.loginUrl || '/wp-login.php'
 
@@ -137,6 +142,35 @@ export function DesignTab({
                 />
             )}
 
+            {/* Simple / Advanced Mode Toggle */}
+            <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                    {designMode === 'simple'
+                        ? 'Showing essential controls. Switch to Advanced for full control.'
+                        : 'Showing all controls.'}
+                </p>
+                <div className="inline-flex rounded-lg border border-border p-0.5 bg-muted">
+                    {[
+                        { value: 'simple' as const, label: 'Simple', icon: <Sparkles className="h-3.5 w-3.5" /> },
+                        { value: 'advanced' as const, label: 'Advanced', icon: <SlidersHorizontal className="h-3.5 w-3.5" /> },
+                    ].map((mode) => (
+                        <button
+                            key={mode.value}
+                            onClick={() => onDesignModeChange(mode.value)}
+                            className={cn(
+                                "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
+                                designMode === mode.value
+                                    ? "bg-background text-foreground shadow-sm"
+                                    : "text-muted-foreground hover:text-foreground"
+                            )}
+                        >
+                            {mode.icon}
+                            {mode.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             {/* Presets Section */}
             <PresetsSection
                 settings={settings}
@@ -156,13 +190,13 @@ export function DesignTab({
             </ProSection>
 
             {/* Background Section - Now layout-aware */}
-            <BackgroundSection settings={settings} onChange={onChange} isPro={isPro} />
+            <BackgroundSection settings={settings} onChange={onChange} isPro={isPro} designMode={designMode} />
 
             {/* Form Section */}
-            <FormSection settings={settings} onChange={onChange} isPro={isPro} />
+            <FormSection settings={settings} onChange={onChange} isPro={isPro} designMode={designMode} />
 
             {/* Logo Section */}
-            <LogoSection settings={settings} onChange={onChange} />
+            <LogoSection settings={settings} onChange={onChange} designMode={designMode} />
 
             <ProSection title="AI Tools" description="Generate backgrounds and themes with AI" isPro={isPro} extraBadge={aiBadge}>
                 <AIToolsSection

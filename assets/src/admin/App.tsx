@@ -55,6 +55,14 @@ export default function App() {
     const [showWizard, setShowWizard] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
     const [isResetting, setIsResetting] = useState(false)
+    const [designMode, setDesignMode] = useState<'simple' | 'advanced'>(
+        () => (localStorage.getItem('ldwp_design_mode') as 'simple' | 'advanced') || 'simple'
+    )
+
+    const handleDesignModeChange = (mode: 'simple' | 'advanced') => {
+        setDesignMode(mode)
+        localStorage.setItem('ldwp_design_mode', mode)
+    }
 
     // Check if there are unsaved changes
     // Check if there are unsaved changes
@@ -231,6 +239,8 @@ export default function App() {
                                     setShowWizard={setShowWizard}
                                     presets={data.presets || {}}
                                     isPro={isPro}
+                                    designMode={designMode}
+                                    onDesignModeChange={handleDesignModeChange}
                                 />
                             )}
                             {activeTab === 'settings' && (

@@ -12,6 +12,7 @@ import { useState } from 'react'
 interface BackgroundSectionProps {
     settings: Record<string, any>
     onChange: (key: string, value: any) => void
+    designMode?: 'simple' | 'advanced'
 }
 
 // Helper for opening media library
@@ -41,7 +42,7 @@ const openMediaLibrary = (imageKey: string, urlKey: string, onChange: (key: stri
     }
 }
 
-const BrandControls = ({ settings, onChange, isPro = false }: { settings: Record<string, any>, onChange: (key: string, value: any) => void, isPro?: boolean }) => {
+const BrandControls = ({ settings, onChange, isPro = false, designMode = 'advanced' }: { settings: Record<string, any>, onChange: (key: string, value: any) => void, isPro?: boolean, designMode?: 'simple' | 'advanced' }) => {
     const bgMode = settings.background_mode || 'solid'
 
     const randomizeGradient = () => {
@@ -62,7 +63,7 @@ const BrandControls = ({ settings, onChange, isPro = false }: { settings: Record
     return (
         <div className="space-y-4">
             {/* Card Split: Page Background Override */}
-            {settings.layout_mode === 'card_split' && (
+            {designMode === 'advanced' && settings.layout_mode === 'card_split' && (
                 <div className="p-3 border rounded-md bg-muted/20">
                     <div className="flex items-center justify-between mb-1">
                         <Label className="text-sm font-semibold">Page Background</Label>
@@ -137,7 +138,7 @@ const BrandControls = ({ settings, onChange, isPro = false }: { settings: Record
                     </div>
 
                     {/* Mesh Pro Lock */}
-                    {settings.gradient_type === 'mesh' && !isPro && (
+                    {designMode === 'advanced' && settings.gradient_type === 'mesh' && !isPro && (
                         <div className="bg-muted p-3 rounded-md border text-center text-sm text-muted-foreground flex flex-col items-center gap-2">
                             <span className="font-semibold text-foreground">Mesh Gradients are a Pro Feature</span>
                             <Button size="sm" variant="default">Upgrade to Pro</Button>
@@ -145,7 +146,7 @@ const BrandControls = ({ settings, onChange, isPro = false }: { settings: Record
                     )}
 
                     {/* Linear/Radial Angle */}
-                    {settings.gradient_type !== 'radial' && settings.gradient_type !== 'mesh' && (
+                    {designMode === 'advanced' && settings.gradient_type !== 'radial' && settings.gradient_type !== 'mesh' && (
                         <div className="flex items-center justify-between">
                             <Label>Angle</Label>
                             <div className="flex items-center gap-2">
@@ -165,7 +166,7 @@ const BrandControls = ({ settings, onChange, isPro = false }: { settings: Record
                     )}
 
                     {/* Radial Position */}
-                    {settings.gradient_type === 'radial' && (
+                    {designMode === 'advanced' && settings.gradient_type === 'radial' && (
                         <div className="flex items-center justify-between">
                             <Label>Position</Label>
                             <select
@@ -208,7 +209,7 @@ const BrandControls = ({ settings, onChange, isPro = false }: { settings: Record
                     )}
 
                     {/* Mesh Gradient Controls */}
-                    {settings.gradient_type === 'mesh' && (
+                    {designMode === 'advanced' && settings.gradient_type === 'mesh' && (
                         <div className={cn("space-y-3", !isPro && "opacity-50 pointer-events-none")}>
                             <div className="flex items-center justify-between">
                                 <Label>Base Color</Label>
@@ -295,100 +296,112 @@ const BrandControls = ({ settings, onChange, isPro = false }: { settings: Record
                     </div>
 
                     {/* Image Size */}
-                    <div className="flex items-center justify-between">
-                        <Label>Image Size</Label>
-                        <select
-                            className="h-9 px-3 rounded-md border border-input bg-background text-sm"
-                            value={settings.background_image_size || 'cover'}
-                            onChange={(e) => onChange('background_image_size', e.target.value)}
-                        >
-                            <option value="cover">Cover</option>
-                            <option value="contain">Contain</option>
-                            <option value="auto">Auto</option>
-                        </select>
-                    </div>
+                    {designMode === 'advanced' && (
+                        <div className="flex items-center justify-between">
+                            <Label>Image Size</Label>
+                            <select
+                                className="h-9 px-3 rounded-md border border-input bg-background text-sm"
+                                value={settings.background_image_size || 'cover'}
+                                onChange={(e) => onChange('background_image_size', e.target.value)}
+                            >
+                                <option value="cover">Cover</option>
+                                <option value="contain">Contain</option>
+                                <option value="auto">Auto</option>
+                            </select>
+                        </div>
+                    )}
 
                     {/* Image Position */}
-                    <div className="flex items-center justify-between">
-                        <Label>Image Position</Label>
-                        <select
-                            className="h-9 px-3 rounded-md border border-input bg-background text-sm"
-                            value={settings.background_image_pos || 'center'}
-                            onChange={(e) => onChange('background_image_pos', e.target.value)}
-                        >
-                            <option value="center">Center</option>
-                            <option value="top">Top</option>
-                            <option value="bottom">Bottom</option>
-                        </select>
-                    </div>
+                    {designMode === 'advanced' && (
+                        <div className="flex items-center justify-between">
+                            <Label>Image Position</Label>
+                            <select
+                                className="h-9 px-3 rounded-md border border-input bg-background text-sm"
+                                value={settings.background_image_pos || 'center'}
+                                onChange={(e) => onChange('background_image_pos', e.target.value)}
+                            >
+                                <option value="center">Center</option>
+                                <option value="top">Top</option>
+                                <option value="bottom">Bottom</option>
+                            </select>
+                        </div>
+                    )}
 
                     {/* Image Repeat */}
-                    <div className="flex items-center justify-between">
-                        <Label>Image Repeat</Label>
-                        <select
-                            className="h-9 px-3 rounded-md border border-input bg-background text-sm"
-                            value={settings.background_image_repeat || 'no-repeat'}
-                            onChange={(e) => onChange('background_image_repeat', e.target.value)}
-                        >
-                            <option value="no-repeat">No Repeat</option>
-                            <option value="repeat">Repeat</option>
-                        </select>
-                    </div>
+                    {designMode === 'advanced' && (
+                        <div className="flex items-center justify-between">
+                            <Label>Image Repeat</Label>
+                            <select
+                                className="h-9 px-3 rounded-md border border-input bg-background text-sm"
+                                value={settings.background_image_repeat || 'no-repeat'}
+                                onChange={(e) => onChange('background_image_repeat', e.target.value)}
+                            >
+                                <option value="no-repeat">No Repeat</option>
+                                <option value="repeat">Repeat</option>
+                            </select>
+                        </div>
+                    )}
 
                     {/* Background Blur */}
-                    <div className="flex items-center justify-between">
-                        <Label>Background Blur</Label>
-                        <div className="flex items-center gap-2">
-                            <Slider
-                                min={0}
-                                max={20}
-                                step={1}
-                                value={[settings.background_blur || 0]}
-                                onValueChange={([val]) => onChange('background_blur', val)}
-                                className="w-24"
-                            />
-                            <span className="text-sm font-medium text-primary w-10">
-                                {settings.background_blur || 0}px
-                            </span>
+                    {designMode === 'advanced' && (
+                        <div className="flex items-center justify-between">
+                            <Label>Background Blur</Label>
+                            <div className="flex items-center gap-2">
+                                <Slider
+                                    min={0}
+                                    max={20}
+                                    step={1}
+                                    value={[settings.background_blur || 0]}
+                                    onValueChange={([val]) => onChange('background_blur', val)}
+                                    className="w-24"
+                                />
+                                <span className="text-sm font-medium text-primary w-10">
+                                    {settings.background_blur || 0}px
+                                </span>
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Color Overlay Toggle */}
-                    <div className="flex items-center justify-between">
-                        <Label>Color Overlay</Label>
-                        <Switch
-                            checked={!!settings.background_overlay_enable}
-                            onCheckedChange={(checked) => onChange('background_overlay_enable', checked ? 1 : 0)}
-                        />
-                    </div>
-
-                    {/* Overlay Settings */}
-                    {!!settings.background_overlay_enable && (
-                        <div className="pl-4 border-l-2 border-border space-y-3">
+                    {designMode === 'advanced' && (
+                        <>
                             <div className="flex items-center justify-between">
-                                <Label>Overlay Color</Label>
-                                <ColorPicker
-                                    value={settings.background_overlay_color || '#000000'}
-                                    onChange={(color) => onChange('background_overlay_color', color)}
+                                <Label>Color Overlay</Label>
+                                <Switch
+                                    checked={!!settings.background_overlay_enable}
+                                    onCheckedChange={(checked) => onChange('background_overlay_enable', checked ? 1 : 0)}
                                 />
                             </div>
-                            <div className="flex items-center justify-between">
-                                <Label>Overlay Opacity</Label>
-                                <div className="flex items-center gap-2">
-                                    <Slider
-                                        min={0}
-                                        max={100}
-                                        step={5}
-                                        value={[settings.background_overlay_opacity || 50]}
-                                        onValueChange={([val]) => onChange('background_overlay_opacity', val)}
-                                        className="w-24"
-                                    />
-                                    <span className="text-sm font-medium text-primary w-10">
-                                        {settings.background_overlay_opacity || 50}%
-                                    </span>
+
+                            {/* Overlay Settings */}
+                            {!!settings.background_overlay_enable && (
+                                <div className="pl-4 border-l-2 border-border space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <Label>Overlay Color</Label>
+                                        <ColorPicker
+                                            value={settings.background_overlay_color || '#000000'}
+                                            onChange={(color) => onChange('background_overlay_color', color)}
+                                        />
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <Label>Overlay Opacity</Label>
+                                        <div className="flex items-center gap-2">
+                                            <Slider
+                                                min={0}
+                                                max={100}
+                                                step={5}
+                                                value={[settings.background_overlay_opacity || 50]}
+                                                onValueChange={([val]) => onChange('background_overlay_opacity', val)}
+                                                className="w-24"
+                                            />
+                                            <span className="text-sm font-medium text-primary w-10">
+                                                {settings.background_overlay_opacity || 50}%
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
+                            )}
+                        </>
                     )}
                 </div>
             )}
@@ -560,7 +573,7 @@ const FormPanelControls = ({ settings, onChange }: { settings: Record<string, an
     )
 }
 
-export function BackgroundSection({ settings, onChange, isPro = false }: BackgroundSectionProps & { isPro?: boolean }) {
+export function BackgroundSection({ settings, onChange, isPro = false, designMode = 'advanced' }: BackgroundSectionProps & { isPro?: boolean }) {
     const layoutMode = settings.layout_mode || 'centered'
     const isAdvancedLayout = layoutMode.startsWith('split_') // Only split layouts have dual backgrounds
 
@@ -577,7 +590,7 @@ export function BackgroundSection({ settings, onChange, isPro = false }: Backgro
                     <CardDescription>Customize the login page background</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <BrandControls settings={settings} onChange={onChange} isPro={isPro} />
+                    <BrandControls settings={settings} onChange={onChange} isPro={isPro} designMode={designMode} />
                 </CardContent>
             </Card>
         )
@@ -610,7 +623,7 @@ export function BackgroundSection({ settings, onChange, isPro = false }: Backgro
                             <p className="text-xs text-muted-foreground mb-3">
                                 The image or color that fills the brand zone (the large visual area).
                             </p>
-                            <BrandControls settings={settings} onChange={onChange} isPro={isPro} />
+                            <BrandControls settings={settings} onChange={onChange} isPro={isPro} designMode={designMode} />
                         </div>
                     )}
                 </div>
