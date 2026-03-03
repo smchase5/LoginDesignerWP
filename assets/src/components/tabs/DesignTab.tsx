@@ -9,9 +9,9 @@ import { PresetsSection } from '@/components/sections/PresetsSection'
 import { LayoutSection } from '@/components/sections/LayoutSection'
 import { Wizard } from '@/components/wizard/Wizard'
 import { Save, ExternalLink, RotateCcw, Lock, Star, Unlock, Sparkles, SlidersHorizontal } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import { AIToolsSection } from '@/components/sections/AIToolsSection'
 import { SmartThemeGenerator } from '@/components/generator/SmartThemeGenerator'
+import { SegmentedControl } from '@/components/ui/segmented-control'
 
 const ProSection = ({
     title,
@@ -149,26 +149,16 @@ export function DesignTab({
                         ? 'Showing essential controls. Switch to Advanced for full control.'
                         : 'Showing all controls.'}
                 </p>
-                <div className="inline-flex rounded-full p-1 bg-muted">
-                    {[
+                <SegmentedControl
+                    value={designMode}
+                    onChange={onDesignModeChange}
+                    options={[
                         { value: 'simple' as const, label: 'Simple', icon: <Sparkles className="h-3.5 w-3.5" /> },
                         { value: 'advanced' as const, label: 'Advanced', icon: <SlidersHorizontal className="h-3.5 w-3.5" /> },
-                    ].map((mode) => (
-                        <button
-                            key={mode.value}
-                            onClick={() => onDesignModeChange(mode.value)}
-                            className={cn(
-                                "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-all",
-                                designMode === mode.value
-                                    ? "bg-background text-foreground shadow-sm"
-                                    : "text-muted-foreground hover:text-foreground"
-                            )}
-                        >
-                            {mode.icon}
-                            {mode.label}
-                        </button>
-                    ))}
-                </div>
+                    ]}
+                    className="min-w-[210px]"
+                    buttonClassName="text-xs"
+                />
             </div>
 
             {/* Presets Section */}

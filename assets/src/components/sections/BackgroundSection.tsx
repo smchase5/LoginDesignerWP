@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { ColorPicker } from '@/components/ui/color-picker'
 import { Slider } from '@/components/ui/slider'
+import { SegmentedControl } from '@/components/ui/segmented-control'
 import { cn } from '@/lib/utils'
 import { Image, X, Shuffle, ChevronDown, ChevronRight } from 'lucide-react'
 import { useState } from 'react'
@@ -82,26 +83,15 @@ const BrandControls = ({ settings, onChange, isPro = false, designMode = 'advanc
             {/* Background Type Selector */}
             <div>
                 <Label className="mb-2 block">Background Type</Label>
-                <div className="flex p-1 bg-muted rounded-full">
-                    {[
+                <SegmentedControl
+                    value={bgMode}
+                    onChange={(value) => onChange('background_mode', value)}
+                    options={[
                         { value: 'solid', label: 'Solid' },
                         { value: 'gradient', label: 'Gradient' },
                         { value: 'image', label: 'Image' }
-                    ].map((type) => (
-                        <button
-                            key={type.value}
-                            onClick={() => onChange('background_mode', type.value)}
-                            className={cn(
-                                "flex-1 py-1.5 px-3 text-sm font-medium rounded-full transition-all",
-                                bgMode === type.value
-                                    ? "bg-background text-foreground shadow-sm"
-                                    : "text-muted-foreground hover:text-foreground"
-                            )}
-                        >
-                            {type.label}
-                        </button>
-                    ))}
-                </div>
+                    ]}
+                />
             </div>
 
             {/* Solid Color */}
@@ -421,23 +411,12 @@ const FormPanelControls = ({ settings, onChange }: { settings: Record<string, an
     return (
         <div className="space-y-4">
             {/* Mode Selector */}
-            <div className="flex p-1 bg-muted rounded-full">
-                {formPanelModes.map((mode) => (
-                    <button
-                        key={mode.id}
-                        type="button"
-                        onClick={() => onChange('form_panel_bg_mode', mode.id)}
-                        className={cn(
-                            "flex-1 py-1.5 px-3 text-xs font-medium rounded-full transition-all",
-                            formPanelMode === mode.id
-                                ? "bg-background text-foreground shadow-sm"
-                                : "text-muted-foreground hover:text-foreground"
-                        )}
-                    >
-                        {mode.label}
-                    </button>
-                ))}
-            </div>
+            <SegmentedControl
+                value={formPanelMode}
+                onChange={(value) => onChange('form_panel_bg_mode', value)}
+                options={formPanelModes.map((mode) => ({ value: mode.id, label: mode.label }))}
+                buttonClassName="text-xs"
+            />
 
             {/* Color Picker - Only for Solid mode */}
             {formPanelMode === 'solid' && (

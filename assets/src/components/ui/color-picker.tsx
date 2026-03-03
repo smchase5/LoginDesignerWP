@@ -14,6 +14,24 @@ interface ColorPickerProps {
     disabled?: boolean
 }
 
+function normalizeHex(value: string): string | null {
+    const trimmed = value.trim()
+    if (!trimmed) return null
+
+    const withHash = trimmed.startsWith("#") ? trimmed : `#${trimmed}`
+    const hex = withHash.slice(1)
+
+    if (/^[0-9A-Fa-f]{3}$/.test(hex)) {
+        return `#${hex.split("").map((char) => char + char).join("").toLowerCase()}`
+    }
+
+    if (/^[0-9A-Fa-f]{6}$/.test(hex)) {
+        return withHash.toLowerCase()
+    }
+
+    return null
+}
+
 export function ColorPicker({
     value,
     onChange,
@@ -23,26 +41,34 @@ export function ColorPicker({
 }: ColorPickerProps) {
     const [open, setOpen] = React.useState(false)
     const [inputValue, setInputValue] = React.useState(value)
+    const normalizedValue = normalizeHex(value) ?? "#ffffff"
 
     // Sync input value with prop value
     React.useEffect(() => {
-        setInputValue(value)
-    }, [value])
+        setInputValue(normalizedValue)
+    }, [normalizedValue])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = e.target.value
         setInputValue(newValue)
 
-        // Only update if it's a valid hex color
-        if (/^#[0-9A-Fa-f]{6}$/.test(newValue)) {
-            onChange(newValue)
+        const normalized = normalizeHex(newValue)
+        if (normalized) {
+            onChange(normalized)
         }
     }
 
     const handleInputBlur = () => {
-        // On blur, if not valid, revert to current value
-        if (!/^#[0-9A-Fa-f]{6}$/.test(inputValue)) {
-            setInputValue(value)
+        const normalized = normalizeHex(inputValue)
+
+        if (!normalized) {
+            setInputValue(normalizedValue)
+            return
+        }
+
+        setInputValue(normalized)
+        if (normalized !== normalizedValue) {
+            onChange(normalized)
         }
     }
 
@@ -52,21 +78,25 @@ export function ColorPicker({
                 <PopoverTrigger asChild disabled={disabled}>
                     <button
                         className={cn(
-                            "h-9 w-14 rounded-md border border-slate-300 shadow-sm cursor-pointer transition-all",
+                            "flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-border bg-background p-1 shadow-sm cursor-pointer transition-all",
                             "hover:border-primary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
                             disabled && "opacity-50 cursor-not-allowed"
                         )}
-                        style={{ backgroundColor: value }}
                         aria-label="Pick a color"
-                    />
+                    >
+                        <span
+                            className="block h-full w-full rounded-[6px] border border-slate-300/90 shadow-inner"
+                            style={{ backgroundColor: normalizedValue }}
+                        />
+                    </button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-3" align="start">
                     <div className="space-y-3">
-                        <HexColorPicker color={value} onChange={onChange} />
+                        <HexColorPicker color={normalizedValue} onChange={onChange} />
                         <div className="flex items-center gap-2">
                             <div
                                 className="h-8 w-8 rounded border border-input shrink-0"
-                                style={{ backgroundColor: value }}
+                                style={{ backgroundColor: normalizedValue }}
                             />
                             <Input
                                 value={inputValue}
@@ -80,16 +110,14 @@ export function ColorPicker({
                 </PopoverContent>
             </Popover>
 
-            {showInput && (
-                <Input
-                    value={inputValue}
-                    onChange={handleInputChange}
-                    onBlur={handleInputBlur}
-                    className="w-24 font-mono text-sm"
-                    placeholder="#000000"
-                    disabled={disabled}
-                />
-            )}
+            <Input
+                value={inputValue}
+                onChange={handleInputChange}
+                onBlur={handleInputBlur}
+                className={cn("w-28 font-mono text-sm", showInput && "w-28")}
+                placeholder="#000000"
+                disabled={disabled}
+            />
         </div>
     )
 }

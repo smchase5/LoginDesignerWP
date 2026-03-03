@@ -140,6 +140,12 @@ class LoginDesignerWP_Settings
             $css_ver
         );
 
+        wp_add_inline_style(
+            'logindesignerwp-admin',
+            '.ldwp-admin button[role="switch"]{border-radius:9999px !important;overflow:hidden;}' .
+            '.ldwp-admin button[role="switch"]>span{border-radius:9999px !important;}'
+        );
+
         wp_enqueue_script(
             'logindesignerwp-admin',
             $build_url . 'admin.js',

@@ -5,6 +5,7 @@ import { LayoutTemplate, PanelLeft, Minus, Lock, X } from 'lucide-react'
 import { ColorPicker } from '@/components/ui/color-picker'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
+import { SegmentedControl } from '@/components/ui/segmented-control'
 
 interface LayoutSectionProps {
     settings: Record<string, any>
@@ -167,22 +168,16 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
 
                     <div className="flex items-center justify-between">
                         <Label className="text-sm">Form Style</Label>
-                        <div className="flex bg-muted p-1 rounded-full">
-                            {['boxed', 'simple'].map((style) => (
-                                <button
-                                    key={style}
-                                    className={cn(
-                                        "px-3 py-1 text-xs font-medium rounded-full transition-all",
-                                        (settings.layout_form_style || 'boxed') === style
-                                            ? "bg-background shadow-sm text-foreground"
-                                            : "text-muted-foreground hover:text-foreground"
-                                    )}
-                                    onClick={() => onChange('layout_form_style', style)}
-                                >
-                                    {style.charAt(0).toUpperCase() + style.slice(1)}
-                                </button>
-                            ))}
-                        </div>
+                        <SegmentedControl
+                            value={settings.layout_form_style || 'boxed'}
+                            onChange={(value) => onChange('layout_form_style', value)}
+                            options={[
+                                { value: 'boxed', label: 'Boxed' },
+                                { value: 'simple', label: 'Simple' },
+                            ]}
+                            className="w-[160px]"
+                            buttonClassName="px-3 py-1 text-xs"
+                        />
                     </div>
 
                     {/* Brand Content Controls */}
@@ -288,20 +283,17 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
                                     {!!settings.brand_logo_bg_enable && (
                                         <div className="pt-2">
                                             <Label className="text-xs text-muted-foreground block mb-1.5">Corner Style</Label>
-                                            <div className="flex bg-muted p-1 rounded-full">
-                                                {['square', 'rounded', 'soft', 'full'].map((preset) => (
-                                                    <button
-                                                        key={preset}
-                                                        className={`flex-1 text-[10px] font-medium py-1 rounded-full transition-all ${(settings.brand_logo_radius_preset || 'square') === preset
-                                                            ? 'bg-background shadow-sm text-foreground'
-                                                            : 'text-muted-foreground hover:text-foreground'
-                                                            }`}
-                                                        onClick={() => onChange('brand_logo_radius_preset', preset)}
-                                                    >
-                                                        {preset.charAt(0).toUpperCase() + preset.slice(1)}
-                                                    </button>
-                                                ))}
-                                            </div>
+                                            <SegmentedControl
+                                                value={settings.brand_logo_radius_preset || 'square'}
+                                                onChange={(value) => onChange('brand_logo_radius_preset', value)}
+                                                options={[
+                                                    { value: 'square', label: 'Square' },
+                                                    { value: 'rounded', label: 'Rounded' },
+                                                    { value: 'soft', label: 'Soft' },
+                                                    { value: 'full', label: 'Full' },
+                                                ]}
+                                                buttonClassName="text-[10px] py-1"
+                                            />
                                         </div>
                                     )}
                                 </div>

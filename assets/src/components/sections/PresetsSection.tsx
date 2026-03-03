@@ -64,7 +64,7 @@ export function PresetsSection({ settings, onBulkChange, presets, isPro }: Prese
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="max-h-[500px] overflow-y-auto pr-1">
+                <div className="max-h-[500px] overflow-y-auto px-1 pt-1 pb-2">
                     <div className="grid grid-cols-4 gap-3">
                         {Object.entries(presets).map(([id, preset]: [string, any]) => {
                             const isLocked = preset.is_pro && !isPro
@@ -75,37 +75,42 @@ export function PresetsSection({ settings, onBulkChange, presets, isPro }: Prese
                                     key={id}
                                     onClick={() => handlePresetSelect(id, preset)}
                                     className={cn(
-                                        "relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all",
-                                        "hover:border-primary hover:-translate-y-0.5",
-                                        selectedPreset === id && "border-primary ring-2 ring-primary/20",
-                                        selectedPreset !== id && "border-border",
+                                        "group relative cursor-pointer rounded-xl overflow-hidden border transition-all duration-200 bg-card",
+                                        "hover:border-primary/60 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(15,23,42,0.08)]",
+                                        selectedPreset === id && "border-primary ring-2 ring-primary/20 shadow-[0_10px_28px_rgba(37,99,235,0.12)]",
+                                        selectedPreset !== id && "border-border/90",
                                         isLocked && "cursor-not-allowed opacity-60"
                                     )}
                                 >
                                     {isLocked && (
-                                        <div className="absolute top-1.5 right-1.5 z-10 bg-black/60 text-white py-0.5 px-2 rounded text-[10px] flex items-center gap-1">
+                                        <div className="absolute top-2 right-2 z-10 bg-slate-900/80 text-white py-0.5 px-2 rounded-full text-[10px] flex items-center gap-1 shadow-sm">
                                             <Lock className="h-2.5 w-2.5" /> Pro
                                         </div>
                                     )}
 
                                     <div
-                                        className="aspect-[4/3] flex items-center justify-center p-3"
+                                        className="aspect-[4/3] flex items-center justify-center p-3 border-b border-border/70 bg-gradient-to-b from-white/50 to-slate-50/70"
                                         style={{ background: preview.bg || '#f0f0f1' }}
                                     >
                                         <div
-                                            className="w-[70%] p-2 rounded"
+                                            className="w-[72%] p-2.5 rounded-lg shadow-[0_6px_20px_rgba(15,23,42,0.12)]"
                                             style={{
                                                 background: preview.form_bg || '#fff',
-                                                border: preview.form_border || 'none'
+                                                border: preview.form_border || '1px solid rgba(148, 163, 184, 0.35)'
                                             }}
                                         >
-                                            <div className="h-1.5 rounded mb-1" style={{ background: preview.input_bg || 'rgba(0,0,0,0.1)' }} />
-                                            <div className="h-1.5 rounded mb-1" style={{ background: preview.input_bg || 'rgba(0,0,0,0.1)' }} />
-                                            <div className="h-2.5 rounded" style={{ background: preview.button_bg || '#2271b1' }} />
+                                            <div className="h-1.5 rounded mb-1 border border-black/5" style={{ background: preview.input_bg || 'rgba(148,163,184,0.22)' }} />
+                                            <div className="h-1.5 rounded mb-1 border border-black/5" style={{ background: preview.input_bg || 'rgba(148,163,184,0.22)' }} />
+                                            <div className="h-2.5 rounded shadow-sm" style={{ background: preview.button_bg || '#2271b1' }} />
                                         </div>
                                     </div>
 
-                                    <div className="text-center py-1.5 px-2 text-xs font-medium bg-muted text-foreground">
+                                    <div className={cn(
+                                        "text-center py-2 px-2 text-xs font-semibold transition-colors",
+                                        selectedPreset === id
+                                            ? "bg-primary/8 text-foreground"
+                                            : "bg-slate-50/90 text-foreground group-hover:bg-slate-100/90"
+                                    )}>
                                         {preset.name}
                                     </div>
                                 </div>

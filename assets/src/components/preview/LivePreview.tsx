@@ -350,7 +350,7 @@ export function LivePreview({
             >
                 {/* Preview Badge - Inside at Top Left */}
                 <div className="absolute top-3 left-3 z-50">
-                    <span className="inline-flex items-center gap-2 text-xs font-medium bg-white/90 backdrop-blur-sm text-gray-700 px-3 py-1.5 rounded-full shadow-sm border border-gray-200">
+                    <span className="inline-flex h-8 items-center gap-2 text-xs font-medium bg-white/90 backdrop-blur-sm text-gray-700 px-3 rounded-full shadow-sm border border-gray-200">
                         <span className={`w-2 h-2 rounded-full ${hasUnsavedChanges ? 'bg-amber-500' : 'bg-green-500'}`}></span>
                         Preview
                         <span className="text-gray-400">·</span>
@@ -360,7 +360,7 @@ export function LivePreview({
                         {hasUnsavedChanges && onDiscard && (
                             <button
                                 onClick={onDiscard}
-                                className="ml-1 p-0.5 text-red-500 hover:text-red-700 transition-colors"
+                                className="ml-1 inline-flex h-4 w-4 shrink-0 items-center justify-center text-red-500 hover:text-red-700 transition-colors"
                                 title="Discard Changes"
                             >
                                 <RotateCcw className="h-3.5 w-3.5" />

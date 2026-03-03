@@ -3,7 +3,7 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { ColorPicker } from '@/components/ui/color-picker'
 import { Slider } from '@/components/ui/slider'
-import { cn } from '@/lib/utils'
+import { SegmentedControl } from '@/components/ui/segmented-control'
 
 // Added Star icon for Pro badge
 import { Star } from 'lucide-react'
@@ -112,26 +112,15 @@ export function FormSection({ settings, onChange, isPro = false, designMode = 'a
                 {/* Form Corners */}
                 <div>
                     <Label className="mb-2 block">Form Corners</Label>
-                    <div className="flex p-1 bg-muted rounded-full">
-                        {[
+                    <SegmentedControl
+                        value={formRadius}
+                        onChange={(value) => onChange('form_border_radius', value)}
+                        options={[
                             { value: 'square', label: 'Square', radius: 0 },
                             { value: 'soft', label: 'Soft', radius: 4 },
                             { value: 'rounded', label: 'Rounded', radius: 12 }
-                        ].map((style) => (
-                            <button
-                                key={style.value}
-                                onClick={() => onChange('form_border_radius', style.radius)}
-                                className={cn(
-                                    "flex-1 py-1.5 px-3 text-sm font-medium rounded-full transition-all",
-                                    formRadius === style.radius
-                                        ? "bg-background text-foreground shadow-sm"
-                                        : "text-muted-foreground hover:text-foreground"
-                                )}
-                            >
-                                {style.label}
-                            </button>
-                        ))}
-                    </div>
+                        ].map((style) => ({ value: style.radius, label: style.label }))}
+                    />
                 </div>
 
                 {/* Border Color - Advanced only */}
@@ -265,27 +254,16 @@ export function FormSection({ settings, onChange, isPro = false, designMode = 'a
                     {designMode === 'advanced' && (
                         <div>
                             <Label className="mb-2 block">Button Corners</Label>
-                            <div className="flex p-1 bg-muted rounded-full">
-                                {[
+                            <SegmentedControl
+                                value={buttonCorners}
+                                onChange={(value) => onChange('button_border_radius', value)}
+                                options={[
                                     { value: 0, label: 'Square' },
                                     { value: 4, label: 'Soft' },
                                     { value: 8, label: 'Rounded' },
                                     { value: 9999, label: 'Pill' }
-                                ].map((style) => (
-                                    <button
-                                        key={style.value}
-                                        onClick={() => onChange('button_border_radius', style.value)}
-                                        className={cn(
-                                            "flex-1 py-1.5 px-3 text-sm font-medium rounded-full transition-all",
-                                            buttonCorners === style.value
-                                                ? "bg-background text-foreground shadow-sm"
-                                                : "text-muted-foreground hover:text-foreground"
-                                        )}
-                                    >
-                                        {style.label}
-                                    </button>
-                                ))}
-                            </div>
+                                ]}
+                            />
                         </div>
                     )}
 

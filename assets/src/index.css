@@ -6,7 +6,7 @@
 
 /* Shadcn CSS Variables */
 .ldwp-admin {
-  --background: 0 0% 100%;
+  --background: 210 33% 98%;
   --foreground: 222.2 84% 4.9%;
   --card: 0 0% 100%;
   --card-foreground: 222.2 84% 4.9%;
@@ -14,16 +14,16 @@
   --popover-foreground: 222.2 84% 4.9%;
   --primary: 222.2 47.4% 11.2%;
   --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
+  --secondary: 210 30% 95.5%;
   --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
+  --muted: 210 24% 94.8%;
   --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
+  --accent: 210 24% 95.5%;
   --accent-foreground: 222.2 47.4% 11.2%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
-  --border: 220 13% 80%;
-  --input: 220 13% 80%;
+  --border: 215 20% 82%;
+  --input: 215 20% 82%;
   --ring: 222.2 84% 4.9%;
   --radius: 0.5rem;
 
@@ -33,12 +33,19 @@
   --wp-success: 142.1 76.2% 36.3%;
 }
 
+#ldwp-admin-root {
+  background:
+    radial-gradient(circle at top left, hsl(210 45% 99%), transparent 28%),
+    linear-gradient(180deg, hsl(210 33% 99%), hsl(var(--background)));
+  padding: 20px 20px 32px;
+  min-height: calc(100vh - 32px);
+}
+
 .ldwp-admin {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
   font-size: 14px;
   line-height: 1.5;
   color: hsl(var(--foreground));
-  background: hsl(var(--background));
 }
 
 /* Neutralize WordPress admin layout when our plugin is active */
@@ -46,12 +53,15 @@
   padding-left: 0;
 }
 
+#wpbody-content:has(#ldwp-admin-root) {
+  padding-bottom: 0;
+}
+
 .wrap:has(#ldwp-admin-root) {
   margin: 0;
-  padding: 20px 20px 0;
-  background: hsl(var(--background));
-  min-height: calc(100vh - 32px);
-  /* fill below WP admin bar */
+  padding: 0;
+  background: transparent;
+  min-height: 0;
 }
 
 /* Hide WP footer and default page title */
@@ -101,6 +111,16 @@ body:has(#ldwp-admin-root) #wpfooter,
   border-radius: 0;
   font-family: inherit;
   font-size: inherit;
+}
+
+/* Radix switch renders as a button, so force the pill shape after the WP reset. */
+.ldwp-admin button[role="switch"] {
+  border-radius: 9999px !important;
+  overflow: hidden;
+}
+
+.ldwp-admin button[role="switch"]>span {
+  border-radius: 9999px !important;
 }
 
 .ldwp-admin h1,
