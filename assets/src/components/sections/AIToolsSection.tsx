@@ -9,7 +9,6 @@ import confetti from 'canvas-confetti'
 
 interface AIToolsSectionProps {
     onBulkChange: (updates: Record<string, any>) => void
-    settings: Record<string, any>
 }
 
 const funLoadingMessages = [
@@ -55,7 +54,7 @@ const triggerCelebration = () => {
     })
 }
 
-export function AIToolsSection({ onBulkChange, settings }: AIToolsSectionProps) {
+export function AIToolsSection({ onBulkChange }: AIToolsSectionProps) {
     const [isGeneratingBg, setIsGeneratingBg] = useState(false)
     const [isGeneratingTheme, setIsGeneratingTheme] = useState(false)
     const [isExtractingColors, setIsExtractingColors] = useState(false)
@@ -73,7 +72,7 @@ export function AIToolsSection({ onBulkChange, settings }: AIToolsSectionProps) 
     // Text to Theme State
     const [themePrompt, setThemePrompt] = useState('')
 
-    const hasKey = !!settings.openai_api_key
+    const hasKey = window.logindesignerwpData?.hasOpenAiKey || false
 
     const MissingKeyContent = (
         <div className="py-6 flex flex-col items-center justify-center text-center space-y-4">

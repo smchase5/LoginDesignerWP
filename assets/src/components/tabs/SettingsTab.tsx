@@ -17,6 +17,7 @@ interface SettingsTabProps {
 export function SettingsTab({ settings, onChange, onSave, isSaving, isPro = false }: SettingsTabProps) {
     const version = '1.0.0'
     const isProPluginActive = window.logindesignerwpData.isProPluginActive
+    const hasStoredOpenAiKey = window.logindesignerwpData.hasOpenAiKey
     const [licenseKey, setLicenseKey] = useState(window.logindesignerwpData.license?.key || '')
     const [licenseStatus, setLicenseStatus] = useState(window.logindesignerwpData.license?.status || 'invalid')
     const [isLicenseLoading, setIsLicenseLoading] = useState(false)
@@ -146,12 +147,15 @@ export function SettingsTab({ settings, onChange, onSave, isSaving, isPro = fals
                             <Label>OpenAI API Key</Label>
                             <Input
                                 type="password"
-                                placeholder="sk-..."
+                                placeholder={hasStoredOpenAiKey ? 'Stored securely. Enter a new key to replace it.' : 'sk-...'}
                                 value={settings.openai_api_key || ''}
                                 onChange={(e) => onChange('openai_api_key', e.target.value)}
                             />
                             <p className="text-xs text-muted-foreground">
-                                Required for AI features. Get your key from{' '}
+                                {hasStoredOpenAiKey
+                                    ? 'A key is already stored on the server. Leave this blank to keep it, or enter a new key to replace it. '
+                                    : 'Required for AI features. '}
+                                Get your key from{' '}
                                 <a
                                     href="https://platform.openai.com/api-keys"
                                     target="_blank"

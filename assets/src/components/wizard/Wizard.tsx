@@ -13,6 +13,7 @@ interface WizardProps {
     onClose: () => void
     onApply: () => void
     presets: Record<string, any>
+    presetsLoading?: boolean
     isPro: boolean
 }
 
@@ -23,7 +24,7 @@ const steps = [
     { id: 4, title: 'Finishing Touches', description: 'Polish with effects and backgrounds.', component: FinishingStep },
 ]
 
-export function Wizard({ settings, onChange, onClose, onApply, presets, isPro }: WizardProps) {
+export function Wizard({ settings, onChange, onClose, onApply, presets, presetsLoading = false, isPro }: WizardProps) {
     const [step, setStep] = useState(1)
 
     const progress = (step / steps.length) * 100
@@ -88,6 +89,7 @@ export function Wizard({ settings, onChange, onClose, onApply, presets, isPro }:
                     settings={settings}
                     onChange={onChange}
                     presets={presets}
+                    presetsLoading={presetsLoading}
                     isPro={isPro}
                 />
             </div>

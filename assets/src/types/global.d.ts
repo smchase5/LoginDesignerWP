@@ -16,9 +16,10 @@ interface LoginDesignerWPData {
     nonce: string
     securityNonce: string
     settings: Record<string, any>
+    hasOpenAiKey: boolean
     isPro: boolean
     isProPluginActive?: boolean
-    presets: Record<string, Preset>
+    presets?: Record<string, Preset>
     assetsUrl: string
     loginUrl: string
     i18n: {

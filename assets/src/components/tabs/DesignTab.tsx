@@ -7,7 +7,6 @@ import { FormSection } from '@/components/sections/FormSection'
 import { LogoSection } from '@/components/sections/LogoSection'
 import { PresetsSection } from '@/components/sections/PresetsSection'
 import { LayoutSection } from '@/components/sections/LayoutSection'
-import { Wizard } from '@/components/wizard/Wizard'
 import { Save, ExternalLink, RotateCcw, Lock, Star, Unlock, Sparkles, SlidersHorizontal } from 'lucide-react'
 import { AIToolsSection } from '@/components/sections/AIToolsSection'
 import { SmartThemeGenerator } from '@/components/generator/SmartThemeGenerator'
@@ -89,9 +88,8 @@ interface DesignTabProps {
     onReset: () => void
     isSaving: boolean
     isResetting: boolean
-    showWizard: boolean
-    setShowWizard: (show: boolean) => void
     presets: Record<string, any>
+    presetsLoading?: boolean
     isPro: boolean
     designMode: 'simple' | 'advanced'
     onDesignModeChange: (mode: 'simple' | 'advanced') => void
@@ -105,16 +103,16 @@ export function DesignTab({
     onReset,
     isSaving,
     isResetting,
-    showWizard,
-    setShowWizard,
     presets,
+    presetsLoading = false,
     isPro,
     designMode,
     onDesignModeChange
 }: DesignTabProps) {
     const loginUrl = window.logindesignerwpData?.loginUrl || '/wp-login.php'
+    const hasStoredOpenAiKey = window.logindesignerwpData?.hasOpenAiKey || false
 
-    const hasAIKey = !!settings.openai_api_key
+    const hasAIKey = hasStoredOpenAiKey
     const aiBadge = hasAIKey ? (
         <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-800">
             AI Active
@@ -127,21 +125,6 @@ export function DesignTab({
 
     return (
         <div className="space-y-6">
-            {/* Wizard Modal */}
-            {showWizard && (
-                <Wizard
-                    settings={settings}
-                    onChange={onChange}
-                    onClose={() => setShowWizard(false)}
-                    onApply={() => {
-                        onSave()
-                        setShowWizard(false)
-                    }}
-                    presets={presets}
-                    isPro={isPro}
-                />
-            )}
-
             {/* Simple / Advanced Mode Toggle */}
             <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
@@ -161,11 +144,17 @@ export function DesignTab({
                 />
             </div>
 
+            {/* Layout Options - Now near the top for foundational decision */}
+            <ProSection title="Layout" description="Choose your login page layout" isPro={isPro}>
+                <LayoutSection settings={settings} onChange={onChange} isPro={isPro} />
+            </ProSection>
+
             {/* Presets Section */}
             <PresetsSection
                 settings={settings}
                 onBulkChange={onBulkChange}
                 presets={presets}
+                isLoading={presetsLoading}
                 isPro={isPro}
             />
 
@@ -173,11 +162,6 @@ export function DesignTab({
             {isPro && (
                 <SmartThemeGenerator onBulkChange={onBulkChange} />
             )}
-
-            {/* Layout Options - Now near the top for foundational decision */}
-            <ProSection title="Layout" description="Choose your login page layout" isPro={isPro}>
-                <LayoutSection settings={settings} onChange={onChange} isPro={isPro} />
-            </ProSection>
 
             {/* Background Section - Now layout-aware */}
             <BackgroundSection settings={settings} onChange={onChange} isPro={isPro} designMode={designMode} />
@@ -191,7 +175,6 @@ export function DesignTab({
             <ProSection title="AI Tools" description="Generate backgrounds and themes with AI" isPro={isPro} extraBadge={aiBadge}>
                 <AIToolsSection
                     onBulkChange={onBulkChange}
-                    settings={settings}
                 />
             </ProSection>
 

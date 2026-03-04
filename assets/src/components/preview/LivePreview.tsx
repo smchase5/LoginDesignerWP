@@ -1,10 +1,23 @@
-import { RotateCcw, Save, ExternalLink } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { RotateCcw, Save, ExternalLink, AlertTriangle, Wand2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { auditContrast } from '@/lib/contrast'
+import {
+    getAdaptiveCardSplitPageBackground,
+    getBrandContentAlignment,
+    getBrandLogoRadius,
+    getLayoutMode,
+    getPerceivedBrightness,
+    isCardSplitLayout,
+    isSplitLayoutMode,
+    isSimpleLayout,
+} from '@/lib/layout'
 
 interface LivePreviewProps {
     settings: Record<string, any>
     hasUnsavedChanges?: boolean
     onDiscard?: () => void
+    onBulkChange?: (updates: Record<string, any>) => void
     onSave?: () => void
     isSaving?: boolean
     loginUrl?: string
@@ -20,11 +33,64 @@ export function LivePreview({
     settings,
     hasUnsavedChanges = false,
     onDiscard,
+    onBulkChange,
     onSave,
     isSaving = false,
     loginUrl = '/wp-login.php',
     securitySettings
 }: LivePreviewProps) {
+    const contrastAudit = auditContrast(settings)
+    const hasContrastIssues = contrastAudit.issues.length > 0
+    const issueSignature = useMemo(
+        () => contrastAudit.issues.map((issue) => `${issue.id}:${issue.ratio.toFixed(2)}`).join('|'),
+        [contrastAudit.issues]
+    )
+    const [contrastDismissed, setContrastDismissed] = useState(false)
+
+    useEffect(() => {
+        setContrastDismissed(false)
+    }, [issueSignature])
+
+    const showContrastNotice = hasContrastIssues && !contrastDismissed
+
+    const isMeshGradient = settings.background_mode === 'gradient' && settings.gradient_type === 'mesh'
+
+    const getMeshLayerStyle = (): React.CSSProperties => {
+        const color1 = settings.background_gradient_1 || '#ff0080'
+        const color2 = settings.background_gradient_2 || '#7928ca'
+        const color3 = settings.background_gradient_3 || '#ff4d4d'
+        const color4 = settings.background_gradient_4 || '#f9cb28'
+        const p1x = settings.mesh_point_1_x ?? 18
+        const p1y = settings.mesh_point_1_y ?? 22
+        const p1s = settings.mesh_point_1_spread ?? 74
+        const p2x = settings.mesh_point_2_x ?? 78
+        const p2y = settings.mesh_point_2_y ?? 18
+        const p2s = settings.mesh_point_2_spread ?? 78
+        const p3x = settings.mesh_point_3_x ?? 26
+        const p3y = settings.mesh_point_3_y ?? 78
+        const p3s = settings.mesh_point_3_spread ?? 76
+        const p4x = settings.mesh_point_4_x ?? 74
+        const p4y = settings.mesh_point_4_y ?? 70
+        const p4s = settings.mesh_point_4_spread ?? 80
+
+        return {
+            position: 'absolute',
+            inset: '-12%',
+            zIndex: 0,
+            pointerEvents: 'none',
+            backgroundImage: [
+                `radial-gradient(circle at ${p1x}% ${p1y}%, ${color1} 0%, transparent ${p1s}%)`,
+                `radial-gradient(circle at ${p2x}% ${p2y}%, ${color2} 0%, transparent ${p2s}%)`,
+                `radial-gradient(circle at ${p3x}% ${p3y}%, ${color3} 0%, transparent ${p3s}%)`,
+                `radial-gradient(circle at ${p4x}% ${p4y}%, ${color4} 0%, transparent ${p4s}%)`,
+                `radial-gradient(circle at 52% 48%, rgba(255,255,255,0.22) 0%, transparent 62%)`,
+            ].join(', '),
+            filter: 'blur(56px) saturate(115%)',
+            transform: 'scale(1.08)',
+            opacity: 0.96,
+        }
+    }
+
     // Build background styles
     const getBackgroundStyle = (): React.CSSProperties => {
         const mode = settings.background_mode || 'solid'
@@ -51,15 +117,13 @@ export function LivePreview({
                 }
 
                 if (type === 'mesh') {
-                    const color3 = settings.background_gradient_3 || color1
-                    const color4 = settings.background_gradient_4 || color2
                     const base = settings.background_color || '#1a1a2e'
                     return {
                         backgroundColor: base,
-                        backgroundImage: `radial-gradient(at 15% 15%, ${color1}, transparent 60%), radial-gradient(at 85% 15%, ${color2}, transparent 60%), radial-gradient(at 15% 85%, ${color3}, transparent 60%), radial-gradient(at 85% 85%, ${color4}, transparent 60%)`,
+                        backgroundImage: 'linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0))',
                         backgroundAttachment: 'fixed',
                         backgroundSize: 'cover',
-                        backgroundRepeat: 'no-repeat'
+                        backgroundRepeat: 'no-repeat',
                     }
                 }
 
@@ -102,13 +166,11 @@ export function LivePreview({
 
     // Form container styles
     const getFormStyle = (): React.CSSProperties => {
-        const layoutMode = settings.layout_mode || 'centered'
-        const isSplitLayout = layoutMode.startsWith('split_')
-        const isCardSplit = layoutMode === 'card_split'
-        const isBrandLayout = isSplitLayout || isCardSplit
+        const layoutMode = getLayoutMode(settings)
+        const isBrandLayout = isSplitLayoutMode(layoutMode)
 
         // Simple layout OR Split layouts with 'simple' form style
-        if (layoutMode === 'simple' || (isBrandLayout && settings.layout_form_style === 'simple')) {
+        if (isSimpleLayout(settings)) {
             return {
                 width: '100%',
                 maxWidth: '100%',
@@ -155,7 +217,7 @@ export function LivePreview({
         if (settings.enable_glassmorphism || settings.glass_enabled) {
             // Split Layout Override: Glass looks bad on the default white background of split layouts
             // Force a solid clean card style for better UX
-            if (isSplitLayout) {
+            if (isBrandLayout) {
                 return {
                     ...baseStyle,
                     backgroundColor: '#ffffff',
@@ -218,7 +280,7 @@ export function LivePreview({
     // Input styles
     const getInputStyle = (): React.CSSProperties => {
         // Override for Split + Glass -> Force standardized inputs
-        const isSplitMode = settings.layout_mode?.startsWith('split_') || settings.layout_mode === 'card_split'
+        const isSplitMode = isSplitLayoutMode(getLayoutMode(settings))
         const isGlassActive = settings.enable_glassmorphism || settings.glass_enabled
 
         if (isSplitMode && isGlassActive) {
@@ -259,7 +321,7 @@ export function LivePreview({
     // Button styles
     const getButtonStyle = (): React.CSSProperties => ({
         backgroundColor: settings.button_bg || settings.button_color || '#2271b1',
-        color: '#fff',
+        color: settings.button_text_color || '#ffffff',
         border: 'none',
         borderRadius: parseRadius(settings.button_border_radius, 3),
         padding: '0 12px',
@@ -271,22 +333,10 @@ export function LivePreview({
         textAlign: 'center',
     })
 
-    // Helper to calculate brightness
-    const getPerceivedBrightness = (hex: string): number => {
-        hex = hex.replace('#', '')
-        if (hex.length === 3) {
-            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2]
-        }
-        const r = parseInt(hex.substring(0, 2), 16)
-        const g = parseInt(hex.substring(2, 4), 16)
-        const b = parseInt(hex.substring(4, 6), 16)
-        return ((r * 299) + (g * 587) + (b * 114)) / 1000
-    }
-
     // Helper to determine label color based on layout and contrast
     const getLabelColor = (): string => {
         // Override for Split + Glass -> Force dark labels
-        const isSplitMode = settings.layout_mode?.startsWith('split_') || settings.layout_mode === 'card_split'
+        const isSplitMode = isSplitLayoutMode(getLayoutMode(settings))
         const isGlassActive = settings.enable_glassmorphism || settings.glass_enabled
 
         if (isSplitMode && isGlassActive) {
@@ -296,9 +346,9 @@ export function LivePreview({
         let color = settings.label_text_color || '#1e1e1e'
 
         // Simple layout contrast fix
-        const layoutMode = settings.layout_mode || 'centered'
-        const isSplitLayout = layoutMode.startsWith('split_') || layoutMode === 'card_split'
-        const isSimpleForm = layoutMode === 'simple' || (isSplitLayout && settings.layout_form_style === 'simple')
+        const layoutMode = getLayoutMode(settings)
+        const isSplitLayout = isSplitLayoutMode(layoutMode)
+        const isSimpleForm = isSimpleLayout(settings)
 
         if (isSimpleForm) {
             let bgCheckColor = '#ffffff'
@@ -350,9 +400,9 @@ export function LivePreview({
             >
                 {/* Preview Badge - Inside at Top Left */}
                 <div className="absolute top-3 left-3 z-50">
-                    <span className="inline-flex h-8 items-center gap-2 text-xs font-medium bg-white/90 backdrop-blur-sm text-gray-700 px-3 rounded-full shadow-sm border border-gray-200">
+                    <div className="inline-flex h-9 items-center gap-2 rounded-full border border-gray-200 bg-white/90 px-3 text-xs font-medium text-gray-700 shadow-sm backdrop-blur-sm">
                         <span className={`w-2 h-2 rounded-full ${hasUnsavedChanges ? 'bg-amber-500' : 'bg-green-500'}`}></span>
-                        Preview
+                        <span>Preview</span>
                         <span className="text-gray-400">·</span>
                         <span className={hasUnsavedChanges ? 'text-amber-600' : 'text-green-600'}>
                             {hasUnsavedChanges ? 'Unsaved' : 'Saved'}
@@ -366,12 +416,13 @@ export function LivePreview({
                                 <RotateCcw className="h-3.5 w-3.5" />
                             </button>
                         )}
-                    </span>
+                    </div>
                 </div>
 
                 {/* Content Rendering based on Layout Mode */}
                 {(() => {
-                    const layoutMode = settings.layout_mode || 'centered'
+                    const layoutMode = getLayoutMode(settings)
+                    const brandContentAlignment = getBrandContentAlignment(settings.brand_content_align)
 
                     // Layout variables from settings
                     const splitRatio = settings.layout_split_ratio || '50'
@@ -557,79 +608,7 @@ export function LivePreview({
 
                             {/* Footer Links */}
                             {(() => {
-                                let linkColor = settings.below_form_link_color
-
-                                // Contrast analysis
-                                const layoutMode = settings.layout_mode || 'centered'
-                                const isCardSplit = layoutMode === 'card_split'
-                                const isSplit = layoutMode.startsWith('split_')
-
-                                let bgCheckColor = '#ffffff'
-                                let isImageBackground = false
-
-                                if (isCardSplit) {
-                                    bgCheckColor = '#ffffff'
-                                } else if (isSplit) {
-                                    const panelMode = settings.form_panel_bg_mode || 'solid'
-                                    if (panelMode === 'solid') {
-                                        bgCheckColor = settings.form_panel_bg_color || '#ffffff'
-                                    } else if (panelMode === 'gradient') {
-                                        bgCheckColor = settings.form_panel_gradient_1 || '#ffffff'
-                                    } else if (panelMode === 'image') {
-                                        isImageBackground = true
-                                    }
-                                } else {
-                                    const bgMode = settings.background_mode || 'solid'
-                                    if (bgMode === 'solid') {
-                                        bgCheckColor = settings.background_color || '#f0f0f1'
-                                    } else if (bgMode === 'gradient') {
-                                        bgCheckColor = settings.background_gradient_1 || settings.background_color || '#f0f0f1'
-                                    } else if (bgMode === 'image') {
-                                        isImageBackground = true
-                                    }
-                                }
-
-                                // Helper to check if color is light
-                                const isLight = (hex: string) => {
-                                    try {
-                                        return getPerceivedBrightness(hex.includes('rgb') ? '#ffffff' : hex) > 130
-                                    } catch (e) { return true }
-                                }
-
-                                const bgIsDark = !isLight(bgCheckColor)
-
-                                // Determine final link color
-                                if (isImageBackground) {
-                                    // For images, we can't easily adhere to a specific color unless it has a strong shadow,
-                                    // but white is generally safest with a shadow.
-                                    // If the user deliberately picked a color, we try to honor it but ADD a shadow.
-                                    // However, if it's dark text on a dark image, it fails. 
-                                    // Safety fallback: If user set a DARK color, but we don't know the image, potentially risky.
-                                    // Best UX: Default to white for AI/Images unless explicitly overridden by user manually (hard to detect manual vs AI).
-                                    // We'll enforce white if the provided color is seemingly dark or default.
-                                    if (!linkColor || !isLight(linkColor)) {
-                                        linkColor = '#ffffff'
-                                    }
-                                } else {
-                                    // Solid/Gradient Backgrounds
-                                    if (bgIsDark) {
-                                        // Background is Dark. Link MUST be Light.
-                                        if (linkColor && !isLight(linkColor)) {
-                                            linkColor = '#ffffff' // Override bad contrast
-                                        } else if (!linkColor) {
-                                            linkColor = '#ffffff' // Default to white
-                                        }
-                                    } else {
-                                        // Background is Light. Link MUST be Dark.
-                                        if (linkColor && isLight(linkColor)) {
-                                            linkColor = '#444444' // Override bad contrast (light on light)
-                                        } else if (!linkColor) {
-                                            linkColor = '#444444' // Default to dark
-                                        }
-                                    }
-                                }
-
-                                const textShadow = isImageBackground ? '0 1px 4px rgba(0,0,0,0.9)' : 'none'
+                                const linkColor = settings.below_form_link_color || '#50575e'
 
                                 return (
                                     <div className="logindesignerwp-preview-links" style={{
@@ -639,7 +618,6 @@ export function LivePreview({
                                         display: 'block',
                                         position: 'relative',
                                         zIndex: 20,
-                                        textShadow: textShadow
                                     }}>
                                         <div style={{ marginBottom: 10 }}>
                                             <a href="#" style={{ color: linkColor, textDecoration: 'underline', opacity: 0.9 }}>
@@ -682,7 +660,7 @@ export function LivePreview({
                             display: 'flex',
                             flexDirection: 'column',
                             justifyContent: 'center',
-                            alignItems: 'center', // Default center, setting.brand_content_align handles text
+                            ...brandContentAlignment,
                             padding: '2rem',
                             color: '#ffffff'
                         }
@@ -704,6 +682,7 @@ export function LivePreview({
 
                         return (
                             <div className="w-full h-full relative flex items-center justify-center" style={style}>
+                                {isMeshGradient && <div style={getMeshLayerStyle()} />}
                                 {!!settings.background_blur && settings.background_blur > 0 && (
                                     <div className="absolute inset-0 z-0 backdrop-blur-sm"
                                         style={{ backdropFilter: `blur(${settings.background_blur}px)` }}
@@ -720,7 +699,10 @@ export function LivePreview({
 
                                 {/* Brand Content Overlay */}
                                 {!!settings.brand_content_enable && (
-                                    <div className="relative z-20 w-full max-w-md space-y-6 text-center flex flex-col items-center">
+                                    <div
+                                        className="relative z-20 flex w-full max-w-md flex-col space-y-6"
+                                        style={brandContentAlignment}
+                                    >
                                         {/* Brand Logo */}
                                         {settings.brand_logo_url && (
                                             <img
@@ -730,19 +712,17 @@ export function LivePreview({
                                                 style={settings.brand_logo_bg_enable ? {
                                                     backgroundColor: settings.brand_logo_bg_color || '#ffffff',
                                                     padding: 10,
-                                                    borderRadius: (({
-                                                        'square': 0,
-                                                        'rounded': 10,
-                                                        'soft': 25,
-                                                        'full': 100
-                                                    } as Record<string, number>)[settings.brand_logo_radius_preset as string || 'square']) ?? 0,
+                                                    borderRadius: getBrandLogoRadius(settings.brand_logo_radius_preset as string | undefined),
                                                     boxSizing: 'content-box'
                                                 } : {}}
                                             />
                                         )}
 
                                         {/* Render Title/Subtitle if enabled */}
-                                        <div className="relative z-10 w-full max-w-sm text-center">
+                                        <div
+                                            className="relative z-10 w-full max-w-sm"
+                                            style={{ textAlign: brandContentAlignment.textAlign }}
+                                        >
                                             <h2
                                                 className="text-3xl font-bold tracking-tight mb-4 font-sans drop-shadow-sm"
                                                 style={{ color: settings.brand_text_color || '#ffffff' }}
@@ -812,16 +792,15 @@ export function LivePreview({
                     }
 
                     // Layout Logic
-                    const isSplitLayout = layoutMode.startsWith('split_')
-                    const isCardSplit = layoutMode === 'card_split'
+                    const isSplitLayout = isSplitLayoutMode(layoutMode) && !isCardSplitLayout(layoutMode)
+                    const isCardSplit = isCardSplitLayout(layoutMode)
                     const showBrand = isSplitLayout || isCardSplit
 
                     // CARD SPLIT LAYOUT SPECIFIC STRUCTURE
                     if (isCardSplit) {
                         // Determine smart page background based on form contrast or manual override
                         const getPageBackgroundStyle = (): React.CSSProperties => {
-                            const manualBg = settings.card_page_background_color;
-                            console.log('LoginDesignerWP Debug: Card Background', { manualBg, formBg: settings.form_bg_color });
+                            const manualBg = settings.card_page_background_color
 
                             // 1. Manual Override
                             if (manualBg) {
@@ -829,22 +808,7 @@ export function LivePreview({
                             }
 
                             // 2. Smart Derivation
-                            const formBg = settings.form_bg_color || '#ffffff'
-                            let isDark = false
-                            try {
-                                isDark = getPerceivedBrightness(formBg) < 130
-                            } catch (e) { }
-
-                            if (isDark) {
-                                // If form is dark, we want a Page Background that complements it.
-                                // Ideal: A very dark version of the same hue, or just Dark Slate if neutral.
-                                // For MVP safety without heavy color libs, we default to Dark Slate #0f172a (222 47% 11%)
-                                // which looks good with almost any dark color (Navy, Black, Dark Red).
-                                return { backgroundColor: '#0f172a' }
-                            }
-
-                            // If form is light, use standard light grey
-                            return { backgroundColor: '#f3f4f6' }
+                            return { backgroundColor: getAdaptiveCardSplitPageBackground(settings.form_bg_color || '#ffffff') }
                         }
 
                         return (
@@ -854,14 +818,23 @@ export function LivePreview({
                                 {/* Background for the whole screen */}
                                 <div className="absolute inset-0 -z-10" style={getPageBackgroundStyle()}></div>
 
-                                <div className="flex w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden h-[600px]">
+                                <div
+                                    className="flex h-[600px] w-full max-w-4xl overflow-hidden rounded-2xl shadow-2xl"
+                                    style={{ backgroundColor: settings.form_panel_bg_color || '#ffffff' }}
+                                >
                                     {/* Left Side (Brand) */}
                                     <div className="relative bg-blue-600" style={{ width: `${splitRatio}%` }}>
                                         {getBrandContent()}
                                     </div>
 
                                     {/* Right Side (Form) */}
-                                    <div className="p-8 flex items-center justify-center bg-white" style={{ width: `${100 - Number(splitRatio)}%`, backgroundColor: settings.form_bg_color || '#ffffff' }}>
+                                    <div
+                                        className="flex items-center justify-center p-8"
+                                        style={{
+                                            width: `${100 - Number(splitRatio)}%`,
+                                            ...getFormPanelStyle(),
+                                        }}
+                                    >
                                         {FormContent}
                                     </div>
                                 </div>
@@ -890,6 +863,7 @@ export function LivePreview({
                                 {/* Centered/Card layout: show background behind form */}
                                 {!showBrand && (
                                     <div className="absolute inset-0 -z-10" style={getBackgroundStyle()}>
+                                        {isMeshGradient && <div style={getMeshLayerStyle()} />}
                                         {/* Background Blur */}
                                         {!!settings.background_blur && settings.background_blur > 0 && (
                                             <div className="absolute inset-0 z-0 backdrop-blur-sm"
@@ -913,6 +887,57 @@ export function LivePreview({
                         </div>
                     )
                 })()}
+
+                {showContrastNotice && (
+                    <div className="absolute bottom-3 left-3 right-3 z-40 flex justify-center">
+                        <div className="flex w-full max-w-[460px] items-start justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-[0_16px_40px_rgba(15,23,42,0.16)]">
+                            <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                    <p className="text-sm font-semibold text-slate-900">Contrast needs attention</p>
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 ring-1 ring-inset ring-amber-200">
+                                        <AlertTriangle className="h-3 w-3" />
+                                        {contrastAudit.issues.length} issue{contrastAudit.issues.length === 1 ? '' : 's'}
+                                    </span>
+                                </div>
+                                <div className="mt-2 space-y-1.5">
+                                    {contrastAudit.issues.map((issue) => (
+                                        <div key={issue.id} className="flex items-start justify-between gap-3 text-xs text-slate-600">
+                                            <span className="min-w-0">
+                                                {issue.label} on {issue.surfaceLabel}
+                                            </span>
+                                            <span className="shrink-0 font-medium text-slate-500">
+                                                {issue.ratio.toFixed(1)}:1
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                                {contrastAudit.approximate && (
+                                    <p className="mt-2 text-[11px] text-slate-500">
+                                        Image-based backgrounds are estimated.
+                                    </p>
+                                )}
+                                <button
+                                    type="button"
+                                    className="mt-2 text-[11px] font-medium text-slate-400 underline-offset-2 hover:text-slate-600 hover:underline"
+                                    onClick={() => setContrastDismissed(true)}
+                                >
+                                    Dismiss
+                                </button>
+                            </div>
+                            {onBulkChange && (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="shrink-0 gap-2 self-center"
+                                    onClick={() => onBulkChange(contrastAudit.fixes)}
+                                >
+                                    <Wand2 className="h-3.5 w-3.5" />
+                                    Fix
+                                </Button>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Action Buttons Below Preview */}

@@ -92,7 +92,9 @@ export function ColorPicker({
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-3" align="start">
                     <div className="space-y-3">
-                        <HexColorPicker color={normalizedValue} onChange={onChange} />
+                        <div className="rounded-lg bg-white p-1 shadow-sm">
+                            <HexColorPicker color={normalizedValue} onChange={onChange} />
+                        </div>
                         <div className="flex items-center gap-2">
                             <div
                                 className="h-8 w-8 rounded border border-input shrink-0"

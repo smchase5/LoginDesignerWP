@@ -5,6 +5,8 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { ColorPicker } from '@/components/ui/color-picker'
 import { Slider } from '@/components/ui/slider'
+import { SegmentedControl } from '@/components/ui/segmented-control'
+import { ensureWpMedia } from '@/lib/wp-media'
 import { Image, X } from 'lucide-react'
 
 interface LogoSectionProps {
@@ -14,8 +16,28 @@ interface LogoSectionProps {
 }
 
 export function LogoSection({ settings, onChange, designMode = 'advanced' }: LogoSectionProps) {
-    const openMediaLibrary = () => {
-        if (typeof window.wp !== 'undefined' && window.wp.media) {
+    const logoBackgroundRadius = settings.logo_border_radius ?? 0
+    const logoCornerPreset =
+        logoBackgroundRadius >= 999 ? 'pill'
+            : logoBackgroundRadius >= 16 ? 'rounded'
+                : logoBackgroundRadius >= 8 ? 'soft'
+                    : 'square'
+
+    const handleLogoCornerChange = (value: string) => {
+        const radiusMap: Record<string, number> = {
+            square: 0,
+            soft: 8,
+            rounded: 16,
+            pill: 999,
+        }
+
+        onChange('logo_border_radius', radiusMap[value] ?? 0)
+    }
+
+    const openMediaLibrary = async () => {
+        try {
+            await ensureWpMedia()
+
             const frame = window.wp.media({
                 title: 'Select Logo',
                 button: { text: 'Use this logo' },
@@ -27,6 +49,9 @@ export function LogoSection({ settings, onChange, designMode = 'advanced' }: Log
                 onChange('logo_image_url', attachment.url)
             })
             frame.open()
+        } catch (error) {
+            console.error('LoginDesignerWP: Error opening logo media library:', error)
+            alert('WordPress media library is not ready yet. Please try again in a moment.')
         }
     }
 
@@ -157,7 +182,7 @@ export function LogoSection({ settings, onChange, designMode = 'advanced' }: Log
                         </div>
 
                         {!!settings.logo_background_enable && (
-                            <div className="grid grid-cols-2 gap-4 pl-4 border-l-2 border-border">
+                            <div className="space-y-4 pl-4 border-l-2 border-border">
                                 <div className="space-y-2">
                                     <Label>Background Color</Label>
                                     <ColorPicker
@@ -166,20 +191,18 @@ export function LogoSection({ settings, onChange, designMode = 'advanced' }: Log
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <Label>Corner Radius</Label>
-                                        <div className="flex items-center gap-2">
-                                            <Slider
-                                                min={0}
-                                                max={50}
-                                                step={1}
-                                                value={[settings.logo_border_radius || 0]}
-                                                onValueChange={([val]) => onChange('logo_border_radius', val)}
-                                                className="w-20"
-                                            />
-                                            <span className="text-xs w-8 text-right">{settings.logo_border_radius || 0}px</span>
-                                        </div>
-                                    </div>
+                                    <Label>Corner Style</Label>
+                                    <SegmentedControl
+                                        value={logoCornerPreset}
+                                        onChange={handleLogoCornerChange}
+                                        options={[
+                                            { value: 'square', label: 'Square' },
+                                            { value: 'soft', label: 'Soft' },
+                                            { value: 'rounded', label: 'Rounded' },
+                                            { value: 'pill', label: 'Pill' },
+                                        ]}
+                                        buttonClassName="text-xs py-1.5"
+                                    />
                                 </div>
                             </div>
                         )}

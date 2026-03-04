@@ -1,5 +1,6 @@
 import { LayoutTemplate, PanelLeft, Minus, CreditCard } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { getLayoutMode } from '@/lib/layout'
 
 interface LayoutStepProps {
     settings: Record<string, any>
@@ -8,7 +9,7 @@ interface LayoutStepProps {
 }
 
 export function LayoutStep({ settings, onChange, isPro }: LayoutStepProps) {
-    const currentLayout = settings.layout_mode || 'centered'
+    const currentLayout = getLayoutMode(settings)
 
     const layouts = [
         {
@@ -54,13 +55,6 @@ export function LayoutStep({ settings, onChange, isPro }: LayoutStepProps) {
                             onClick={() => {
                                 if (isLocked) return
                                 onChange('layout_mode', layout.id)
-                                // Reset/Sync Logic
-                                const isBrandLayout = layout.id.startsWith('split_') || layout.id === 'card_split'
-                                if (!isBrandLayout) {
-                                    onChange('brand_hide_form_logo', 0)
-                                } else {
-                                    onChange('enable_glassmorphism', 0)
-                                }
                             }}
                             className={cn(
                                 "group relative flex flex-col items-center text-center p-6 border-2 rounded-xl cursor-pointer transition-all duration-200",

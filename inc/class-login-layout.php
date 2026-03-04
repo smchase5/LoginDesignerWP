@@ -41,11 +41,20 @@ class LoginDesignerWP_Login_Layout
             return;
         }
 
+        // Keep fresh installs on the default WordPress login page.
+        if (!get_option('logindesignerwp_settings_saved', false)) {
+            return;
+        }
+
         $this->settings = logindesignerwp_get_settings();
 
         // Check if Custom Styles are Enabled
         // Defaults to 1 (true) in helpers.php, but check explicitly for 0/false.
         if (isset($this->settings['enable_styles']) && ($this->settings['enable_styles'] === 0 || $this->settings['enable_styles'] === '0')) {
+            return;
+        }
+
+        if (!logindesignerwp_requires_layout_shell($this->settings)) {
             return;
         }
 
@@ -67,7 +76,7 @@ class LoginDesignerWP_Login_Layout
         }
 
         $settings = $this->settings;
-        $layout_mode = isset($settings['layout_mode']) ? $settings['layout_mode'] : 'centered';
+        $layout_mode = logindesignerwp_get_layout_mode($settings);
 
         // CSS Classes for the shell
         $classes = array('lp-shell');
@@ -93,7 +102,7 @@ class LoginDesignerWP_Login_Layout
         $shell_start .= '<div class="lp-brand">';
 
         // Brand Content Injection
-        if (!empty($settings['brand_content_enable']) && ($is_split_layout = strpos($layout_mode, 'split_') === 0 || $layout_mode === 'card_split')) {
+        if (!empty($settings['brand_content_enable']) && logindesignerwp_is_split_layout_mode($layout_mode)) {
             $shell_start .= '<div class="lp-brand-content">';
 
             // Brand Logo
@@ -147,8 +156,6 @@ class LoginDesignerWP_Login_Layout
         // Hack to handle UTF-8 correctly in loadHTML
         $dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
-
-        $xpath = new DOMXPath($dom);
         $login_div = $dom->getElementById('login');
 
         if (!$login_div) {
@@ -166,9 +173,9 @@ class LoginDesignerWP_Login_Layout
 
         // Inject Brand Content
         $settings = $this->settings;
-        $layout_mode = isset($settings['layout_mode']) ? $settings['layout_mode'] : 'centered';
+        $layout_mode = logindesignerwp_get_layout_mode($settings);
 
-        if (!empty($settings['brand_content_enable']) && ($is_split_layout = strpos($layout_mode, 'split_') === 0 || $layout_mode === 'card_split')) {
+        if (!empty($settings['brand_content_enable']) && logindesignerwp_is_split_layout_mode($layout_mode)) {
             $brand_content = $dom->createElement('div');
             $brand_content->setAttribute('class', 'lp-brand-content');
             $brand->appendChild($brand_content);
@@ -221,5 +228,3 @@ class LoginDesignerWP_Login_Layout
         return $dom->saveHTML();
     }
 }
-
-

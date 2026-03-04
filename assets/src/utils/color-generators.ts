@@ -11,6 +11,77 @@ export const getContrastColor = (hex: string): string => {
     return colord(hex).isDark() ? '#ffffff' : '#111827'
 }
 
+const randomHue = () => Math.floor(Math.random() * 360)
+const randomFrom = <T,>(items: T[]): T => items[Math.floor(Math.random() * items.length)]
+
+export type GradientMood = 'soft' | 'bold' | 'dark'
+
+export const generateGradientPalette = (type: 'linear' | 'radial' | 'mesh', mood: GradientMood = 'soft') => {
+    const moodConfig = {
+        soft: {
+            saturation: [38, 46, 54, 60],
+            lightness: [62, 68, 72],
+            meshModes: ['analogous', 'analogous', 'triadic'] as const,
+            standardModes: ['analogous', 'triadic'] as const,
+            ambientMix: '#f8fafc',
+            ambientAmount: 0.18,
+        },
+        bold: {
+            saturation: [66, 74, 80, 86],
+            lightness: [48, 54, 58],
+            meshModes: ['split-complementary', 'tetradic', 'triadic'] as const,
+            standardModes: ['complementary', 'triadic'] as const,
+            ambientMix: '#0f172a',
+            ambientAmount: 0.18,
+        },
+        dark: {
+            saturation: [50, 58, 66, 72],
+            lightness: [34, 40, 46],
+            meshModes: ['analogous', 'split-complementary', 'tetradic'] as const,
+            standardModes: ['analogous', 'complementary'] as const,
+            ambientMix: '#020617',
+            ambientAmount: 0.34,
+        },
+    }[mood]
+
+    const base = colord({
+        h: randomHue(),
+        s: randomFrom([...moodConfig.saturation]),
+        l: randomFrom([...moodConfig.lightness]),
+    })
+
+    const paletteModes = type === 'mesh'
+        ? moodConfig.meshModes
+        : moodConfig.standardModes
+
+    const harmony = base.harmonies(randomFrom([...paletteModes])).map((color) => color.saturate(0.05))
+    const picks = harmony.length >= 4
+        ? harmony
+        : [
+            base,
+            harmony[1] || base.rotate(28),
+            harmony[2] || base.rotate(-24),
+            harmony[3] || base.rotate(52),
+        ]
+
+    if (type === 'mesh') {
+        const ambientBase = base.mix(moodConfig.ambientMix, moodConfig.ambientAmount).desaturate(mood === 'soft' ? 0.12 : 0.04).toHex()
+
+        return {
+            background_color: ambientBase,
+            background_gradient_1: mood === 'soft' ? picks[0].lighten(0.1).toHex() : picks[0].lighten(0.04).toHex(),
+            background_gradient_2: mood === 'dark' ? picks[1].darken(0.02).toHex() : picks[1].toHex(),
+            background_gradient_3: mood === 'soft' ? picks[2].lighten(0.12).toHex() : picks[2].lighten(0.06).toHex(),
+            background_gradient_4: mood === 'dark' ? picks[3].darken(0.08).toHex() : picks[3].darken(0.03).toHex(),
+        }
+    }
+
+    return {
+        background_gradient_1: mood === 'soft' ? picks[0].lighten(0.06).toHex() : picks[0].toHex(),
+        background_gradient_2: mood === 'dark' ? picks[1].darken(0.06).toHex() : picks[1].lighten(0.03).toHex(),
+    }
+}
+
 // Generate Palette based on strategy
 export const generateTheme = (baseColor: string, strategy: 'modern' | 'bold' | 'dark'): Record<string, any> => {
     const base = colord(baseColor)

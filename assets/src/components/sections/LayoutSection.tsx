@@ -1,11 +1,13 @@
 
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
-import { LayoutTemplate, PanelLeft, Minus, Lock, X } from 'lucide-react'
+import { LayoutTemplate, PanelLeft, Minus, Lock, X, CreditCard } from 'lucide-react'
 import { ColorPicker } from '@/components/ui/color-picker'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { SegmentedControl } from '@/components/ui/segmented-control'
+import { ensureWpMedia } from '@/lib/wp-media'
+import { getLayoutMode, isBrandLayoutMode } from '@/lib/layout'
 
 interface LayoutSectionProps {
     settings: Record<string, any>
@@ -14,7 +16,7 @@ interface LayoutSectionProps {
 }
 
 export function LayoutSection({ settings, onChange, isPro = false }: LayoutSectionProps) {
-    const currentLayout = settings.layout_mode || 'centered'
+    const currentLayout = getLayoutMode(settings)
 
     // 4 clean layouts - Centered first (default), Simple second
     const layouts = [
@@ -43,7 +45,7 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
             id: 'card_split',
             title: 'Card Split',
             description: 'Split inside a card',
-            icon: <div className="flex w-6 h-6 border border-current rounded"><div className="w-1/2 border-r border-current"></div></div>,
+            icon: <CreditCard className="w-6 h-6" />,
             isPro: true,
         },
     ]
@@ -56,10 +58,8 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
         { value: '480', label: 'Wide (480px)' },
     ]
 
-    const isSplitLayout = currentLayout.startsWith('split_')
-    const isCardSplit = currentLayout === 'card_split'
     const isSimpleLayout = currentLayout === 'simple'
-    const showBrandOptions = isSplitLayout || isCardSplit
+    const showBrandOptions = isBrandLayoutMode(currentLayout)
 
     return (
         <div className="space-y-4">
@@ -81,16 +81,6 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
                             onClick={() => {
                                 if (isDisabled) return
                                 onChange('layout_mode', layout.id)
-
-                                // Reset brand settings if switching to non-brand layout
-                                const isBrandLayout = layout.id.startsWith('split_') || layout.id === 'card_split'
-                                if (!isBrandLayout) {
-                                    onChange('brand_hide_form_logo', 0)
-                                } else {
-                                    // Disable glassmorphism on form container by default for split layouts
-                                    // as it often looks bad with the default white form panel
-                                    onChange('enable_glassmorphism', 0)
-                                }
                             }}
                         >
                             {isDisabled && (
@@ -221,7 +211,7 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
                                                 />
                                                 <button
                                                     onClick={() => {
-                                                        onChange('brand_logo_id', '')
+                                                        onChange('brand_logo_id', 0)
                                                         onChange('brand_logo_url', '')
                                                     }}
                                                     className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
@@ -236,8 +226,10 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
                                         )}
                                         <button
                                             className="text-xs bg-secondary hover:bg-secondary/80 text-secondary-foreground px-2 py-1 rounded transition-colors"
-                                            onClick={() => {
-                                                if (typeof window.wp !== 'undefined' && window.wp.media) {
+                                            onClick={async () => {
+                                                try {
+                                                    await ensureWpMedia()
+
                                                     const frame = window.wp.media({
                                                         title: 'Select Brand Logo',
                                                         button: { text: 'Use this logo' },
@@ -249,6 +241,9 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
                                                         onChange('brand_logo_url', attachment.url)
                                                     })
                                                     frame.open()
+                                                } catch (error) {
+                                                    console.error('LoginDesignerWP: Error opening brand logo media library:', error)
+                                                    alert('WordPress media library is not ready yet. Please try again in a moment.')
                                                 }
                                             }}
                                         >
@@ -288,11 +283,11 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
                                                 onChange={(value) => onChange('brand_logo_radius_preset', value)}
                                                 options={[
                                                     { value: 'square', label: 'Square' },
-                                                    { value: 'rounded', label: 'Rounded' },
                                                     { value: 'soft', label: 'Soft' },
-                                                    { value: 'full', label: 'Full' },
+                                                    { value: 'rounded', label: 'Rounded' },
+                                                    { value: 'full', label: 'Pill' },
                                                 ]}
-                                                buttonClassName="text-[10px] py-1"
+                                                buttonClassName="text-xs py-1.5"
                                             />
                                         </div>
                                     )}

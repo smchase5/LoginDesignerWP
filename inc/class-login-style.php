@@ -47,14 +47,6 @@ class LoginDesignerWP_Login_Style
             return;
         }
 
-        // Enqueue Layout System CSS
-        wp_enqueue_style(
-            'logindesignerwp-layouts',
-            LOGINDESIGNERWP_URL . 'assets/src/layouts.css',
-            array(),
-            LOGINDESIGNERWP_VERSION
-        );
-
         $this->settings = logindesignerwp_get_settings();
         $s = $this->settings;
 
@@ -91,14 +83,24 @@ class LoginDesignerWP_Login_Style
         $css = "/* LoginDesignerWP Custom Styles */\n";
 
         // Determine Layout Mode
-        $layout_mode = isset($s['layout_mode']) ? $s['layout_mode'] : 'centered';
+        $layout_mode = logindesignerwp_get_layout_mode($s);
 
         // Layout types:
         // - 'simple': Just fields/logo, no form container styling
         // - 'centered': Background on body, form in styled box
         // - 'split_left'/'split_right': Two panels, brand gets background, form gets panel styling
         // - 'card_split': Similar to split but centralized card
-        $is_split_layout = strpos($layout_mode, 'split_') === 0 || $layout_mode === 'card_split';
+        $is_split_layout = logindesignerwp_is_split_layout_mode($layout_mode);
+        $needs_layout_shell = logindesignerwp_requires_layout_shell($s);
+
+        if ($needs_layout_shell) {
+            wp_enqueue_style(
+                'logindesignerwp-layouts',
+                LOGINDESIGNERWP_URL . 'assets/src/layouts.css',
+                array(),
+                LOGINDESIGNERWP_VERSION
+            );
+        }
 
         // Glassmorphism Override for Split Layouts
         // Glass effects rely on a unified background. Split layouts separate the background, making glass look broken (invisible on white).
@@ -116,15 +118,30 @@ class LoginDesignerWP_Login_Style
 
         // Determine is "Simple Layout" logic should apply
         // Either explicit 'simple' layout OR split layout with explicit 'simple' form style
-        $layout_form_style = isset($s['layout_form_style']) ? $s['layout_form_style'] : 'boxed';
-        $is_simple_form_style = $layout_form_style === 'simple';
-
-        $is_simple_layout = $layout_mode === 'simple' || ($is_split_layout && $is_simple_form_style);
+        $is_simple_layout = logindesignerwp_is_simple_layout($s);
 
         // Form width (for simple layout) and split ratio (for split layouts)
         $form_width = isset($s['layout_form_width']) ? intval($s['layout_form_width']) : 360;
         $split_ratio = isset($s['layout_split_ratio']) ? intval($s['layout_split_ratio']) : 50;
         $css .= ":root { --lp-max-width: " . $form_width . "px; --lp-brand-width: " . $split_ratio . "%; }\n";
+
+        if (!$needs_layout_shell && !$is_split_layout) {
+            $css .= "body.login {\n";
+            $css .= "    min-height: 100vh !important;\n";
+            $css .= "    display: flex !important;\n";
+            $css .= "    flex-direction: column !important;\n";
+            $css .= "    justify-content: center !important;\n";
+            $css .= "    align-items: center !important;\n";
+            $css .= "    padding: 2rem 1rem !important;\n";
+            $css .= "    box-sizing: border-box !important;\n";
+            $css .= "}\n";
+            $css .= "body.login #login {\n";
+            $css .= "    width: 100% !important;\n";
+            $css .= "    max-width: " . $form_width . "px !important;\n";
+            $css .= "    margin: 0 auto !important;\n";
+            $css .= "    padding: 0 !important;\n";
+            $css .= "}\n";
+        }
 
         // Determine effective background color behind the footer links / simple form
         $bg_check_color = '#ffffff';
@@ -270,13 +287,28 @@ class LoginDesignerWP_Login_Style
             } elseif ('mesh' === $gradient_type) {
                 $col3 = esc_attr(isset($s['background_gradient_3']) ? $s['background_gradient_3'] : $col1);
                 $col4 = esc_attr(isset($s['background_gradient_4']) ? $s['background_gradient_4'] : $col2);
+                $p1x = isset($s['mesh_point_1_x']) ? intval($s['mesh_point_1_x']) : 18;
+                $p1y = isset($s['mesh_point_1_y']) ? intval($s['mesh_point_1_y']) : 22;
+                $p1s = isset($s['mesh_point_1_spread']) ? intval($s['mesh_point_1_spread']) : 74;
+                $p2x = isset($s['mesh_point_2_x']) ? intval($s['mesh_point_2_x']) : 78;
+                $p2y = isset($s['mesh_point_2_y']) ? intval($s['mesh_point_2_y']) : 18;
+                $p2s = isset($s['mesh_point_2_spread']) ? intval($s['mesh_point_2_spread']) : 78;
+                $p3x = isset($s['mesh_point_3_x']) ? intval($s['mesh_point_3_x']) : 26;
+                $p3y = isset($s['mesh_point_3_y']) ? intval($s['mesh_point_3_y']) : 78;
+                $p3s = isset($s['mesh_point_3_spread']) ? intval($s['mesh_point_3_spread']) : 76;
+                $p4x = isset($s['mesh_point_4_x']) ? intval($s['mesh_point_4_x']) : 74;
+                $p4y = isset($s['mesh_point_4_y']) ? intval($s['mesh_point_4_y']) : 70;
+                $p4s = isset($s['mesh_point_4_spread']) ? intval($s['mesh_point_4_spread']) : 80;
 
                 $css .= "    background-color: " . esc_attr($s['background_color']) . " !important;\n";
                 $css .= "    background-image: \n";
-                $css .= "        radial-gradient(at 15% 15%, " . $col1 . ", transparent 60%),\n";
-                $css .= "        radial-gradient(at 85% 15%, " . $col2 . ", transparent 60%),\n";
-                $css .= "        radial-gradient(at 15% 85%, " . $col3 . ", transparent 60%),\n";
-                $css .= "        radial-gradient(at 85% 85%, " . $col4 . ", transparent 60%) !important;\n";
+                $css .= "        radial-gradient(circle at " . $p1x . "% " . $p1y . "%, " . $col1 . " 0%, transparent " . $p1s . "%),\n";
+                $css .= "        radial-gradient(circle at " . $p2x . "% " . $p2y . "%, " . $col2 . " 0%, transparent " . $p2s . "%),\n";
+                $css .= "        radial-gradient(circle at " . $p3x . "% " . $p3y . "%, " . $col3 . " 0%, transparent " . $p3s . "%),\n";
+                $css .= "        radial-gradient(circle at " . $p4x . "% " . $p4y . "%, " . $col4 . " 0%, transparent " . $p4s . "%),\n";
+                $css .= "        radial-gradient(circle at 52% 48%, rgba(255,255,255,0.22) 0%, transparent 62%) !important;\n";
+                $css .= "    background-size: 140% 140% !important;\n";
+                $css .= "    background-position: center center !important;\n";
             } else {
                 $css .= "    background: linear-gradient(135deg, " . $col1 . ", " . $col2 . ") !important;\n";
             }
@@ -547,14 +579,8 @@ class LoginDesignerWP_Login_Style
         if ($is_split_layout && !empty($s['brand_logo_bg_enable'])) {
             $brand_bg_color = isset($s['brand_logo_bg_color']) ? esc_attr($s['brand_logo_bg_color']) : '#ffffff';
 
-            $radius_map = array(
-                'square' => 0,
-                'rounded' => 10,
-                'soft' => 25,
-                'full' => 100,
-            );
             $preset = isset($s['brand_logo_radius_preset']) ? $s['brand_logo_radius_preset'] : 'square';
-            $brand_radius = isset($radius_map[$preset]) ? $radius_map[$preset] : 0;
+            $brand_radius = logindesignerwp_get_brand_logo_radius($preset);
 
             $css .= ".lp-brand-logo {\n";
             $css .= "    background-color: " . $brand_bg_color . " !important;\n";
@@ -759,4 +785,5 @@ class LoginDesignerWP_Login_Style
         $b = hexdec(substr($hex, 4, 2));
         return (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
     }
+
 }

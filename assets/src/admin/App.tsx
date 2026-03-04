@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { DesignTab } from '@/components/tabs/DesignTab'
@@ -7,6 +7,7 @@ import { SocialTab } from '@/components/tabs/SocialTab'
 import { SecurityTab } from '@/components/tabs/SecurityTab'
 import { LivePreview } from '@/components/preview/LivePreview'
 import { Wizard } from '@/components/wizard/Wizard'
+import { applyLayoutAdjustments } from '@/lib/layout-adjustments'
 import { Palette, Settings, Share2, Shield, Wand2 } from 'lucide-react'
 
 type TabId = 'design' | 'settings' | 'social' | 'security'
@@ -24,6 +25,7 @@ export default function App() {
     const [activeTab, setActiveTab] = useState<TabId>('design')
     const [settings, setSettings] = useState<Record<string, any>>(data.settings || {})
     const [savedSettings, setSavedSettings] = useState<Record<string, any>>(data.settings || {})
+    const [isSettingsDirty, setIsSettingsDirty] = useState(false)
     const [securitySettings, setSecuritySettings] = useState<any>(() => {
         const defaults = {
             enabled: false,
@@ -52,42 +54,112 @@ export default function App() {
         }
         return { ...defaults, ...(data.security || {}) }
     })
+    const [isSecurityDirty, setIsSecurityDirty] = useState(false)
     const [showWizard, setShowWizard] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
     const [isResetting, setIsResetting] = useState(false)
+    const [presets, setPresets] = useState<Record<string, any>>(data.presets || {})
+    const [isPresetsLoading, setIsPresetsLoading] = useState(!data.presets)
     const [designMode, setDesignMode] = useState<'simple' | 'advanced'>(
         () => (localStorage.getItem('ldwp_design_mode') as 'simple' | 'advanced') || 'simple'
     )
+
+    useEffect(() => {
+        if (data.presets) {
+            return
+        }
+
+        let isMounted = true
+
+        const loadPresets = async () => {
+            try {
+                const formData = new FormData()
+                formData.append('action', 'logindesignerwp_get_presets')
+                formData.append('nonce', data.nonce)
+
+                const response = await fetch(window.ajaxurl || '/wp-admin/admin-ajax.php', {
+                    method: 'POST',
+                    body: formData,
+                })
+
+                const result = await response.json()
+                if (isMounted && result.success && result.data?.presets) {
+                    setPresets(result.data.presets)
+                }
+            } catch (error) {
+                console.error('Failed to load presets:', error)
+            } finally {
+                if (isMounted) {
+                    setIsPresetsLoading(false)
+                }
+            }
+        }
+
+        loadPresets()
+
+        return () => {
+            isMounted = false
+        }
+    }, [data.nonce, data.presets])
 
     const handleDesignModeChange = (mode: 'simple' | 'advanced') => {
         setDesignMode(mode)
         localStorage.setItem('ldwp_design_mode', mode)
     }
 
-    // Check if there are unsaved changes
-    // Check if there are unsaved changes
-    const hasUnsavedChanges =
-        JSON.stringify(settings) !== JSON.stringify(savedSettings) ||
-        JSON.stringify(securitySettings) !== JSON.stringify(savedSecuritySettings)
+    const hasUnsavedChanges = isSettingsDirty || isSecurityDirty
 
     const handleSettingChange = (key: string, value: any) => {
-        setSettings((prev) => ({ ...prev, [key]: value }))
+        setSettings((prev) => {
+            if (prev[key] === value) {
+                return prev
+            }
+
+            const nextSettings = (key === 'layout_mode' || key === 'layout_form_style')
+                ? applyLayoutAdjustments({ ...prev, [key]: value })
+                : { ...prev, [key]: value }
+
+            setIsSettingsDirty(true)
+            return nextSettings
+        })
     }
 
     const handleBulkChange = (updates: Record<string, any>) => {
-        setSettings((prev) => ({ ...prev, ...updates }))
+        setSettings((prev) => {
+            const nextBase = { ...prev, ...updates }
+            const nextSettings = ('layout_mode' in updates || 'layout_form_style' in updates)
+                ? applyLayoutAdjustments(nextBase)
+                : nextBase
+            let hasChanges = false
+
+            for (const [key, value] of Object.entries(nextSettings)) {
+                if (prev[key] !== value) {
+                    hasChanges = true
+                    break
+                }
+            }
+
+            if (!hasChanges) {
+                return prev
+            }
+
+            setIsSettingsDirty(true)
+            return nextSettings
+        })
     }
 
     const handleDiscard = () => {
         setSettings(savedSettings)
         setSecuritySettings(savedSecuritySettings)
+        setIsSettingsDirty(false)
+        setIsSecurityDirty(false)
     }
 
     const handleSave = async () => {
         setIsSaving(true)
         try {
             // Save visual settings if changed
-            if (JSON.stringify(settings) !== JSON.stringify(savedSettings)) {
+            if (isSettingsDirty) {
                 const settingsFormData = new FormData()
                 settingsFormData.append('action', 'logindesignerwp_save_settings')
                 settingsFormData.append('nonce', data.nonce)
@@ -104,11 +176,12 @@ export default function App() {
                 const result = await response.json()
                 if (result.success) {
                     setSavedSettings({ ...settings })
+                    setIsSettingsDirty(false)
                 }
             }
 
             // Save security settings if changed
-            if (JSON.stringify(securitySettings) !== JSON.stringify(savedSecuritySettings)) {
+            if (isSecurityDirty) {
                 const securityFormData = new FormData()
                 securityFormData.append('action', 'logindesignerwp_save_security_settings')
                 securityFormData.append('nonce', data.securityNonce || data.nonce)
@@ -134,6 +207,7 @@ export default function App() {
                 const result = await response.json()
                 if (result.success) {
                     setSavedSecuritySettings({ ...securitySettings })
+                    setIsSecurityDirty(false)
                 }
             }
         } catch (error) {
@@ -230,7 +304,8 @@ export default function App() {
                                 setShowWizard(false)
                                 handleSave()
                             }}
-                            presets={data.presets || {}}
+                            presets={presets}
+                            presetsLoading={isPresetsLoading}
                             isPro={isPro}
                         />
                     ) : (
@@ -244,9 +319,8 @@ export default function App() {
                                     onReset={handleReset}
                                     isSaving={isSaving}
                                     isResetting={isResetting}
-                                    showWizard={showWizard}
-                                    setShowWizard={setShowWizard}
-                                    presets={data.presets || {}}
+                                    presets={presets}
+                                    presetsLoading={isPresetsLoading}
                                     isPro={isPro}
                                     designMode={designMode}
                                     onDesignModeChange={handleDesignModeChange}
@@ -277,7 +351,14 @@ export default function App() {
                                     onSave={handleSave}
                                     isSaving={isSaving}
                                     securitySettings={securitySettings}
-                                    onSecurityChange={(key, value) => setSecuritySettings((prev: any) => ({ ...prev, [key]: value }))}
+                                    onSecurityChange={(key, value) => setSecuritySettings((prev: any) => {
+                                        if (prev[key] === value) {
+                                            return prev
+                                        }
+
+                                        setIsSecurityDirty(true)
+                                        return { ...prev, [key]: value }
+                                    })}
                                 />
                             )}
                         </>
@@ -291,6 +372,7 @@ export default function App() {
                             settings={settings}
                             hasUnsavedChanges={hasUnsavedChanges}
                             onDiscard={handleDiscard}
+                            onBulkChange={handleBulkChange}
                             onSave={handleSave}
                             isSaving={isSaving}
                             loginUrl={data.loginUrl || '/wp-login.php'}

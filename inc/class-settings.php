@@ -33,6 +33,7 @@ class LoginDesignerWP_Settings
         add_action('admin_menu', array($this, 'add_settings_page'));
         add_action('admin_init', array($this, 'register_settings'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
+        add_filter('script_loader_tag', array($this, 'filter_admin_script_loader_tag'), 10, 3);
         add_action('wp_ajax_logindesignerwp_save_settings', array($this, 'ajax_save_settings'));
         add_action('wp_ajax_logindesignerwp_reset_defaults', array($this, 'ajax_reset_defaults'));
         add_action('wp_ajax_logindesignerwp_save_social_settings', array($this, 'ajax_save_social_settings'));
@@ -114,10 +115,6 @@ class LoginDesignerWP_Settings
             return;
         }
 
-        // Disable script concatenation to strictly enforce order and prevent "undefined" errors
-        global $concatenate_scripts;
-        $concatenate_scripts = false;
-
         // WordPress dependencies - explicitly enqueue all required scripts
         wp_enqueue_style('wp-color-picker');
         wp_enqueue_script('wp-color-picker');
@@ -154,35 +151,13 @@ class LoginDesignerWP_Settings
             true
         );
 
-        // DEBUG: Add inline script to check loading status immediately
-        wp_add_inline_script('logindesignerwp-admin', 'console.log("LoginDesignerWP: Inline check - wp.media:", typeof wp.media);', 'before');
-
-        // Force type="module" for the Vite-built admin script
-        add_filter('script_loader_tag', function ($tag, $handle, $src) {
-            if ('logindesignerwp-admin' !== $handle) {
-                return $tag;
-            }
-            // Add type="module" and crossorigin
-            return '<script type="module" src="' . esc_url($src) . '"></script>';
-        }, 10, 3);
-
-        // DEBUG: Log admin script info
-        error_log('LoginDesignerWP: Admin script enqueued. Deps: jquery, wp-color-picker, media-views. Type: module');
-        error_log('LoginDesignerWP: Admin script URL: ' . $build_url . 'admin.js');
-        error_log('LoginDesignerWP: Admin script version: ' . $js_ver);
-
-
-
         // Localize data for React app
         $settings = logindesignerwp_get_settings();
 
-        // Inject AI settings (mapping backend keys to frontend keys)
+        // Surface AI status without exposing the stored API key to the browser.
         $ai_settings = get_option('logindesignerwp_ai', array()); // Default to empty array if not set
-        if (!empty($ai_settings['openai_key'])) {
-            $settings['openai_api_key'] = $ai_settings['openai_key'];
-        }
-        if (!empty($ai_settings['image_model'])) {
-            $settings['ai_model'] = $ai_settings['image_model'];
+        if (!empty($ai_settings['text_model'])) {
+            $settings['ai_model'] = $ai_settings['text_model'];
         }
 
         $is_pro = function_exists('logindesignerwp_is_pro_active') && logindesignerwp_is_pro_active();
@@ -193,11 +168,6 @@ class LoginDesignerWP_Settings
         }
         if (!empty($settings['background_image_id'])) {
             $settings['background_image_url'] = wp_get_attachment_image_url($settings['background_image_id'], 'large');
-        }
-
-        $presets = array();
-        if (class_exists('Login_Designer_WP_Presets_Core')) {
-            $presets = Login_Designer_WP_Presets_Core::get_presets();
         }
 
         // Security Settings
@@ -232,10 +202,10 @@ class LoginDesignerWP_Settings
             'licenseNonce' => $license_nonce,
             'settings' => $settings,
             'security' => $security_settings,
+            'hasOpenAiKey' => !empty($ai_settings['openai_key']),
             'isPro' => $is_pro,
             'isProPluginActive' => $is_pro_plugin_active,
             'license' => $license_data,
-            'presets' => $presets,
             'assetsUrl' => LOGINDESIGNERWP_URL . 'assets/',
             'loginUrl' => wp_login_url(),
             'i18n' => array(
@@ -243,6 +213,23 @@ class LoginDesignerWP_Settings
                 'error' => __('Something went wrong.', 'logindesignerwp'),
             ),
         ));
+    }
+
+    /**
+     * Add module type to the Vite admin bundle.
+     *
+     * @param string $tag    Script tag HTML.
+     * @param string $handle Script handle.
+     * @param string $src    Script source URL.
+     * @return string
+     */
+    public function filter_admin_script_loader_tag($tag, $handle, $src)
+    {
+        if ('logindesignerwp-admin' !== $handle) {
+            return $tag;
+        }
+
+        return '<script type="module" src="' . esc_url($src) . '"></script>';
     }
 
     /**

@@ -1,6 +1,7 @@
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { ensureWpMedia } from '@/lib/wp-media'
 import { Sparkles, Image as ImageIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -12,8 +13,10 @@ interface FinishingStepProps {
 export function FinishingStep({ settings, onChange }: FinishingStepProps) {
     const isGlass = !!settings.enable_glassmorphism
 
-    const handleBgSelect = () => {
-        if (typeof window.wp !== 'undefined' && window.wp.media) {
+    const handleBgSelect = async () => {
+        try {
+            await ensureWpMedia()
+
             const frame = window.wp.media({
                 title: 'Select Background Image',
                 button: { text: 'Use Background' },
@@ -26,6 +29,9 @@ export function FinishingStep({ settings, onChange }: FinishingStepProps) {
                 onChange('background_image_url', attachment.url)
             })
             frame.open()
+        } catch (error) {
+            console.error('LoginDesignerWP: Error opening wizard background media library:', error)
+            alert('WordPress media library is not ready yet. Please try again in a moment.')
         }
     }
 

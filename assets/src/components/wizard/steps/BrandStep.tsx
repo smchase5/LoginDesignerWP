@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '../../ui/textarea'
+import { ensureWpMedia } from '@/lib/wp-media'
+import { isBrandLayoutMode, getLayoutMode } from '@/lib/layout'
 import { Upload, X, ImageIcon } from 'lucide-react'
 
 interface BrandStepProps {
@@ -11,7 +13,7 @@ interface BrandStepProps {
 }
 
 export function BrandStep({ settings, onChange }: BrandStepProps) {
-    const isSplitLayout = (settings.layout_mode || '').startsWith('split_') || settings.layout_mode === 'card_split'
+    const isSplitLayout = isBrandLayoutMode(getLayoutMode(settings))
 
     // Auto-enable brand content and set defaults for split layouts
     useEffect(() => {
@@ -31,8 +33,10 @@ export function BrandStep({ settings, onChange }: BrandStepProps) {
         }
     }, [isSplitLayout]) // Run once when layout mode check changes or component mounts into this state
 
-    const handleMediaSelect = (keyId: string, keyUrl: string) => {
-        if (typeof window.wp !== 'undefined' && window.wp.media) {
+    const handleMediaSelect = async (keyId: string, keyUrl: string) => {
+        try {
+            await ensureWpMedia()
+
             const frame = window.wp.media({
                 title: 'Select Image',
                 button: { text: 'Use this image' },
@@ -44,6 +48,9 @@ export function BrandStep({ settings, onChange }: BrandStepProps) {
                 onChange(keyUrl, attachment.url)
             })
             frame.open()
+        } catch (error) {
+            console.error('LoginDesignerWP: Error opening wizard media library:', error)
+            alert('WordPress media library is not ready yet. Please try again in a moment.')
         }
     }
 
@@ -75,7 +82,7 @@ export function BrandStep({ settings, onChange }: BrandStepProps) {
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => {
-                                        onChange('logo_id', '')
+                                        onChange('logo_id', 0)
                                         onChange('logo_image_url', '')
                                     }}
                                     className="text-muted-foreground hover:text-destructive"

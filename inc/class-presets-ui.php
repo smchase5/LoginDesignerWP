@@ -36,8 +36,25 @@ class Login_Designer_WP_Presets_UI
     public function __construct()
     {
         // AJAX handlers
+        add_action('wp_ajax_logindesignerwp_get_presets', array($this, 'ajax_get_presets'));
         add_action('wp_ajax_logindesignerwp_apply_preset', array($this, 'ajax_apply_preset'));
         add_action('wp_ajax_logindesignerwp_delete_preset', array($this, 'ajax_delete_preset'));
+    }
+
+    /**
+     * AJAX: Fetch Presets
+     */
+    public function ajax_get_presets()
+    {
+        check_ajax_referer('logindesignerwp_save_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(__('Permission denied.', 'logindesignerwp'));
+        }
+
+        wp_send_json_success(array(
+            'presets' => Login_Designer_WP_Presets_Core::get_presets(),
+        ));
     }
 
     /**
@@ -142,20 +159,7 @@ class Login_Designer_WP_Presets_UI
      */
     public function ajax_apply_preset()
     {
-        // Use 'logindesignerwp_nonce' as consistent nonce, or check if 'logindesignerwp_preset_nonce' is created in localized script
-        // Given admin.js normally uses logindesignerwp_ajax.nonce, we should verify what is sent.
-        // For now, I'll use check_ajax_referer with the nonce wrapper likely used in JS.
-        // admin.js usually sends 'nonce' from logindesignerwp_ajax.nonce.
-
-        $nonce = isset($_POST['nonce']) ? $_POST['nonce'] : '';
-        if (!wp_verify_nonce($nonce, 'logindesignerwp_nonce') && !wp_verify_nonce($nonce, 'logindesignerwp_save_nonce')) {
-            // Fallback for custom nonce if I add it to localized script
-            // But admin.js uses logindesignerwp_ajax.nonce which is 'logindesignerwp_nonce'
-            // check_ajax_referer('logindesignerwp_save_nonce', 'nonce'); // from previous wizard edits
-            // Let's stick to standard permissions check first if nonce fails? No, nonce first.
-        }
-
-        // Actually, let's look at what class-settings sends. It sends 'logindesignerwp_nonce'.
+        check_ajax_referer('logindesignerwp_save_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
             wp_send_json_error(__('Permission denied.', 'logindesignerwp'));
@@ -200,11 +204,11 @@ class Login_Designer_WP_Presets_UI
      */
     public function ajax_delete_preset()
     {
+        check_ajax_referer('logindesignerwp_save_nonce', 'nonce');
+
         if (!current_user_can('manage_options')) {
             wp_send_json_error(__('Permission denied.', 'logindesignerwp'));
         }
-
-        // Nonce check should be done here too.
 
         $preset_key = isset($_POST['preset']) ? sanitize_text_field($_POST['preset']) : '';
         if (strpos($preset_key, 'custom_') !== 0) {

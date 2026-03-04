@@ -7,6 +7,8 @@ import { ColorPicker } from '@/components/ui/color-picker'
 import { Slider } from '@/components/ui/slider'
 import { SegmentedControl } from '@/components/ui/segmented-control'
 import { cn } from '@/lib/utils'
+import { ensureWpMedia } from '@/lib/wp-media'
+import { generateGradientPalette, type GradientMood } from '@/utils/color-generators'
 import { Image, X, Shuffle, ChevronDown, ChevronRight } from 'lucide-react'
 import { useState } from 'react'
 
@@ -17,13 +19,10 @@ interface BackgroundSectionProps {
 }
 
 // Helper for opening media library
-const openMediaLibrary = (imageKey: string, urlKey: string, onChange: (key: string, value: any) => void) => {
-    if (typeof window.wp === 'undefined' || typeof window.wp.media === 'undefined') {
-        alert('WordPress media library is not loaded. Please refresh the page.')
-        return
-    }
-
+const openMediaLibrary = async (imageKey: string, urlKey: string, onChange: (key: string, value: any) => void) => {
     try {
+        await ensureWpMedia()
+
         const frame = window.wp.media({
             title: 'Select Background Image',
             button: { text: 'Use this image' },
@@ -39,26 +38,35 @@ const openMediaLibrary = (imageKey: string, urlKey: string, onChange: (key: stri
         frame.open()
     } catch (error) {
         console.error('LoginDesignerWP: Error opening media library:', error)
-        alert('Error opening media library. Please refresh the page.')
+        alert('WordPress media library is not ready yet. Please try again in a moment.')
     }
 }
 
 const BrandControls = ({ settings, onChange, isPro = false, designMode = 'advanced' }: { settings: Record<string, any>, onChange: (key: string, value: any) => void, isPro?: boolean, designMode?: 'simple' | 'advanced' }) => {
     const bgMode = settings.background_mode || 'solid'
+    const [gradientMood, setGradientMood] = useState<GradientMood>('soft')
+    const gradientMoods: GradientMood[] = ['soft', 'bold', 'dark']
+    const isMeshLocked = settings.gradient_type === 'mesh' && !isPro
+    const meshBlobs = [
+        { id: 1, label: 'Blob 1', colorKey: 'background_gradient_1', defaultColor: '#ff0080' },
+        { id: 2, label: 'Blob 2', colorKey: 'background_gradient_2', defaultColor: '#7928ca' },
+        { id: 3, label: 'Blob 3', colorKey: 'background_gradient_3', defaultColor: '#ff4d4d' },
+        { id: 4, label: 'Blob 4', colorKey: 'background_gradient_4', defaultColor: '#f9cb28' },
+    ] as const
 
     const randomizeGradient = () => {
-        const randomColor = () => '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')
-
-        if (settings.gradient_type === 'mesh') {
-            onChange('background_color', randomColor())
-            onChange('background_gradient_1', randomColor())
-            onChange('background_gradient_2', randomColor())
-            onChange('background_gradient_3', randomColor())
-            onChange('background_gradient_4', randomColor())
-        } else {
-            onChange('background_gradient_1', randomColor())
-            onChange('background_gradient_2', randomColor())
+        if (isMeshLocked) {
+            return
         }
+
+        const gradientType = settings.gradient_type === 'mesh' ? 'mesh' : (settings.gradient_type === 'radial' ? 'radial' : 'linear')
+        const nextMood = gradientMoods[Math.floor(Math.random() * gradientMoods.length)]
+        setGradientMood(nextMood)
+        const palette = generateGradientPalette(gradientType, nextMood)
+
+        Object.entries(palette).forEach(([key, value]) => {
+            onChange(key, value)
+        })
     }
 
     return (
@@ -113,6 +121,16 @@ const BrandControls = ({ settings, onChange, isPro = false, designMode = 'advanc
                         <Label>Gradient Type</Label>
                         <div className="flex items-center gap-2">
                             <select
+                                className="h-9 min-w-[110px] px-3 rounded-md border border-input bg-background text-sm"
+                                value={gradientMood}
+                                onChange={(e) => setGradientMood(e.target.value as GradientMood)}
+                                title="Randomizer Mood"
+                            >
+                                <option value="soft">Soft</option>
+                                <option value="bold">Bold</option>
+                                <option value="dark">Dark</option>
+                            </select>
+                            <select
                                 className="h-9 px-3 rounded-md border border-input bg-background text-sm"
                                 value={settings.gradient_type || 'linear'}
                                 onChange={(e) => onChange('gradient_type', e.target.value)}
@@ -121,7 +139,13 @@ const BrandControls = ({ settings, onChange, isPro = false, designMode = 'advanc
                                 <option value="radial">Radial</option>
                                 <option value="mesh">Mesh (Pro)</option>
                             </select>
-                            <Button variant="outline" size="icon" onClick={randomizeGradient} title="Randomize Colors">
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={randomizeGradient}
+                                disabled={isMeshLocked}
+                                title={isMeshLocked ? 'Mesh randomizer is available in Pro' : 'Randomize palette and mood'}
+                            >
                                 <Shuffle className="h-4 w-4" />
                             </Button>
                         </div>
@@ -208,35 +232,59 @@ const BrandControls = ({ settings, onChange, isPro = false, designMode = 'advanc
                                     onChange={(color) => onChange('background_color', color)}
                                 />
                             </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-1">
-                                    <Label className="text-xs">Top Left</Label>
-                                    <ColorPicker
-                                        value={settings.background_gradient_1 || '#ff0080'}
-                                        onChange={(color) => onChange('background_gradient_1', color)}
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <Label className="text-xs">Top Right</Label>
-                                    <ColorPicker
-                                        value={settings.background_gradient_2 || '#7928ca'}
-                                        onChange={(color) => onChange('background_gradient_2', color)}
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <Label className="text-xs">Bottom Left</Label>
-                                    <ColorPicker
-                                        value={settings.background_gradient_3 || '#ff4d4d'}
-                                        onChange={(color) => onChange('background_gradient_3', color)}
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <Label className="text-xs">Bottom Right</Label>
-                                    <ColorPicker
-                                        value={settings.background_gradient_4 || '#f9cb28'}
-                                        onChange={(color) => onChange('background_gradient_4', color)}
-                                    />
-                                </div>
+                            <div className="space-y-3">
+                                {meshBlobs.map((blob) => (
+                                    <div key={blob.id} className="rounded-lg border border-border/80 bg-muted/20 p-3">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <Label className="text-xs font-semibold">{blob.label}</Label>
+                                            <ColorPicker
+                                                value={settings[blob.colorKey] || blob.defaultColor}
+                                                onChange={(color) => onChange(blob.colorKey, color)}
+                                            />
+                                        </div>
+                                        <div className="mt-3 grid grid-cols-3 gap-3">
+                                            <div className="space-y-1">
+                                                <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                                                    <span>X</span>
+                                                    <span>{settings[`mesh_point_${blob.id}_x`] ?? (blob.id === 1 ? 18 : blob.id === 2 ? 78 : blob.id === 3 ? 26 : 74)}%</span>
+                                                </div>
+                                                <Slider
+                                                    min={0}
+                                                    max={100}
+                                                    step={1}
+                                                    value={[settings[`mesh_point_${blob.id}_x`] ?? (blob.id === 1 ? 18 : blob.id === 2 ? 78 : blob.id === 3 ? 26 : 74)]}
+                                                    onValueChange={([val]) => onChange(`mesh_point_${blob.id}_x`, val)}
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                                                    <span>Y</span>
+                                                    <span>{settings[`mesh_point_${blob.id}_y`] ?? (blob.id === 1 ? 22 : blob.id === 2 ? 18 : blob.id === 3 ? 78 : 70)}%</span>
+                                                </div>
+                                                <Slider
+                                                    min={0}
+                                                    max={100}
+                                                    step={1}
+                                                    value={[settings[`mesh_point_${blob.id}_y`] ?? (blob.id === 1 ? 22 : blob.id === 2 ? 18 : blob.id === 3 ? 78 : 70)]}
+                                                    onValueChange={([val]) => onChange(`mesh_point_${blob.id}_y`, val)}
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                                                    <span>Spread</span>
+                                                    <span>{settings[`mesh_point_${blob.id}_spread`] ?? (blob.id === 1 ? 74 : blob.id === 2 ? 78 : blob.id === 3 ? 76 : 80)}%</span>
+                                                </div>
+                                                <Slider
+                                                    min={40}
+                                                    max={95}
+                                                    step={1}
+                                                    value={[settings[`mesh_point_${blob.id}_spread`] ?? (blob.id === 1 ? 74 : blob.id === 2 ? 78 : blob.id === 3 ? 76 : 80)]}
+                                                    onValueChange={([val]) => onChange(`mesh_point_${blob.id}_spread`, val)}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     )}
