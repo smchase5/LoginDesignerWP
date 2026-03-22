@@ -1,5 +1,4 @@
 import { buildPresetUpdates } from '@/lib/preset-updates'
-import { getLayoutMode, isCardSplitLayout, isSimpleLayout, isSplitLayoutMode } from '@/lib/layout'
 
 interface PresetThumbnailProps {
     settings: Record<string, any>
@@ -63,11 +62,6 @@ export function PresetThumbnail({ settings, presetId, preset, className = '' }: 
         ...buildPresetUpdates(settings, presetId, preset),
     }
 
-    const layoutMode = getLayoutMode(previewSettings)
-    const isCardSplit = isCardSplitLayout(layoutMode)
-    const isSplit = isSplitLayoutMode(layoutMode) && !isCardSplit
-    const isSimple = isSimpleLayout(previewSettings)
-    const splitRatio = Number(previewSettings.layout_split_ratio || 50)
     const background = getBackground(previewSettings)
     const panelBackground = getPanelBackground(previewSettings)
     const formCardStyle = getFormCardStyle(previewSettings)
@@ -89,58 +83,23 @@ export function PresetThumbnail({ settings, presetId, preset, className = '' }: 
         </>
     )
 
-    if (isCardSplit) {
-        return (
-            <div className={`aspect-[5/4] relative overflow-hidden border-b border-border/70 bg-slate-100 ${className}`} style={{ background }}>
-                <div className="absolute inset-[14px] overflow-hidden rounded-[18px] border border-black/8 shadow-[0_10px_24px_rgba(15,23,42,0.12)] ring-1 ring-black/5" style={{ background: panelBackground }}>
-                    <div className="flex h-full">
-                        <div style={{ width: `${splitRatio}%`, background }} className="relative" />
-                        <div className="flex items-center justify-center p-3.5" style={{ width: `${100 - splitRatio}%`, background: panelBackground }}>
-                            <div
-                                className={`w-full ${isSimple ? 'px-1' : 'rounded-[12px] border border-black/8 p-2.5 shadow-[0_5px_14px_rgba(15,23,42,0.09)]'}`}
-                                style={isSimple ? undefined : formCardStyle}
-                            >
-                                <div className="flex flex-col gap-1.5">
-                                    {fields}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
-    if (isSplit) {
-        return (
-            <div className={`aspect-[5/4] relative overflow-hidden border-b border-border/70 ${className}`}>
-                <div className="flex h-full">
-                    <div style={{ width: `${splitRatio}%`, background }} />
-                    <div className="flex items-center justify-center p-3.5" style={{ width: `${100 - splitRatio}%`, background: panelBackground }}>
-                        <div
-                            className={`w-[82%] ${isSimple ? 'px-1' : 'rounded-[12px] border border-black/8 p-2.5 shadow-[0_5px_14px_rgba(15,23,42,0.09)]'}`}
-                            style={isSimple ? undefined : formCardStyle}
-                        >
-                            <div className="flex flex-col gap-1.5">
-                                {fields}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
     return (
         <div
-            className={`aspect-[5/4] relative flex items-center justify-center p-4 border-b border-border/70 bg-gradient-to-b from-white/50 to-slate-50/70 ${className}`}
+            className={`aspect-[5/4] relative overflow-hidden border-b border-border/70 ${className}`}
             style={{ background }}
         >
             <div
-                className={`w-[72%] flex flex-col gap-1.5 ${isSimple ? 'px-1' : 'rounded-[12px] border border-black/8 p-2.5 shadow-[0_6px_18px_rgba(15,23,42,0.10)]'}`}
-                style={isSimple ? undefined : formCardStyle}
+                className="absolute inset-[14px] overflow-hidden rounded-[14px] border border-black/8 p-3 shadow-[0_8px_20px_rgba(15,23,42,0.10)]"
+                style={{ background: panelBackground }}
             >
-                {fields}
+                <div
+                    className="h-full rounded-[10px] border p-2.5 shadow-[0_4px_10px_rgba(15,23,42,0.08)]"
+                    style={formCardStyle}
+                >
+                    <div className="flex flex-col gap-1.5">
+                        {fields}
+                    </div>
+                </div>
             </div>
         </div>
     )

@@ -9,7 +9,6 @@ import { PresetsSection } from '@/components/sections/PresetsSection'
 import { LayoutSection } from '@/components/sections/LayoutSection'
 import { Save, ExternalLink, RotateCcw, Lock, Star, Unlock, Sparkles, SlidersHorizontal } from 'lucide-react'
 import { AIToolsSection } from '@/components/sections/AIToolsSection'
-import { SmartThemeGenerator } from '@/components/generator/SmartThemeGenerator'
 import { SegmentedControl } from '@/components/ui/segmented-control'
 
 const ProSection = ({
@@ -144,11 +143,6 @@ export function DesignTab({
                 />
             </div>
 
-            {/* Layout Options - Now near the top for foundational decision */}
-            <ProSection title="Layout" description="Choose your login page layout" isPro={isPro}>
-                <LayoutSection settings={settings} onChange={onChange} isPro={isPro} />
-            </ProSection>
-
             {/* Presets Section */}
             <PresetsSection
                 settings={settings}
@@ -158,10 +152,10 @@ export function DesignTab({
                 isPro={isPro}
             />
 
-            {/* Smart Theme Generator (New Pro Feature) */}
-            {isPro && (
-                <SmartThemeGenerator onBulkChange={onBulkChange} />
-            )}
+            {/* Layout Options */}
+            <ProSection title="Layout" description="Choose your login page layout" isPro={isPro}>
+                <LayoutSection settings={settings} onChange={onChange} isPro={isPro} />
+            </ProSection>
 
             {/* Background Section - Now layout-aware */}
             <BackgroundSection settings={settings} onChange={onChange} isPro={isPro} designMode={designMode} />

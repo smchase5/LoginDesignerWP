@@ -59,6 +59,40 @@ function logindesignerwp_sanitize_int_range($value, $default, $min, $max)
 }
 
 /**
+ * Sanitize split ratio to a curated set of layout-safe values.
+ *
+ * @param mixed  $value Raw value.
+ * @param string $default Default fallback.
+ * @return string
+ */
+function logindesignerwp_sanitize_split_ratio($value, $default = '50')
+{
+    $allowed = array('35', '40', '45', '50', '55', '60', '65');
+    $default = in_array((string) $default, $allowed, true) ? (string) $default : '50';
+    $value = (string) $value;
+
+    if (in_array($value, $allowed, true)) {
+        return $value;
+    }
+
+    if (!is_numeric($value)) {
+        return $default;
+    }
+
+    $candidate = intval($value);
+    $closest = intval($default);
+
+    foreach ($allowed as $allowed_value) {
+        $allowed_int = intval($allowed_value);
+        if (abs($allowed_int - $candidate) < abs($closest - $candidate)) {
+            $closest = $allowed_int;
+        }
+    }
+
+    return (string) $closest;
+}
+
+/**
  * Normalize the saved layout mode.
  *
  * @param array $settings Plugin settings.
@@ -455,9 +489,8 @@ function logindesignerwp_sanitize_settings($input)
         array('320', '360', '420', '480'),
         $defaults['layout_form_width']
     );
-    $sanitized['layout_split_ratio'] = logindesignerwp_sanitize_enum(
-        $input['layout_split_ratio'] ?? '',
-        array('20', '25', '30', '35', '40', '45', '50', '55', '60', '65', '70', '75', '80'),
+    $sanitized['layout_split_ratio'] = logindesignerwp_sanitize_split_ratio(
+        $input['layout_split_ratio'] ?? $defaults['layout_split_ratio'],
         $defaults['layout_split_ratio']
     );
     $sanitized['layout_split_mobile'] = logindesignerwp_sanitize_enum(

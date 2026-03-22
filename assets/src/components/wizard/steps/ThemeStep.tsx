@@ -39,7 +39,7 @@ export function ThemeStep({ settings, onChange, presets, presetsLoading = false,
                                 key={id}
                                 onClick={() => handlePresetSelect(id, preset)}
                                 className={cn(
-                                    "group relative rounded-xl border border-slate-300 cursor-pointer overflow-hidden transition-all duration-200 bg-card",
+                                    "group relative rounded-xl border border-slate-400/90 ring-1 ring-inset ring-slate-200 cursor-pointer overflow-hidden transition-all duration-200 bg-card",
                                     isActive
                                         ? "border-primary ring-2 ring-primary/20 scale-[1.02] shadow-[0_10px_28px_rgba(37,99,235,0.12)]"
                                         : "hover:border-primary/50 hover:scale-[1.02] hover:shadow-[0_8px_24px_rgba(15,23,42,0.08)]",

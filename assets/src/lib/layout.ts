@@ -2,6 +2,33 @@ export function getLayoutMode(settings: Record<string, any>): string {
     return settings.layout_mode || 'centered'
 }
 
+export const ALLOWED_SPLIT_RATIOS = ['35', '40', '45', '50', '55', '60', '65'] as const
+
+const ALLOWED_SPLIT_RATIO_NUMBERS = ALLOWED_SPLIT_RATIOS.map((value) => parseInt(value, 10))
+
+export function normalizeSplitRatio(value: unknown, fallback = '50'): string {
+    const fallbackValue = ALLOWED_SPLIT_RATIOS.includes(fallback as typeof ALLOWED_SPLIT_RATIOS[number]) ? fallback : '50'
+    const raw = (typeof value === 'string' || typeof value === 'number') ? String(value).trim() : ''
+
+    if (ALLOWED_SPLIT_RATIOS.includes(raw as typeof ALLOWED_SPLIT_RATIOS[number])) {
+        return raw
+    }
+
+    const numeric = Number.parseInt(raw, 10)
+    if (Number.isNaN(numeric)) {
+        return fallbackValue
+    }
+
+    let closest = Number.parseInt(fallbackValue, 10)
+    for (const allowed of ALLOWED_SPLIT_RATIO_NUMBERS) {
+        if (Math.abs(allowed - numeric) < Math.abs(closest - numeric)) {
+            closest = allowed
+        }
+    }
+
+    return String(closest)
+}
+
 export function isSplitLayoutMode(layoutMode: string): boolean {
     return layoutMode.startsWith('split_') || layoutMode === 'card_split'
 }

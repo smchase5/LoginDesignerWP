@@ -122,7 +122,7 @@ class LoginDesignerWP_Login_Style
 
         // Form width (for simple layout) and split ratio (for split layouts)
         $form_width = isset($s['layout_form_width']) ? intval($s['layout_form_width']) : 360;
-        $split_ratio = isset($s['layout_split_ratio']) ? intval($s['layout_split_ratio']) : 50;
+        $split_ratio = intval(logindesignerwp_sanitize_split_ratio($s['layout_split_ratio'] ?? '50', '50'));
         $css .= ":root { --lp-max-width: " . $form_width . "px; --lp-brand-width: " . $split_ratio . "%; }\n";
 
         if (!$needs_layout_shell && !$is_split_layout) {

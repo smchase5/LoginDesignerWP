@@ -7,6 +7,7 @@ import {
     getBrandContentAlignment,
     getBrandLogoRadius,
     getLayoutMode,
+    normalizeSplitRatio,
     getPerceivedBrightness,
     isCardSplitLayout,
     isSplitLayoutMode,
@@ -425,7 +426,7 @@ export function LivePreview({
                     const brandContentAlignment = getBrandContentAlignment(settings.brand_content_align)
 
                     // Layout variables from settings
-                    const splitRatio = settings.layout_split_ratio || '50'
+                    const splitRatio = normalizeSplitRatio(settings.layout_split_ratio, '50')
                     const verticalAlign = settings.layout_vertical_align || 'center'
                     const density = settings.layout_density || 'normal'
 

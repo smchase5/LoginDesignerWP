@@ -3,11 +3,10 @@ import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 import { LayoutTemplate, PanelLeft, Minus, Lock, X, CreditCard } from 'lucide-react'
 import { ColorPicker } from '@/components/ui/color-picker'
-import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { SegmentedControl } from '@/components/ui/segmented-control'
 import { ensureWpMedia } from '@/lib/wp-media'
-import { getLayoutMode, isBrandLayoutMode } from '@/lib/layout'
+import { getLayoutMode, isBrandLayoutMode, normalizeSplitRatio } from '@/lib/layout'
 
 interface LayoutSectionProps {
     settings: Record<string, any>
@@ -57,9 +56,22 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
         { value: '420', label: 'Medium (420px)' },
         { value: '480', label: 'Wide (480px)' },
     ]
+    const splitRatioOptions = [
+        { value: '35', label: '35/65', description: 'Form Focus' },
+        { value: '40', label: '40/60', description: 'Lean Form' },
+        { value: '45', label: '45/55', description: 'Balanced' },
+        { value: '50', label: '50/50', description: 'Even Split' },
+        { value: '55', label: '55/45', description: 'Lean Brand' },
+        { value: '60', label: '60/40', description: 'Brand Focus' },
+        { value: '65', label: '65/35', description: 'Hero Brand' },
+    ]
 
     const isSimpleLayout = currentLayout === 'simple'
     const showBrandOptions = isBrandLayoutMode(currentLayout)
+    const splitRatio = normalizeSplitRatio(settings.layout_split_ratio, '50')
+    const splitRatioValue = parseInt(splitRatio, 10)
+    const formRatioValue = 100 - splitRatioValue
+    const activeSplitOption = splitRatioOptions.find((option) => option.value === splitRatio) || splitRatioOptions[3]
 
     return (
         <div className="space-y-4">
@@ -135,7 +147,7 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
                 <div className="mt-4 pt-4 border-t border-border space-y-4">
                     <div>
                         <Label className="text-sm font-medium">Split Options</Label>
-                        <p className="text-xs text-muted-foreground mt-0.5">
+                        <p className="mt-0.5 text-xs text-slate-600">
                             Adjust the brand/form ratio
                         </p>
                     </div>
@@ -143,17 +155,31 @@ export function LayoutSection({ settings, onChange, isPro = false }: LayoutSecti
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
                             <Label className="text-sm">Split Ratio</Label>
-                            <span className="text-xs text-muted-foreground font-mono">
-                                {settings.layout_split_ratio || '50'}%
+                            <span className="font-mono text-xs text-slate-700">
+                                {splitRatioValue}% / {formRatioValue}%
                             </span>
                         </div>
-                        <Slider
-                            value={[parseInt(settings.layout_split_ratio || '50')]}
-                            min={20}
-                            max={80}
-                            step={5}
-                            onValueChange={(vals) => onChange('layout_split_ratio', vals[0].toString())}
+
+                        <SegmentedControl
+                            value={splitRatio}
+                            onChange={(value) => onChange('layout_split_ratio', value)}
+                            options={splitRatioOptions.map((option) => ({
+                                value: option.value,
+                                label: option.label,
+                            }))}
+                            className="w-full rounded-lg border border-slate-300 bg-slate-100 shadow-inner"
+                            buttonClassName="min-h-[38px] px-1 py-1 text-[11px] font-semibold tracking-tight"
+                            activeClassName="rounded-md border-slate-400 bg-white shadow-sm"
+                            inactiveClassName="text-slate-700"
                         />
+
+                        <div className="rounded-md border border-slate-300 bg-white px-3 py-2.5">
+                            <div className="flex items-center justify-between text-[11px]">
+                                <span className="font-medium text-slate-700">Brand {splitRatioValue}%</span>
+                                <span className="font-semibold text-slate-900">{activeSplitOption.description}</span>
+                                <span className="font-medium text-slate-700">Form {formRatioValue}%</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="flex items-center justify-between">
